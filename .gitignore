@@ -1,3 +1,9 @@
+# self defined
+# Disable .idea once for all
+.idea
+# tasks.json
+tasks.json
+
 # Object files
 *.o
 *.ko
