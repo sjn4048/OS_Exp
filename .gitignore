@@ -1,6 +1,6 @@
 # self defined
 # Disable .idea once for all
-.idea
+.idea/
 # tasks.json
 tasks.json
 
