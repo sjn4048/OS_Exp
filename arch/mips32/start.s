@@ -41,7 +41,7 @@ exception:
 	move $k1, $sp
 	la  $k0, kernel_sp
 	lw  $sp, 0($k0)
-		
+
 interrupt_save_context:
 	addiu $sp, $sp, -128
 	sw $at, 4($sp)

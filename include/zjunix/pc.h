@@ -1,6 +1,9 @@
 #ifndef _ZJUNIX_PC_H
 #define _ZJUNIX_PC_H
 
+#define TASK_KERNEL_SIZE 4096
+unsigned int sysctl_sched_latency = 1000000;
+
 typedef struct {
     unsigned int epc;
     unsigned int at;
@@ -18,15 +21,15 @@ typedef struct {
 
 typedef struct {
     context context;
-    int ASID;
-    unsigned int counter;
-    char name[32];
-    unsigned long start_time;
+    int ASID;   //id
+    unsigned int counter;  //remain time
+    char name[32];  //name
+    unsigned long start_time;   //create time
 } task_struct;
 
 typedef union {
     task_struct task;
-    unsigned char kernel_stack[4096];
+    unsigned char kernel_stack[TASK_KERNEL_SIZE];
 } task_union;
 
 #define PROC_DEFAULT_TIMESLOTS 6
@@ -39,5 +42,6 @@ void pc_kill_syscall(unsigned int status, unsigned int cause, context* pt_contex
 int pc_kill(int proc);
 task_struct* get_curr_pcb();
 int print_proc();
+void change_sysctl_sched_latency(unsigned int latency);
 
 #endif  // !_ZJUNIX_PC_H

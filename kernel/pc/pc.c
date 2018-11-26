@@ -55,9 +55,19 @@ void init_pc() {
     register_interrupt_handler(7, pc_schedule);
 
     asm volatile(
-        "li $v0, 1000000\n\t"
+        "li $v0, %0\n\t"
         "mtc0 $v0, $11\n\t"
-        "mtc0 $zero, $9");
+        "mtc0 $zero, $9"
+         : "r"(sysctl_sched_latency));
+}
+
+//改变cfs调度的周期，通过修改中断时间间隔实现
+void change_sysctl_sched_latency(unsigned int latency){
+    asm volatile(
+        "li $v0, %0\n\t"
+        "mtc0 $v0, $11\n\t"
+        "mtc0 $zero, $9"
+         : "r"(latency));
 }
 
 void pc_schedule(unsigned int status, unsigned int cause, context* pt_context) {
