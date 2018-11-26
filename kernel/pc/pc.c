@@ -7,6 +7,7 @@
 
 task_struct pcb[8];
 int curr_proc;
+unsigned int sysctl_sched_latency = 1000000;
 
 static void copy_context(context* src, context* dest) {
     dest->epc = src->epc;

@@ -2,7 +2,6 @@
 #define _ZJUNIX_PC_H
 
 #define TASK_KERNEL_SIZE 4096
-unsigned int sysctl_sched_latency = 1000000;
 
 typedef struct {
     unsigned int epc;
