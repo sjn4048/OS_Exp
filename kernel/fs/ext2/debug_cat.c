@@ -2,7 +2,9 @@
 // Created by zengk on 2018/11/29.
 //
 
-#include "debug_cat.h"
+#include "ext2.h"
+
+#ifdef DEBUG_EXT2
 
 #ifdef WINDOWS
 
@@ -65,3 +67,12 @@ int debug_cat(int type, const char *format, ...) {
 }
 
 #endif //system type
+
+#else
+
+int debug_cat(int type, const char *format, ...) {
+    // empty function
+    return 0;
+}
+
+#endif
