@@ -1,14 +1,21 @@
 //
-// Created by zengk on 2018/11/29.
+// Created by zengkai on 2018/11/29.
 //
 
 #include "ext2.h"
 
-#ifdef DEBUG_EXT2
-
-#ifdef WINDOWS
-
+/**
+ * print information, warning or error message on output device
+ * via calling different function
+ * determined by platform
+ * @param type: type of message, information/warning/error
+ * @param format: format string
+ * @param ...: valuable length parameter
+ * @return number of parameter that successfully output
+ */
 int debug_cat(int type, const char *format, ...) {
+#ifdef DEBUG_EXT2
+#ifdef WINDOWS
     // header
     switch (type) {
         case DEBUG_LOG:
@@ -20,6 +27,8 @@ int debug_cat(int type, const char *format, ...) {
         case DEBUG_ERROR:
             printf("[ ERROR ] ");
             break;
+        case DEBUG_NONE:
+            break;
         default:
             printf("Debug catalog failed.\n");
             break;
@@ -30,15 +39,10 @@ int debug_cat(int type, const char *format, ...) {
     va_start(ap, format);
     int count = vprintf(format, ap);
     va_end(ap);
-    printf("\n");
 
     // return the count of successively printed argument
     return count;
-}
-
 #elif SWORD
-
-int debug_cat(int type, const char *format, ...) {
     // header
     switch (type) {
         case DEBUG_LOG:
@@ -64,15 +68,9 @@ int debug_cat(int type, const char *format, ...) {
 
     // return the count of successively printed argument
     return count;
-}
-
-#endif //system type
-
+#endif //SYSTEM TYPE
 #else
-
-int debug_cat(int type, const char *format, ...) {
     // empty function
     return 0;
+#endif //DEBUG
 }
-
-#endif

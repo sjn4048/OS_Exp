@@ -8,6 +8,7 @@ This is a ext2 file system, maybe.
     - windows_disk_driver.c
     - disk_tool.c
     - super.c
+    - inode.c
 
 ### debug_cat.c
 
@@ -39,3 +40,7 @@ This module helps to find and decode the partition table.
 ### super.c
 
 This module works on super block.
+
+### inode.c
+
+This module deals with inodes.
