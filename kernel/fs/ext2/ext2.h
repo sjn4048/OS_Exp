@@ -8,21 +8,16 @@
 /* all macro definition of ext2 file system */
 #define WINDOWS // platform
 #define DEBUG_EXT2 // debug mode
-
-#define INIT_SUCCESS 0
-#define INIT_FAIL 1
+#define SUCCESS 0x1
+#define FAIL 0x0
+#define NOT_FOUND 0x2
 #define DEBUG_LOG 100
 #define DEBUG_WARNING 101
 #define DEBUG_ERROR 102
 #define DEBUG_NONE 103
-#define FIND_PART_SUCCESS 200
-#define FIND_PART_FAIL 201
-#define SUPER_SB_FILL_SUCCESS 300
-#define SUPER_SB_FILL_FAIL 301
-#define SUPER_GROUP_DESC_SUCCESS 302
-#define SUPER_GROUP_DESC_FAIL 303
-#define INODE_INODE_FILL_SUCCESS 400
-#define INODE_INODE_FILL_FAIL 401
+
+#define EXT2_FT_DIR 2
+#define EXT2_S_IFDIR 0x4000
 
 /* type and structure definition */
 typedef unsigned long DWORD;
@@ -31,13 +26,6 @@ typedef unsigned short __u16;
 typedef unsigned int __u32;
 typedef __u16 __le16;
 typedef __u32 __le32;
-
-/* physical interface provide function communicating with hardware
- * read and write sector by sector */
-struct physical_interface {
-    int (*read)(__u32 id, void *buffer);
-    int (*write)(__u32 id, void *buffer);
-};
 
 /* partition entry in MBR (main boot record) */
 struct partition_entry {
@@ -64,11 +52,11 @@ struct partition_entry {
  * the total size is 1 block, if block size >= 2KB (padding 0)
  * the total size is 2 blocks, if block size = 1KB */
 struct ext2_super_block {
-    /* total inodes count
+    /* total inodes count (used, free or reserved)
      * = sum(inodes in each block group)
      * <= s_inode_per_group * number of block groups */
     __le32 s_inodes_count;
-    /* total blocks count
+    /* total blocks count (used, free or reserved)
      * = sum(blocks in each block group)
      * <= s_block_per_group * number of block groups */
     __le32 s_blocks_count;
@@ -385,38 +373,81 @@ struct ext2_dir_entry {
     char *name;
 };
 
+/* ext2 file */
+struct ext2_file {
+    /* no longer than 255 byte ('\0') */
+    __u8 path[256];
+    /* start address */
+    __u32 blocks[15];
+    /* size */
+    __u32 size;
+    /* pointers, starts from 0 */
+    __u32 pointer;
+};
+
+/* structure for optimize file path */
+struct ext2_path {
+    __u8 *name;
+    struct ext2_inode inode;
+    struct ext2_path *parent;
+    struct ext2_path *child;
+};
+
 /* global variable */
-struct physical_interface disk;
+/* disk interface */
+struct physical_interface {
+    int (*read)(__u32 id, void *buffer);
+    int (*write)(__u32 id, void *buffer);
+} disk;
+/* memory interface */
+struct memory_interface {
+    void *(*allocate)(unsigned int size);
+    void (*free)(void *obj);
+    void *(*copy)(void *dest, void *src, int len);
+    void *(*set)(void *dest, int value, int len);
+} memory;
+/* meta information of file system */
+struct ext2_fs_info {
+    /* start address of ext2 partition (in sector) */
+    __u32 par_start_address;
+    /* start address of group descriptors (= par_start_address + offset) */
+    __u32 group_desc_address;
+    /* size of block (in byte) */
+    __u16 block_size;
+    /* size of inode (in byte) */
+    __u16 inode_size;
+    /* total inodes count */
+    __u32 inode_count;
+    /* inodes per block group */
+    __u32 inode_per_bg;
+} fs_info;
+/* current directory */
+struct ext2_path *current_dir;
 
 /* platform specification */
 #ifdef WINDOWS
-
 #include "stdio.h"
+#include "stdlib.h"
 #include "stdarg.h"
 #include "windows.h"
 
 #define VIRTUAL_DISK "\\\\.\\PhysicalDrive2" // this is the virtual disk used while my developing
 #define SECTOR_SIZE 512 // this is the sector size of virtual disk
-
 int windows_disk_read(__u32 id, void *buffer);
 int windows_disk_write(__u32 id, void *buffer);
-
 #elif SWORD
-
 #include "driver/vga.h"
 #include "zjunix/utils.h"
 #include "driver/sd.h"
-
 #endif // system type
-
-/* init.c */
-int ext2_init();
 
 /* debug_cat.c */
 int debug_cat(int type, const char *format, ...);
 
 /* disk_tool.c */
 int find_part(struct partition_entry *par, void *data);
+int disk_read(__u32 id, __u8 *buffer, int len);
+int disk_write(__u32 id, __u8 *buffer, int len);
 
 /* super.c */
 int sb_fill(struct ext2_super_block *sb, void *data);
@@ -424,5 +455,15 @@ int group_desc_fill(struct ext2_group_desc *group_desc, void *data);
 
 /* inode.c */
 int inode_fill(struct ext2_inode *inode, void *data);
+int dir_entry_fill(struct ext2_dir_entry *dir, void *data);
+int is_equal(__u8 *s1, __u8 *s2);
+int find_inode(__u32 id, struct ext2_inode *inode);
+int traverse_block(__u8 *target, __u32 *i_blocks, struct ext2_inode *inode);
+int get_root_inode(struct ext2_inode *inode);
+
+/* provided to outside */
+int ext2_init();
+int ext2_find(__u8 *path, struct ext2_inode *inode);
+
 
 #endif //EXT2_EXT2_H

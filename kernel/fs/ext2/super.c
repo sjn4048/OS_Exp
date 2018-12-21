@@ -12,8 +12,7 @@
  */
 int sb_fill(struct ext2_super_block *sb, void *data) {
     *sb = *(struct ext2_super_block *) data;
-    debug_cat(DEBUG_LOG, "Successfully got superblock\n");
-    return SUPER_SB_FILL_SUCCESS;
+    return SUCCESS;
 }
 
 /**
@@ -24,8 +23,5 @@ int sb_fill(struct ext2_super_block *sb, void *data) {
  */
 int group_desc_fill(struct ext2_group_desc *group_desc, void *data) {
     *group_desc = *(struct ext2_group_desc *) data;
-    debug_cat(DEBUG_LOG, "Successfully got a group descriptor\n");
-    return SUPER_GROUP_DESC_SUCCESS;
+    return SUCCESS;
 }
-
-

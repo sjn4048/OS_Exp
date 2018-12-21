@@ -21,14 +21,15 @@ int windows_disk_read(__u32 id, void *buffer) {
     HANDLE ext2Disk = CreateFileA(deviceName, GENERIC_READ, FILE_SHARE_READ | FILE_SHARE_WRITE,
                                   NULL, OPEN_EXISTING, 0, NULL);
     // move file pointer
-    long address_piece[2];
-    long long *address = (long long *) address_piece;
-    *address = id * SECTOR_SIZE;
-    SetFilePointer(ext2Disk, (LONG) address_piece[0], &address_piece[1], FILE_BEGIN);
+    long long address = (long long) id * SECTOR_SIZE;
+    unsigned long address_low = (unsigned long) (address & 0xffffffff);
+    unsigned long address_high = (unsigned long) (address >> 32);
+    SetFilePointer(ext2Disk, (LONG) address_low, (PLONG) &address_high, FILE_BEGIN);
 
     if (ext2Disk == INVALID_HANDLE_VALUE) {
         // if we do not successfully get the resource
-        debug_cat(DEBUG_ERROR, "Access hardware failed. Error code: 0x%X\n", (unsigned long) GetLastError());
+        debug_cat(DEBUG_ERROR, "windows_disk_read: failed to access hardware. error code: 0x%X.\n",
+                  (unsigned long) GetLastError());
         return 0;
     } else {
         // we read from the hard disk
@@ -36,10 +37,10 @@ int windows_disk_read(__u32 id, void *buffer) {
         ReadFile(ext2Disk, buffer, length, &bytesOfRead, 0);
         // if we have read nothing
         if (bytesOfRead != length) {
-            debug_cat(DEBUG_ERROR, "ReadFile failed. Error code: 0x%X\n", (unsigned long) GetLastError());
+            debug_cat(DEBUG_ERROR, "windows_disk_read: failed to read file. error code: 0x%X.\n",
+                      (unsigned long) GetLastError());
             return 0;
         } else {
-            debug_cat(DEBUG_LOG, "Successfully read %ld byte(s) data.\n", (unsigned long) bytesOfRead);
             return (int) bytesOfRead;
         }
     }
