@@ -121,7 +121,7 @@ int find_inode(__u32 id, struct ext2_inode *inode) {
  * @param inode: where store result
  * @return success or not, finish or not
  */
-int traverse_direct_block(__u8 *target, const __u32 *i_blocks, int length, struct ext2_inode *inode) {
+int traverse_direct_block(__u8 *target, const __u32 *i_blocks, int length, INODE *inode) {
     // block by block
     __u8 buffer[4096];
     int offset;
@@ -151,7 +151,8 @@ int traverse_direct_block(__u8 *target, const __u32 *i_blocks, int length, struc
             }
 
             // we can continue
-            if (FAIL == find_inode(dir.inode, inode)) {
+            inode->id = dir.inode;
+            if (FAIL == find_inode(inode->id, &(inode->info))) {
                 return FAIL;
             } else {
                 return SUCCESS;
@@ -170,7 +171,7 @@ int traverse_direct_block(__u8 *target, const __u32 *i_blocks, int length, struc
  * @param inode: where store result
  * @return success or not, finish or not
  */
-int traverse_indirect_block(__u8 *target, const __u32 *i_blocks, int length, struct ext2_inode *inode) {
+int traverse_indirect_block(__u8 *target, const __u32 *i_blocks, int length, INODE *inode) {
     __u8 buffer[4096];
     for (int i = 0; i < length; i++) {
         if (i_blocks[i] == 0) {
@@ -204,7 +205,7 @@ int traverse_indirect_block(__u8 *target, const __u32 *i_blocks, int length, str
  * @param inode: where store result
  * @return success or not, finish or not
  */
-int traverse_double_indirect_block(__u8 *target, const __u32 *i_blocks, int length, struct ext2_inode *inode) {
+int traverse_double_indirect_block(__u8 *target, const __u32 *i_blocks, int length, INODE *inode) {
     __u8 buffer[4096];
     for (int i = 0; i < length; i++) {
         if (i_blocks[i] == 0) {
@@ -239,7 +240,7 @@ int traverse_double_indirect_block(__u8 *target, const __u32 *i_blocks, int leng
  * @param inode: where store result
  * @return success or not, finish or not
  */
-int traverse_triple_indirect_block(__u8 *target, const __u32 *i_blocks, int length, struct ext2_inode *inode) {
+int traverse_triple_indirect_block(__u8 *target, const __u32 *i_blocks, int length, INODE *inode) {
     __u8 buffer[4096];
     for (int i = 0; i < length; i++) {
         if (i_blocks[i] == 0) {
@@ -273,7 +274,7 @@ int traverse_triple_indirect_block(__u8 *target, const __u32 *i_blocks, int leng
  * @param inode: store result
  * @return success or not
  */
-int traverse_block(__u8 *target, __u32 *i_blocks, struct ext2_inode *inode) {
+int traverse_block(__u8 *target, __u32 *i_blocks, INODE *inode) {
     int result = traverse_direct_block(target, i_blocks, 12, inode);
     if (NOT_FOUND == result & NOT_FOUND) {
         result = traverse_indirect_block(target, i_blocks + 12, 1, inode);

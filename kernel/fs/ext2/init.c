@@ -61,11 +61,12 @@ int find_ext2_fs(__u8 *buffer) {
 
 int load_root_inode() {
     // initialize current path (root)
-    current_dir->name = NULL;
-    current_dir->parent = NULL;
-    current_dir->child = NULL;
+    current_dir.name = NULL;
+    current_dir.parent = NULL;
+    current_dir.child = NULL;
+    current_dir.inode.id = 2;
 
-    if (SUCCESS == get_root_inode(&(current_dir->inode))) {
+    if (SUCCESS == get_root_inode(&(current_dir.inode.info))) {
         return SUCCESS;
     } else {
         return FAIL;
@@ -101,13 +102,6 @@ int ext2_init() {
 #endif // system type
 
     __u8 buffer[1024];
-
-    current_dir = NULL;
-    current_dir = (struct ext2_path *) memory.allocate(sizeof(struct ext2_path));
-    if (current_dir == NULL) {
-        debug_cat(DEBUG_ERROR, "ext2_init: failed due to memory error.\n");
-        goto error;
-    }
 
     // find Linux partition
     if (SUCCESS == find_linux_par(buffer)) {

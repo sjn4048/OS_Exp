@@ -16,8 +16,11 @@
 #define DEBUG_ERROR 102
 #define DEBUG_NONE 103
 
-#define EXT2_FT_DIR 2
+#define EXT2_DIRTY 1
+#define EXT2_NOT_DIRTY 0
+
 #define EXT2_S_IFDIR 0x4000
+#define EXT2_S_IFREG 0x8000
 
 /* type and structure definition */
 typedef unsigned long DWORD;
@@ -344,6 +347,12 @@ struct ext2_inode {
     } osd2;
 };
 
+/* structure of inode in memory */
+typedef struct ext2_inode_info {
+    struct ext2_inode info;
+    __u32 id;
+} INODE;
+
 /* directory entry */
 struct ext2_dir_entry {
     /* inode ID
@@ -374,21 +383,22 @@ struct ext2_dir_entry {
 };
 
 /* ext2 file */
-struct ext2_file {
-    /* no longer than 255 byte ('\0') */
-    __u8 path[256];
+typedef struct ext2_file {
     /* start address */
-    __u32 blocks[15];
-    /* size */
-    __u32 size;
+    INODE inode;
     /* pointers, starts from 0 */
     __u32 pointer;
-};
+    /* 4096 bytes buffer */
+    __u8 *buffer;
+    /* dirty
+     * 1 for dirty, and need to be written back to disk */
+    __u8 dirty;
+} EXT2_FILE;
 
 /* structure for optimize file path */
 struct ext2_path {
     __u8 *name;
-    struct ext2_inode inode;
+    INODE inode;
     struct ext2_path *parent;
     struct ext2_path *child;
 };
@@ -422,7 +432,7 @@ struct ext2_fs_info {
     __u32 inode_per_bg;
 } fs_info;
 /* current directory */
-struct ext2_path *current_dir;
+struct ext2_path current_dir;
 
 /* platform specification */
 #ifdef WINDOWS
@@ -431,7 +441,7 @@ struct ext2_path *current_dir;
 #include "stdarg.h"
 #include "windows.h"
 
-#define VIRTUAL_DISK "\\\\.\\PhysicalDrive2" // this is the virtual disk used while my developing
+#define VIRTUAL_DISK "\\\\.\\PhysicalDrive3" // this is the virtual disk used while my developing
 #define SECTOR_SIZE 512 // this is the sector size of virtual disk
 int windows_disk_read(__u32 id, void *buffer);
 int windows_disk_write(__u32 id, void *buffer);
@@ -458,12 +468,17 @@ int inode_fill(struct ext2_inode *inode, void *data);
 int dir_entry_fill(struct ext2_dir_entry *dir, void *data);
 int is_equal(__u8 *s1, __u8 *s2);
 int find_inode(__u32 id, struct ext2_inode *inode);
-int traverse_block(__u8 *target, __u32 *i_blocks, struct ext2_inode *inode);
+int traverse_block(__u8 *target, __u32 *i_blocks, INODE *inode);
 int get_root_inode(struct ext2_inode *inode);
+
+/* block.c */
+int write_block(EXT2_FILE *file);
+int read_block(EXT2_FILE *file);
 
 /* provided to outside */
 int ext2_init();
-int ext2_find(__u8 *path, struct ext2_inode *inode);
-
+int ext2_find(__u8 *path, INODE *inode);
+int ext2_open(__u8 *path, EXT2_FILE *file);
+int ext2_lseek(EXT2_FILE *file, __u32 new_pointer);
 
 #endif //EXT2_EXT2_H
