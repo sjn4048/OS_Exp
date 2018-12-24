@@ -27,6 +27,7 @@ typedef unsigned long DWORD;
 typedef unsigned char __u8;
 typedef unsigned short __u16;
 typedef unsigned int __u32;
+typedef unsigned long __u64;
 typedef __u16 __le16;
 typedef __u32 __le32;
 
@@ -480,5 +481,7 @@ int ext2_init();
 int ext2_find(__u8 *path, INODE *inode);
 int ext2_open(__u8 *path, EXT2_FILE *file);
 int ext2_lseek(EXT2_FILE *file, __u32 new_pointer);
+int ext2_read(EXT2_FILE *file, __u8 *buffer, __u64 length, __u64 *bytes_of_read);
+int ext2_write(EXT2_FILE *file, const __u8 *buffer, __u64 length, __u64 *bytes_of_write);
 
 #endif //EXT2_EXT2_H

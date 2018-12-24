@@ -172,7 +172,6 @@ int find_file_absolute(__u8 *path, INODE *inode) {
  * @return success or not
  */
 int ext2_find(__u8 *path, INODE *inode) {
-
     if (path[0] != '/') {
         debug_cat(DEBUG_ERROR, "find_file: path must start with a '/'\n");
         return FAIL;
@@ -233,7 +232,7 @@ int ext2_open(__u8 *path, EXT2_FILE *file) {
         return FAIL;
     }
 
-    debug_cat(DEBUG_ERROR, "ext2_open: opened.\n");
+    debug_cat(DEBUG_LOG, "ext2_open: opened.\n");
     return SUCCESS;
 }
 
@@ -247,6 +246,12 @@ int ext2_lseek(EXT2_FILE *file, __u32 new_pointer) {
     if (file == NULL) {
         debug_cat(DEBUG_ERROR, "ext2_lseek: empty file pointer.\n");
         return FAIL;
+    }
+
+    if (file->pointer / fs_info.block_size == new_pointer / fs_info.block_size) {
+        file->pointer = new_pointer;
+        debug_cat(DEBUG_LOG, "ext2_lseek: pointer moved.\n");
+        return SUCCESS;
     }
 
     if (new_pointer >= file->inode.info.i_size) {
@@ -267,6 +272,87 @@ int ext2_lseek(EXT2_FILE *file, __u32 new_pointer) {
         return FAIL;
     }
 
-    debug_cat(DEBUG_ERROR, "ext2_lseek: pointer moved.\n");
+    debug_cat(DEBUG_LOG, "ext2_lseek: pointer moved.\n");
+    return SUCCESS;
+}
+
+/**
+ * read bytes from file
+ * @param file: specific file
+ * @param buffer: store data
+ * @param length: length of data you want to read
+ * @param bytes_of_read: length of data successfully read
+ * @return success or not
+ */
+int ext2_read(EXT2_FILE *file, __u8 *buffer, __u64 length, __u64 *bytes_of_read) {
+    if (file == NULL) {
+        debug_cat(DEBUG_ERROR, "ext2_read: empty file pointer.\n");
+        return FAIL;
+    }
+
+    // if the length is longer than the bytes left
+    if (length > file->inode.info.i_size - file->pointer) {
+        length = file->inode.info.i_size - file->pointer;
+    }
+
+    __u64 count = 0;
+    while (count < length) {
+        int i = 0;
+        for (i = file->pointer % fs_info.block_size; i < fs_info.block_size && count < length; i++) {
+            buffer[count++] = file->buffer[i];
+        }
+        if (i == fs_info.block_size) {
+            if (FAIL == ext2_lseek(file, (file->pointer / fs_info.block_size + 1) * fs_info.block_size)) {
+                debug_cat(DEBUG_ERROR, "ext2_read: failed to move pointer.\n");
+                return FAIL;
+            }
+        }
+    }
+
+    if (bytes_of_read != NULL) {
+        (*bytes_of_read) = count;
+    }
+    debug_cat(DEBUG_LOG, "ext2_read: read %d byte(s) of data.\n", count);
+    return SUCCESS;
+}
+
+/**
+ * write bytes to file
+ * @param file: specific file
+ * @param buffer: store data
+ * @param length: length of data you want to write
+ * @param bytes_of_read: length of data successfully write
+ * @return success or not
+ */
+int ext2_write(EXT2_FILE *file, const __u8 *buffer, __u64 length, __u64 *bytes_of_write) {
+    if (file == NULL) {
+        debug_cat(DEBUG_ERROR, "ext2_write: empty file pointer.\n");
+        return FAIL;
+    }
+
+    // if the length is longer than the bytes left
+    if (length > file->inode.info.i_size - file->pointer) {
+        length = file->inode.info.i_size - file->pointer;
+    }
+
+    __u64 count = 0;
+    while (count < length) {
+        int i = 0;
+        for (i = file->pointer % fs_info.block_size; i < fs_info.block_size && count < length; i++) {
+            file->buffer[i] = buffer[count++];
+            file->dirty = EXT2_DIRTY;
+        }
+        if (i == fs_info.block_size) {
+            if (FAIL == ext2_lseek(file, (file->pointer / fs_info.block_size + 1) * fs_info.block_size)) {
+                debug_cat(DEBUG_ERROR, "ext2_write: failed to move pointer.\n");
+                return FAIL;
+            }
+        }
+    }
+
+    if (bytes_of_write != NULL) {
+        (*bytes_of_write) = count;
+    }
+    debug_cat(DEBUG_LOG, "ext2_read: read %d byte(s) of data.\n", count);
     return SUCCESS;
 }
