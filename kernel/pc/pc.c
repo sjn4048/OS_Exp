@@ -7,6 +7,7 @@
 
 unsigned int sysctl_sched_latency = 1000000;
 task_struct *current_task = 0;
+task_struct taskss[3];
 struct list_head tasks;
 unsigned int cur_PID = 0;
 void add_task(task_struct *task) {
@@ -63,6 +64,8 @@ void init_pc() {
         "mtc0 $zero, $9"
         : : "r"(sysctl_sched_latency));
     current_task = &(new->task);
+    add_task(&(new->task));
+    taskss[0] = new->task;
 }
 
 //改变cfs调度的周期，通过修改中断时间间隔实现
@@ -74,19 +77,24 @@ void change_sysctl_sched_latency(unsigned int latency){
         : : "r"(latency));
 }
 
+int curtask = 0;
 void pc_schedule(unsigned int status, unsigned int cause, context* pt_context) {
-    struct list_head *pos;
-    task_struct *next, *torun, *towait;
+    // struct list_head *pos;
+    // task_struct *next, *torun, *towait;
     copy_context(pt_context, &(current_task->context));
-    list_for_each(pos, &tasks) {
-        next = container_of(pos, task_struct, sched);
-        if (next->name != current_task->name) {
-            // Load context
-            copy_context(&(next->context), pt_context);
-            current_task = next;
-        }
-    }
-
+    // list_for_each(pos, &tasks) {
+    //     next = container_of(pos, task_struct, sched);
+    //     if (next->name != current_task->name) {
+    //         // Load context
+    //         copy_context(&(next->context), pt_context);
+    //         current_task = next;
+    //         break;
+    //     }
+    // }
+    curtask = (curtask + 1) % 3;
+    task_struct next = taskss[curtask];
+    copy_context(pt_context, &(next.context));
+    current_task = &next;
     asm volatile("mtc0 $zero, $9\n\t");
 }
 
@@ -100,7 +108,7 @@ int pc_peek() {
     // return i;
     return 0;
 }
-
+int po = 0;
 void pc_create(char *task_name, void(*entry)(unsigned int argc, void *args), unsigned int argc, void *args) {
     task_union *new = (task_union*) kmalloc(sizeof(task_union));
     kernel_memset(&(new->task.context), 0, sizeof(context));
@@ -118,6 +126,13 @@ void pc_create(char *task_name, void(*entry)(unsigned int argc, void *args), uns
     new->task.parent = current_task->PID;
     new->task.state = 0;
     add_task(&(new->task));
+    if (po == 0) {
+        taskss[1] = new->task;
+        po = 1;
+    }
+    else{
+        taskss[2] = new->task;
+    }
 }
 
 void pc_kill_syscall(unsigned int status, unsigned int cause, context* pt_context) {
