@@ -62,6 +62,7 @@ void init_pc() {
         "mtc0 $0, $11\n\t"
         "mtc0 $zero, $9"
         : : "r"(sysctl_sched_latency));
+    current_task = &(new->task);
 }
 
 //改变cfs调度的周期，通过修改中断时间间隔实现
@@ -111,19 +112,12 @@ void pc_create(char *task_name, void(*entry)(unsigned int argc, void *args), uns
     asm volatile("la %0, _gp\n\t" : "=r"(init_gp)); 
     new->task.context.gp = init_gp;
 
-    log(LOG_START, "1");
     new->task.context.a0 = argc;
-    log(LOG_START, "2");
     new->task.context.a1 = (unsigned int)args;
-    log(LOG_START, "3");
     new->task.PID = cur_PID++;
-    log(LOG_START, "4");
     new->task.parent = current_task->PID;
-    log(LOG_START, "5");
     new->task.state = 0;
-    log(LOG_START, "6");
     add_task(&(new->task));
-    log(LOG_START, "7");
 }
 
 void pc_kill_syscall(unsigned int status, unsigned int cause, context* pt_context) {
