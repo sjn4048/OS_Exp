@@ -101,7 +101,7 @@ void pc_schedule(unsigned int status, unsigned int cause, context* pt_context) {
         next = taskss1;
     else
         next = taskss2;
-    copy_context(pt_context, &(next->context));
+    copy_context(&(next->context), pt_context);
     current_task = next;
     asm volatile("mtc0 $zero, $9\n\t");
 }
