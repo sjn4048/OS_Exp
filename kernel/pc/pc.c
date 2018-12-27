@@ -1,5 +1,5 @@
 #include "pc.h"
-
+#include "rbtree.h"
 #include <driver/vga.h>
 #include <intr.h>
 #include <zjunix/syscall.h>
