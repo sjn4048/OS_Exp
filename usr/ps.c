@@ -7,6 +7,7 @@
 #include <zjunix/fs/fat.h>
 #include <zjunix/slab.h>
 #include <zjunix/time.h>
+#include <zjunix/log.h>
 #include <zjunix/utils.h>
 #include "../usr/ls.h"
 #include "exec.h"
@@ -51,6 +52,7 @@ int proc_demo_create() {
 }
 
 void ps() {
+    log(LOG_STEP, "ps");
     kernel_printf("Press any key to enter shell.\n");
     kernel_getchar();
     char c;

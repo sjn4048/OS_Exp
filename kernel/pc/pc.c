@@ -83,6 +83,7 @@ int curtask = 0;
 void pc_schedule(unsigned int status, unsigned int cause, context* pt_context) {
     // struct list_head *pos;
     // task_struct *next, *torun, *towait;
+    log(LOG_STEP, "pc_schedule");
     copy_context(pt_context, &(current_task->context));
     // list_for_each(pos, &tasks) {
     //     next = container_of(pos, task_struct, sched);
@@ -93,6 +94,7 @@ void pc_schedule(unsigned int status, unsigned int cause, context* pt_context) {
     //         break;
     //     }
     // }
+    log(LOG_STEP, "1");
     curtask = (curtask + 1) % 3;
     task_struct *next = 0;
     if (curtask == 0) 
@@ -101,9 +103,13 @@ void pc_schedule(unsigned int status, unsigned int cause, context* pt_context) {
         next = taskss1;
     else
         next = taskss2;
+    log(LOG_STEP, "2");
     copy_context(&(next->context), pt_context);
+    log(LOG_STEP, "3");
     current_task = next;
+    log(LOG_STEP, "4");
     asm volatile("mtc0 $zero, $9\n\t");
+    log(LOG_STEP, "5");
 }
 
 int pc_peek() {

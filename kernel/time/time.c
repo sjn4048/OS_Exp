@@ -3,6 +3,7 @@
 #include <driver/vga.h>
 #include <intr.h>
 #include <zjunix/pc.h>
+#include <zjunix/log.h>
 
 void get_time_string(unsigned int ticks_high, unsigned int ticks_low, char *buf) {
     // Divide by 256
@@ -34,6 +35,7 @@ void get_time_string(unsigned int ticks_high, unsigned int ticks_low, char *buf)
 #pragma GCC optimize("O0")
 
 void system_time_proc() {
+    log(LOG_STEP, "system_time_proc");
     unsigned int ticks_high, ticks_low;
     int i;
     char buffer[8];
