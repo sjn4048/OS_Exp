@@ -54,5 +54,5 @@ int pc_kill(int proc);
 task_struct* get_curr_pcb();
 int print_proc();
 void change_sysctl_sched_latency(unsigned int latency);
-
+extern void *kmalloc(unsigned int size);
 #endif  // !_ZJUNIX_PC_H
