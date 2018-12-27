@@ -8,6 +8,7 @@
 task_struct pcb[8];
 int curr_proc;
 unsigned int sysctl_sched_latency = 1000000;
+task_struct *current_task = 0;
 
 static void copy_context(context* src, context* dest) {
     dest->epc = src->epc;
@@ -49,7 +50,7 @@ void init_pc() {
     for (i = 1; i < 8; i++)
         pcb[i].ASID = -1;
     pcb[0].ASID = 0;
-    pcb[0].counter = PROC_DEFAULT_TIMESLOTS;
+    pcb[0].counter = 6;
     kernel_strcpy(pcb[0].name, "init");
     curr_proc = 0;
     register_syscall(10, pc_kill_syscall);

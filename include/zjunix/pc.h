@@ -26,12 +26,13 @@ typedef struct {
     unsigned long start_time;   //create time
 } task_struct;
 
+extern task_struct *current_task;
+
 typedef union {
     task_struct task;
     unsigned char kernel_stack[TASK_KERNEL_SIZE];
 } task_union;
 
-#define PROC_DEFAULT_TIMESLOTS 6
 
 void init_pc();
 void pc_schedule(unsigned int status, unsigned int cause, context* pt_context);
