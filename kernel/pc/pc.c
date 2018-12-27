@@ -3,6 +3,7 @@
 #include <intr.h>
 #include <arch.h>
 #include <zjunix/syscall.h>
+#include <zjunix/log.h>
 
 unsigned int sysctl_sched_latency = 1000000;
 task_struct *current_task = 0;
@@ -54,11 +55,10 @@ void init_pc() {
     new->task.state = 0;
     INIT_LIST_HEAD(&(new->task.sched));
     kernel_strcpy(new->task.name, "idle");
-
-
+    log(LOG_STEP, "1");
     register_syscall(10, pc_kill_syscall);
     register_interrupt_handler(7, pc_schedule);
-
+    log(LOG_STEP, "2");
     asm volatile(
         //"li $v0, %0\n\t"
         "mtc0 $0, $11\n\t"
@@ -104,19 +104,27 @@ int pc_peek() {
 
 void pc_create(char *task_name, void(*entry)(unsigned int argc, void *args), unsigned int argc, void *args) {
     task_union *new = (task_union*) kmalloc(sizeof(task_union));
+    log(LOG_STEP, "1");
     kernel_memset(&(new->task.context), 0, sizeof(context));
+    log(LOG_STEP, "2");
     kernel_strcpy(new->task.name, task_name);
+    log(LOG_STEP, "3");
     new->task.context.epc = (unsigned int)entry;
+    log(LOG_STEP, "4");
     INIT_LIST_HEAD(&(new->task.sched));
+    log(LOG_STEP, "5");
     new->task.context.sp = (unsigned int)new + TASK_KERNEL_SIZE;
+    log(LOG_STEP, "6");
     unsigned int init_gp;
     asm volatile("la %0, _gp\n\t" : "=r"(init_gp)); 
     new->task.context.gp = init_gp;
+    log(LOG_STEP, "7");
     new->task.context.a0 = argc;
     new->task.context.a1 = (unsigned int)args;
     new->task.PID = cur_PID++;
     new->task.parent = current_task->PID;
     new->task.state = 0;
+    log(LOG_STEP, "8");
     add_task(&(new->task));
 }
 

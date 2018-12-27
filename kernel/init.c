@@ -66,6 +66,7 @@ void init_kernel() {
     // Process control
     log(LOG_START, "Process Control Module.");
     init_pc();
+    log(LOG_STEP, "init_pc.");
     create_startup_process();
     log(LOG_END, "Process Control Module.");
     // Interrupts
