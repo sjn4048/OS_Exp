@@ -7,7 +7,9 @@
 
 unsigned int sysctl_sched_latency = 1000000;
 task_struct *current_task = 0;
-task_struct taskss[3];
+task_struct *taskss0 = 0;
+task_struct *taskss1 = 0;
+task_struct *taskss2 = 0;
 struct list_head tasks;
 unsigned int cur_PID = 0;
 void add_task(task_struct *task) {
@@ -65,7 +67,7 @@ void init_pc() {
         : : "r"(sysctl_sched_latency));
     current_task = &(new->task);
     add_task(&(new->task));
-    taskss[0] = new->task;
+    taskss0 = &(new->task);
 }
 
 //改变cfs调度的周期，通过修改中断时间间隔实现
@@ -92,9 +94,15 @@ void pc_schedule(unsigned int status, unsigned int cause, context* pt_context) {
     //     }
     // }
     curtask = (curtask + 1) % 3;
-    task_struct next = taskss[curtask];
-    copy_context(pt_context, &(next.context));
-    current_task = &next;
+    task_struct *next = 0;
+    if (curtask == 0) 
+        next = taskss0;
+    else if (curtask == 1) 
+        next = taskss1;
+    else
+        next = taskss2;
+    copy_context(pt_context, &(next->context));
+    current_task = next;
     asm volatile("mtc0 $zero, $9\n\t");
 }
 
@@ -127,11 +135,11 @@ void pc_create(char *task_name, void(*entry)(unsigned int argc, void *args), uns
     new->task.state = 0;
     add_task(&(new->task));
     if (po == 0) {
-        taskss[1] = new->task;
+        taskss1 = &(new->task);
         po = 1;
     }
     else{
-        taskss[2] = new->task;
+        taskss2 = &(new->task);
     }
 }
 
