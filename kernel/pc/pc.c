@@ -1,6 +1,7 @@
 #include "pc.h"
 #include <driver/vga.h>
 #include <intr.h>
+#include <arch.h>
 #include <zjunix/syscall.h>
 
 unsigned int sysctl_sched_latency = 1000000;
@@ -47,7 +48,7 @@ static void copy_context(context* src, context* dest) {
 
 void init_pc() {
     INIT_LIST_HEAD(&tasks);
-    task_union *new = (task_union*) kmalloc(sizeof(task_union));
+    task_union *new = (task_union*)(kernel_sp - TASK_KERNEL_SIZE);
     new->task.PID = cur_PID++;
     new->task.parent = 0;
     new->task.state = 0;
