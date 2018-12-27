@@ -4,6 +4,8 @@
 #define TASK_KERNEL_SIZE 4096
 
 #include <zjunix/rbtree.h>
+#include <zjunix/list.h>
+#include <zjunix/utils.h>
 
 typedef struct {
     unsigned int epc;
@@ -26,11 +28,13 @@ struct sched_entity {
 };
 
 typedef struct {
+    struct sched_entity sched_entity;
     context context;
-    int ASID;   //id
-    unsigned int counter;  //remain time
+    unsigned int PID;   //pid
+    unsigned int parent;   //parent's pid
+    unsigned int state;   //state
     char name[32];  //name
-    unsigned long start_time;   //create time
+    struct list_head sched;
 } task_struct;
 
 extern task_struct *current_task;
@@ -44,7 +48,7 @@ typedef union {
 void init_pc();
 void pc_schedule(unsigned int status, unsigned int cause, context* pt_context);
 int pc_peek();
-void pc_create(int asid, void (*func)(), unsigned int init_sp, unsigned int init_gp, char* name);
+void pc_create(char *task_name, void(*entry)(unsigned int argc, void *args), unsigned int argc, void *args);
 void pc_kill_syscall(unsigned int status, unsigned int cause, context* pt_context);
 int pc_kill(int proc);
 task_struct* get_curr_pcb();
