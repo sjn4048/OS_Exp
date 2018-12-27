@@ -3,6 +3,8 @@
 
 #define TASK_KERNEL_SIZE 4096
 
+#include <zjunix/rbtree.h>
+
 typedef struct {
     unsigned int epc;
     unsigned int at;
@@ -17,6 +19,11 @@ typedef struct {
     unsigned int fp;
     unsigned int ra;
 } context;
+
+struct sched_entity {
+    struct rb_node rb_node;       // rbtree node
+    float vruntime;
+};
 
 typedef struct {
     context context;

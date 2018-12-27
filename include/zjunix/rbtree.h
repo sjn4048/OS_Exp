@@ -1,10 +1,7 @@
 #ifndef	RBTREE_H
 #define	RBTREE_H
 
-#define container_of(ptr, type, member) ({			\
-	const typeof( ((type *)0)->member ) *__mptr = (ptr);	\
-	(type *)( (char *)__mptr - offsetof(type,member) );})
-#define offsetof(TYPE, MEMBER) ((unsigned long) &((TYPE *)0)->MEMBER)
+#include <zjunix/utils.h>
 
 #define Null 0
 
