@@ -80,8 +80,7 @@ void init_pc() {
     add_task(&(new->task), all_task);
     add_task(&(new->task), all_ready);
     new->task.sched_entity.vruntime = 0;
-    kernel_printf("  PID : %d, name : %s, vruntime : %d\n", new->task.PID, new->task.name,
-        new->task.sched_entity.vruntime);
+    print_proc();
     asm volatile(
         "li $v0, 1000000\n\t"
         "mtc0 $v0, $11\n\t"
