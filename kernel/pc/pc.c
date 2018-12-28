@@ -89,7 +89,7 @@ void change_sysctl_sched_latency(unsigned int latency){
 
 
 void pc_schedule(unsigned int status, unsigned int cause, context* pt_context) {
-    
+
 
 
     copy_context(pt_context, &(current_task->context));
@@ -141,7 +141,7 @@ int print_proc() {
     list_for_each(pos, &all_task) {
         next = container_of(pos, task_struct, task);
         kernel_printf("PID : %d, name : %s, vruntime : %d\n", next->PID, next->name,
-        (int)(next->sched_entity.vruntime));
+        next->sched_entity.vruntime);
     }
     return 0;
 }
