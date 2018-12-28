@@ -210,7 +210,7 @@ int pc_kill(unsigned int PID) {
         return 1;
     }
     task->state = TASK_DEAD;
-    remove_task(&(task->task_list));
+    remove_task(task);
     delete_process(&(rq.tasks_timeline), &(task->sched_entity));
 
     enable_interrupts();
