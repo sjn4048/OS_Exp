@@ -9,6 +9,7 @@
 exc_fn exceptions[32];
 
 void do_exceptions(unsigned int status, unsigned int cause, context* pt_context) {
+    kernel_printf("exception!!!!!!!!!!!!!");
     int index = cause >> 2;
     index &= 0x1f;
     if (exceptions[index]) {

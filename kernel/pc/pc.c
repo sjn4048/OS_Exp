@@ -5,6 +5,9 @@
 #include <zjunix/syscall.h>
 #include <zjunix/log.h>
 
+int curtask = 0;
+int po = 0;
+
 unsigned int sysctl_sched_latency = 1000000;
 task_struct *current_task = 0;
 task_struct *taskss0 = 0;
@@ -49,8 +52,10 @@ static void copy_context(context* src, context* dest) {
     dest->fp = src->fp;
     dest->ra = src->ra;
 }
-
 void init_pc() {
+    sysctl_sched_latency = 1000000;
+    po = 0;
+    curtask = 0;
     INIT_LIST_HEAD(&tasks);
     task_union *new = (task_union*)(kernel_sp - TASK_KERNEL_SIZE);
     new->task.PID = cur_PID++;
@@ -60,11 +65,15 @@ void init_pc() {
     kernel_strcpy(new->task.name, "idle");
     register_syscall(10, pc_kill_syscall);
     register_interrupt_handler(7, pc_schedule);
+    // asm volatile(
+    //     //"li $v0, %0\n\t"
+    //     "mtc0 $0, $11\n\t"
+    //     "mtc0 $zero, $9"
+    //     : : "r"(sysctl_sched_latency));
     asm volatile(
-        //"li $v0, %0\n\t"
-        "mtc0 $0, $11\n\t"
-        "mtc0 $zero, $9"
-        : : "r"(sysctl_sched_latency));
+        "li $v0, 1000000\n\t"
+        "mtc0 $v0, $11\n\t"
+        "mtc0 $zero, $9");
     current_task = &(new->task);
     add_task(&(new->task));
     taskss0 = &(new->task);
@@ -79,11 +88,10 @@ void change_sysctl_sched_latency(unsigned int latency){
         : : "r"(latency));
 }
 
-int curtask = 0;
+
 void pc_schedule(unsigned int status, unsigned int cause, context* pt_context) {
     // struct list_head *pos;
     // task_struct *next, *torun, *towait;
-    log(LOG_STEP, "pc_schedule");
     copy_context(pt_context, &(current_task->context));
     // list_for_each(pos, &tasks) {
     //     next = container_of(pos, task_struct, sched);
@@ -94,22 +102,18 @@ void pc_schedule(unsigned int status, unsigned int cause, context* pt_context) {
     //         break;
     //     }
     // }
-    log(LOG_STEP, "1");
+    task_struct *next;
     curtask = (curtask + 1) % 3;
-    task_struct *next = 0;
     if (curtask == 0) 
         next = taskss0;
     else if (curtask == 1) 
         next = taskss1;
     else
         next = taskss2;
-    log(LOG_STEP, "2");
     copy_context(&(next->context), pt_context);
-    log(LOG_STEP, "3");
     current_task = next;
-    log(LOG_STEP, "4");
     asm volatile("mtc0 $zero, $9\n\t");
-    log(LOG_STEP, "5");
+    
 }
 
 int pc_peek() {
@@ -122,7 +126,6 @@ int pc_peek() {
     // return i;
     return 0;
 }
-int po = 0;
 void pc_create(char *task_name, void(*entry)(unsigned int argc, void *args), unsigned int argc, void *args) {
     task_union *new = (task_union*) kmalloc(sizeof(task_union));
     kernel_memset(&(new->task.context), 0, sizeof(context));
