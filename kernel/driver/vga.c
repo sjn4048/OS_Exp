@@ -11,13 +11,12 @@ int cursor_col;
 int cursor_freq = 31;
 
 void kernel_set_cursor() {
-    *GPIO_CURSOR = ((cursor_freq & 0xff) << 16) + (((cursor_row+1) & 0xff) << 8) + ((cursor_col+2) & 0xff);
+    *GPIO_CURSOR = ((cursor_freq & 0xff) << 16) + (((cursor_row+2) & 0xff) << 8) + ((cursor_col+1) & 0xff);
 }
 
 void init_vga() {
     unsigned int w = 0x000fff00;
-    cursor_col = 2;
-    cursor_row = 1;
+    cursor_row = cursor_col = 0;
     cursor_freq = 31;
     kernel_set_cursor();
 }
@@ -25,8 +24,8 @@ void init_vga() {
 void kernel_clear_screen(int scope) {
     unsigned int w = 0x000fff00;
     scope &= 31;
-    cursor_col = 2;
-    cursor_row = 1;
+    cursor_col = 0;
+    cursor_row = 0;
     kernel_set_cursor();
     kernel_memset_word(CHAR_VRAM, w, scope * VGA_CHAR_MAX_COL);
 }
@@ -39,10 +38,8 @@ void kernel_scroll_screen() {
 
 void kernel_putchar_at(int ch, int fc, int bg, int row, int col) {
     unsigned int *p;
-    row = row & 31;
-    col = col & 127;
-    row += 1;
-    col += 2;
+    row = (row+2) & 31;
+    col = (col+1) & 127;
     p = CHAR_VRAM + row * VGA_CHAR_MAX_COL + col;
     *p = ((bg & 0xfff) << 20) + ((fc & 0xfff) << 8) + (ch & 0xff);
 }
