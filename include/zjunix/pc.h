@@ -22,9 +22,43 @@ typedef struct {
     unsigned int ra;
 } context;
 
+typedef struct {
+	unsigned long weight, inv_weight;
+} load_weight;
+
 struct sched_entity {
     struct rb_node rb_node;       // rbtree node
     float vruntime;
+    load_weight load;		/* for load-balancing */
+	unsigned int exec_start;
+	unsigned int sum_exec_runtime;
+	unsigned int vruntime;
+	unsigned int prev_sum_exec_runtime;
+	unsigned int nr_migrations;
+};
+
+struct sched_class {
+
+	struct task_struct * (*pick_next_task) (struct rq *rq);
+
+	// void (*enqueue_task) (struct rq *rq, struct task_struct *p, int flags);
+	// void (*dequeue_task) (struct rq *rq, struct task_struct *p, int flags);
+	// void (*yield_task) (struct rq *rq);
+
+	// void (*check_preempt_curr) (struct rq *rq, struct task_struct *p, int flags);
+
+	// void (*put_prev_task) (struct rq *rq, struct task_struct *p);
+
+	// void (*set_curr_task) (struct rq *rq);
+	// void (*task_tick) (struct rq *rq, struct task_struct *p, int queued);
+	// void (*task_fork) (struct task_struct *p);
+
+	// void (*switched_from) (struct rq *this_rq, struct task_struct *task);
+	// void (*switched_to) (struct rq *this_rq, struct task_struct *task);
+	// void (*prio_changed) (struct rq *this_rq, struct task_struct *task, int oldprio);
+
+	// unsigned int (*get_rr_interval) (struct rq *rq, struct task_struct *task);
+
 };
 
 typedef struct {
@@ -34,7 +68,11 @@ typedef struct {
     unsigned int parent;   //parent's pid
     unsigned int state;   //state
     char name[32];  //name
-    struct list_head sched;
+    struct list_head task;
+    unsigned int usage;
+    int prio, static_prio, normal_prio;
+    const struct sched_class *sched_class;
+    struct list_head children;
 } task_struct;
 
 extern task_struct *current_task;

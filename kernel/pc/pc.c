@@ -5,20 +5,19 @@
 #include <zjunix/syscall.h>
 #include <zjunix/log.h>
 
-int curtask = 0;
-int po = 0;
 
 unsigned int sysctl_sched_latency = 1000000;
 task_struct *current_task = 0;
-task_struct *taskss0 = 0;
-task_struct *taskss1 = 0;
-task_struct *taskss2 = 0;
-struct list_head tasks;
+struct list_head all_task;
+struct list_head all_dead;
+struct list_head all_waiting;
+struct list_head all_ready;
 unsigned int cur_PID = 0;
 
-void add_task(task_struct *task) {
-    list_add_tail(&(task->sched), &tasks);
+void add_task(task_struct *task, struct list_head tasks) {
+    list_add_tail(&(task->task), &tasks);
 }
+
 static void copy_context(context* src, context* dest) {
     dest->epc = src->epc;
     dest->at = src->at;
@@ -55,14 +54,15 @@ static void copy_context(context* src, context* dest) {
 }
 void init_pc() {
     // sysctl_sched_latency = 1000000;
-    // po = 0;
-    // curtask = 0;
-    INIT_LIST_HEAD(&tasks);
+    INIT_LIST_HEAD(&all_task);
+    INIT_LIST_HEAD(&all_dead);
+    INIT_LIST_HEAD(&all_waiting);
+    INIT_LIST_HEAD(&all_ready);
     task_union *new = (task_union*)(kernel_sp - TASK_KERNEL_SIZE);
     new->task.PID = cur_PID++;
     new->task.parent = 0;
     new->task.state = 0;
-    INIT_LIST_HEAD(&(new->task.sched));
+    INIT_LIST_HEAD(&(new->task.task));
     kernel_strcpy(new->task.name, "idle");
     register_syscall(10, pc_kill_syscall);
     register_interrupt_handler(7, pc_schedule);
@@ -76,8 +76,7 @@ void init_pc() {
         "mtc0 $v0, $11\n\t"
         "mtc0 $zero, $9");
     current_task = &(new->task);
-    add_task(&(new->task));
-    taskss0 = &(new->task);
+    add_task(&(new->task), all_task);
 }
 
 // change the reschedule period of CFS, by modifying the interrupt period
@@ -90,46 +89,36 @@ void change_sysctl_sched_latency(unsigned int latency){
 
 
 void pc_schedule(unsigned int status, unsigned int cause, context* pt_context) {
+    
+
 
     copy_context(pt_context, &(current_task->context));
-    task_struct *next;
-    curtask = (curtask + 1) % 3;
-    if (curtask == 0) 
-        next = taskss0;
-    else if (curtask == 1) 
-        next = taskss1;
-    else
-        next = taskss2;
+    task_struct *next = current_task;
     copy_context(&(next->context), pt_context);
     current_task = next;
     asm volatile("mtc0 $zero, $9\n\t");
-    
+
 }
 
 
 void pc_create(char *task_name, void(*entry)(unsigned int argc, void *args), unsigned int argc, void *args) {
     task_union *new = (task_union*) kmalloc(sizeof(task_union));
-    kernel_memset(&(new->task.context), 0, sizeof(context));
+    INIT_LIST_HEAD(&(new->task.task));
     kernel_strcpy(new->task.name, task_name);
+    // ------- setting context registers
+    kernel_memset(&(new->task.context), 0, sizeof(context));
     new->task.context.epc = (unsigned int)entry;
-    INIT_LIST_HEAD(&(new->task.sched));
     new->task.context.sp = (unsigned int)new + TASK_KERNEL_SIZE;
     unsigned int init_gp;
     asm volatile("la %0, _gp\n\t" : "=r"(init_gp)); 
     new->task.context.gp = init_gp;
     new->task.context.a0 = argc;
     new->task.context.a1 = (unsigned int)args;
+    // ------- done setting context registers
     new->task.PID = cur_PID++;
     new->task.parent = current_task->PID;
     new->task.state = 0;
-    add_task(&(new->task));
-    if (po == 0) {
-        taskss1 = &(new->task);
-        po = 1;
-    }
-    else{
-        taskss2 = &(new->task);
-    }
+    add_task(&(new->task), all_task);
 }
 
 void pc_kill_syscall(unsigned int status, unsigned int cause, context* pt_context) {
@@ -149,8 +138,8 @@ int pc_kill(unsigned int PID) {
 int print_proc() {
     struct list_head *pos;
     task_struct *next;
-    list_for_each(pos, &tasks) {
-        next = container_of(pos, task_struct, sched);
+    list_for_each(pos, &all_task) {
+        next = container_of(pos, task_struct, task);
         kernel_printf("PID : %d, name : %s, vruntime : %d\n", next->PID, next->name,
         (int)(next->sched_entity.vruntime));
     }
