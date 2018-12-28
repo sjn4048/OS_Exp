@@ -16,7 +16,8 @@ void kernel_set_cursor() {
 
 void init_vga() {
     unsigned int w = 0x000fff00;
-    cursor_row = cursor_col = 0;
+    cursor_col = 2;
+    cursor_row = 1;
     cursor_freq = 31;
     kernel_set_cursor();
 }
