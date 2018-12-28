@@ -66,6 +66,7 @@ void init_pc() {
     task_union *new = (task_union*)(kernel_sp - TASK_KERNEL_SIZE);
     new->task.PID = cur_PID++;
     new->task.parent = 0;
+    new->task.sched_entity.vruntime = 0;
     new->task.state = 0;
     INIT_LIST_HEAD(&(new->task.task));
     kernel_strcpy(new->task.name, "idle");
