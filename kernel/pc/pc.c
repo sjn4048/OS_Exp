@@ -53,6 +53,7 @@ static void copy_context(context* src, context* dest) {
     dest->ra = src->ra;
 }
 void init_pc() {
+    init_CFS();
     // sysctl_sched_latency = 1000000;
     INIT_LIST_HEAD(&all_task);
     INIT_LIST_HEAD(&all_dead);

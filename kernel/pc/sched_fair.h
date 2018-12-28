@@ -43,14 +43,12 @@ static const int prio_to_wmult[40] = {
 };
 
 
-static struct task_struct * (*pick_next_task_fair) (struct rq *rq);
+struct task_struct * (*pick_next_task_fair) (struct rq *rq);
 /*
  * All the scheduling class methods:
  */
-static const struct sched_class fair_sched_class = {
+static struct sched_class fair_sched_class;
 
-	.pick_next_task	= pick_next_task_fair,
-
-};
+void init_CFS();
 
 #endif
