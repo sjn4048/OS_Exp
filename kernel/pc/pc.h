@@ -44,27 +44,9 @@ static const int prio_to_wmult[40] = {
  /*  15 */ 119304647, 148102320, 186737708, 238609294, 286331153,
 };
 
-struct sched_entity {
-    struct rb_node rb_node;       // rbtree node
-    float vruntime;
-};
 
-typedef struct {
-    struct sched_entity sched_entity;
-    context context;
-    unsigned int PID;   //pid
-    unsigned int parent;   //parent's pid
-    unsigned int state;   //state
-    char name[32];  //name
-    struct list_head sched;
-} task_struct;
 
-extern task_struct *current_task;
 
-typedef union {
-    task_struct task;
-    unsigned char kernel_stack[TASK_KERNEL_SIZE];
-} task_union;
 
 
 #endif
