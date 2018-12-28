@@ -7,6 +7,8 @@
 #include <zjunix/rbtree.h>
 #include <zjunix/utils.h>
 
+
+
 typedef struct {
     unsigned int epc;
     unsigned int at;
@@ -23,21 +25,21 @@ typedef struct {
 } context;
 
 typedef struct {
-	unsigned long weight, inv_weight;
+	unsigned long weight, inv_weight;  // task's weight 
 } load_weight;
 
 struct sched_entity {
     struct rb_node rb_node;       // rbtree node
-    unsigned long weight;       // task's weight 
     unsigned int vruntime;       // vruntime of cfs
     load_weight load;		/* for load-balancing */
-	unsigned int exec_start;    // task's start time
-	unsigned int sum_exec_runtime;  // total run time of this period
+	unsigned int exec_start;    // task's start time of this period
+	unsigned int sum_exec_runtime;  // total run time
 
 };
 
 typedef struct {
     int nice;    // nice value of this task
+    int static_prio, normal_prio;
     struct sched_entity sched_entity; // schedule entity
     context context; // context register
     unsigned int PID;   //pid
@@ -50,7 +52,6 @@ typedef struct {
      * being used to imply it is a I/O task or compute-intensive task
 	 */
     unsigned int usage; 
-    int prio, static_prio, normal_prio;
     /* children : 
 	 * a list contains all chrildren of this task
      * when this task is terminated
@@ -71,7 +72,7 @@ typedef union {
 
 void init_pc();
 void pc_schedule(unsigned int status, unsigned int cause, context* pt_context);
-void pc_create(char *task_name, void(*entry)(unsigned int argc, void *args), unsigned int argc, void *args);
+void pc_create(char *task_name, void(*entry)(unsigned int argc, void *args), unsigned int argc, void *args, int nice);
 void pc_kill_syscall(unsigned int status, unsigned int cause, context* pt_context);
 int pc_kill(unsigned int PID);
 int print_proc();

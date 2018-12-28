@@ -1,7 +1,7 @@
 #ifndef SCHED_FAIR
 #define SCHED_FAIR
 #include <zjunix/pc.h>
-
+#include <zjunix/rbtree.h>
 /*
  * Nice levels are multiplicative, with a gentle 10% change for every
  * nice level changed. I.e. when a CPU-bound task goes from nice 0 to
@@ -45,12 +45,14 @@ static const int prio_to_wmult[40] = {
 
 /* CFS-related fields in a runqueue */
 struct cfs_rq {
-	load_weight load; // total load in queue
+    /*
+	 * the part of load.weight contributed by tasks
+	 */
+	unsigned long task_weight;
 	unsigned long nr_running; // total tasks in queue
 
 	unsigned int exec_clock; // cur time clock of cpu
 	unsigned int min_vruntime; // min vruntime in queue (leftmost leaf's task)
-
 	struct rb_root tasks_timeline; // cur task
 	struct rb_node *rb_leftmost;
 
@@ -66,11 +68,6 @@ struct cfs_rq {
      * defines all tasks on cfs queue, indentical to 'all_ready' defined in pc.c
 	 */
 	struct list_head leaf_cfs_rq_list;
-
-	/*
-	 * the part of load.weight contributed by tasks
-	 */
-	unsigned long task_weight;
 
 };
 
@@ -92,12 +89,12 @@ struct cfs_rq {
 
 	// unsigned int (*get_rr_interval) (struct rq *rq, struct task_struct *task);
 
-
+void init_cfs_rq(struct cfs_rq * rq);
 
 /*
  * All the scheduling class methods:
  */
-struct task_struct * pick_next_task_fair();
+struct rb_node * pick_next_task_fair(struct cfs_rq * rq);
 
 void update_vruntime_fair();
 

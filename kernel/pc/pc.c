@@ -5,6 +5,11 @@
 #include <zjunix/syscall.h>
 #include <zjunix/log.h>
 
+#define TASK_RUNNING 0
+#define TASK_WAITING 1
+#define TASK_READY 2
+#define TASK_DEAD 3
+
 unsigned int sysctl_sched_latency = 1000000;
 task_struct *current_task = 0;
 struct list_head all_task;
@@ -12,7 +17,7 @@ struct list_head all_dead;
 struct list_head all_waiting;
 struct list_head all_ready;
 unsigned int cur_PID = 0;
-
+struct cfs_rq rq;
 void add_task(task_struct *task, struct list_head tasks) {
     list_add_tail(&(task->task), &tasks);
 }
@@ -53,6 +58,7 @@ static void copy_context(context* src, context* dest) {
 }
 void init_pc() {
     // sysctl_sched_latency = 1000000;
+    init_cfs_rq(&rq);
     INIT_LIST_HEAD(&all_task);
     INIT_LIST_HEAD(&all_dead);
     INIT_LIST_HEAD(&all_waiting);
@@ -99,24 +105,47 @@ void pc_schedule(unsigned int status, unsigned int cause, context* pt_context) {
 }
 
 
-void pc_create(char *task_name, void(*entry)(unsigned int argc, void *args), unsigned int argc, void *args) {
+void pc_create(char *task_name, void(*entry)(unsigned int argc, void *args), unsigned int argc, void *args, int nice) {
     task_union *new = (task_union*) kmalloc(sizeof(task_union));
-    INIT_LIST_HEAD(&(new->task.task));
-    kernel_strcpy(new->task.name, task_name);
+    task_struct task = new->task;
+    kernel_strcpy(task.name, task_name);
+    INIT_LIST_HEAD(&(task.task));
+    INIT_LIST_HEAD(&(task.children));
+    task.nice = nice;
+    task.static_prio = nice + 20;
+    task.normal_prio = nice + 20;
+    task.PID = cur_PID++;
+    task.usage = 0;
+
+    // ------- setting schedule entity
+    struct sched_entity* entity = &(task.sched_entity);
+    entity->vruntime = 0;
+    entity->exec_start = -1;
+    entity->sum_exec_runtime = 0;
+    entity->load.weight = prio_to_weight[task.normal_prio];
+    entity->load.inv_weight = prio_to_wmult[task.normal_prio];
+    // ------- done setting schedule entity
+
     // ------- setting context registers
-    kernel_memset(&(new->task.context), 0, sizeof(context));
-    new->task.context.epc = (unsigned int)entry;
-    new->task.context.sp = (unsigned int)new + TASK_KERNEL_SIZE;
+    kernel_memset(&(task.context), 0, sizeof(context));
+    task.context.epc = (unsigned int)entry;
+    task.context.sp = (unsigned int)new + TASK_KERNEL_SIZE;
     unsigned int init_gp;
     asm volatile("la %0, _gp\n\t" : "=r"(init_gp)); 
-    new->task.context.gp = init_gp;
-    new->task.context.a0 = argc;
-    new->task.context.a1 = (unsigned int)args;
+    task.context.gp = init_gp;
+    task.context.a0 = argc;
+    task.context.a1 = (unsigned int)args;
     // ------- done setting context registers
-    new->task.PID = cur_PID++;
-    new->task.parent = current_task->PID;
-    new->task.state = 0;
-    add_task(&(new->task), all_task);
+
+    // task's parent is current task (who create it) 
+    task.parent = current_task->PID;
+    // add new task to parents' children list
+    list_add_tail(&task, &(current_task->children));
+
+    task.state = TASK_READY;
+    // add to coresponding task queue(s)
+    add_task(&(task), all_task);
+    add_task(&(task), all_ready);
 }
 
 void pc_kill_syscall(unsigned int status, unsigned int cause, context* pt_context) {
