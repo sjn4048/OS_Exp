@@ -142,7 +142,7 @@ void pc_create(char *task_name, void(*entry)(unsigned int argc, void *args), uns
     // task's parent is current task (who create it) 
     task->parent = current_task->PID;
     // add new task to parents' children list
-    list_add_tail(&(task->task), &(current_task->children));
+    // list_add_tail(&(task->task), &(current_task->children));
 
     task->state = TASK_READY;
     // add to coresponding task queue(s)
