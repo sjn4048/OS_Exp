@@ -94,7 +94,7 @@ void init_cfs_rq(struct cfs_rq * rq);
 /*
  * All the scheduling class methods:
  */
-struct rb_node * pick_next_task_fair(struct cfs_rq * rq);
+struct sched_entity * pick_next_task_fair(struct cfs_rq * rq);
 
 void update_vruntime_fair();
 

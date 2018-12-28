@@ -19,6 +19,6 @@ void init_cfs_rq(struct cfs_rq * rq){
     INIT_LIST_HEAD(&(rq->leaf_cfs_rq_list));
 }
 
-struct rb_node * pick_next_task_fair(struct cfs_rq * rq){
+struct sched_entity * pick_next_task_fair(struct cfs_rq * rq){
     return rb_entry(rq->rb_leftmost, struct sched_entity, rb_node);
 }
