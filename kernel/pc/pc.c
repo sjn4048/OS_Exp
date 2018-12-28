@@ -107,42 +107,42 @@ void pc_schedule(unsigned int status, unsigned int cause, context* pt_context) {
 
 void pc_create(char *task_name, void(*entry)(unsigned int argc, void *args), unsigned int argc, void *args, int nice) {
     task_union *new = (task_union*) kmalloc(sizeof(task_union));
-    task_struct task = new->task;
-    kernel_strcpy(task.name, task_name);
-    INIT_LIST_HEAD(&(task.task));
-    INIT_LIST_HEAD(&(task.children));
-    task.nice = nice;
-    task.static_prio = nice + 20;
-    task.normal_prio = nice + 20;
-    task.PID = cur_PID++;
-    task.usage = 0;
+    task_struct * task = &(new->task);
+    kernel_strcpy(task->name, task_name);
+    INIT_LIST_HEAD(&(task->task));
+    INIT_LIST_HEAD(&(task->children));
+    task->nice = nice;
+    task->static_prio = nice + 20;
+    task->normal_prio = nice + 20;
+    task->PID = cur_PID++;
+    task->usage = 0;
 
     // ------- setting schedule entity
-    struct sched_entity* entity = &(task.sched_entity);
+    struct sched_entity* entity = &(task->sched_entity);
     entity->vruntime = 0;
     entity->exec_start = -1;
     entity->sum_exec_runtime = 0;
-    entity->load.weight = prio_to_weight[task.normal_prio];
-    entity->load.inv_weight = prio_to_wmult[task.normal_prio];
+    entity->load.weight = prio_to_weight[task->normal_prio];
+    entity->load.inv_weight = prio_to_wmult[task->normal_prio];
     // ------- done setting schedule entity
 
     // ------- setting context registers
-    kernel_memset(&(task.context), 0, sizeof(context));
-    task.context.epc = (unsigned int)entry;
-    task.context.sp = (unsigned int)new + TASK_KERNEL_SIZE;
+    kernel_memset(&(task->context), 0, sizeof(context));
+    task->context.epc = (unsigned int)entry;
+    task->context.sp = (unsigned int)new + TASK_KERNEL_SIZE;
     unsigned int init_gp;
     asm volatile("la %0, _gp\n\t" : "=r"(init_gp)); 
-    task.context.gp = init_gp;
-    task.context.a0 = argc;
-    task.context.a1 = (unsigned int)args;
+    task->context.gp = init_gp;
+    task->context.a0 = argc;
+    task->context.a1 = (unsigned int)args;
     // ------- done setting context registers
 
     // task's parent is current task (who create it) 
-    task.parent = current_task->PID;
+    task->parent = current_task->PID;
     // add new task to parents' children list
-    list_add_tail(&(task.task), &(current_task->children));
+    list_add_tail(&(task->task), &(current_task->children));
 
-    task.state = TASK_READY;
+    task->state = TASK_READY;
     // add to coresponding task queue(s)
     add_task(&(task), all_task);
     add_task(&(task), all_ready);
