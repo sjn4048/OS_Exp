@@ -45,7 +45,6 @@ int proc_demo_create() {
 }
 
 void ps() {
-    log(LOG_STEP, "ps");
     kernel_printf("Press any key to enter shell.\n");
     kernel_getchar();
     char c;

@@ -9,7 +9,7 @@
 #define TASK_WAITING 1
 #define TASK_READY 2
 #define TASK_DEAD 3
-
+task_struct *other = 0;
 unsigned int sysctl_sched_latency = 1000000;
 task_struct *current_task = 0;
 struct list_head all_task;
@@ -93,11 +93,11 @@ void change_sysctl_sched_latency(unsigned int latency){
 }
 
 void pc_schedule(unsigned int status, unsigned int cause, context* pt_context) {
-
+    
     update_vruntime_fair(current_task);
-
     copy_context(pt_context, &(current_task->context));
-    task_struct *next = current_task;
+    task_struct *next = other;
+    other = current_task;
     copy_context(&(next->context), pt_context);
     current_task = next;
     asm volatile("mtc0 $zero, $9\n\t");
@@ -146,6 +146,7 @@ void pc_create(char *task_name, void(*entry)(unsigned int argc, void *args), uns
     // add to coresponding task queue(s)
     add_task(task, all_task);
     add_task(task, all_ready);
+    other = task;
 }
 
 void pc_kill_syscall(unsigned int status, unsigned int cause, context* pt_context) {

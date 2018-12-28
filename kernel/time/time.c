@@ -35,7 +35,6 @@ void get_time_string(unsigned int ticks_high, unsigned int ticks_low, char *buf)
 #pragma GCC optimize("O0")
 
 void system_time_proc() {
-    log(LOG_STEP, "system_time_proc");
     unsigned int ticks_high, ticks_low;
     int i;
     char buffer[8];
