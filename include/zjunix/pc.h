@@ -28,33 +28,38 @@ typedef struct {
 
 struct sched_entity {
     struct rb_node rb_node;       // rbtree node
-    unsigned long weight;
-    unsigned int vruntime;
+    unsigned long weight;       // task's weight 
+    unsigned int vruntime;       // vruntime of cfs
     load_weight load;		/* for load-balancing */
-	unsigned int exec_start;
-	unsigned int sum_exec_runtime;
-	unsigned int prev_sum_exec_runtime;
+	unsigned int exec_start;    // task's start time
+	unsigned int sum_exec_runtime;  // total run time of this period
+
 };
 
 typedef struct {
     int nice;    // nice value of this task
-    struct sched_entity sched_entity;
-    context context;
+    struct sched_entity sched_entity; // schedule entity
+    context context; // context register
     unsigned int PID;   //pid
     unsigned int parent;   //parent's pid
     unsigned int state;   //state
     char name[32];  //name
     struct list_head task; // task pointer
-    /*
+    /* usage : 
 	 * record the cpu usage of this task
      * being used to imply it is a I/O task or compute-intensive task
 	 */
     unsigned int usage; 
     int prio, static_prio, normal_prio;
-    const struct sched_class *sched_class;
+    /* children : 
+	 * a list contains all chrildren of this task
+     * when this task is terminated
+     * kill all children of this task recursivelly
+	 */
     struct list_head children;
 } task_struct;
 
+// current running task
 extern task_struct *current_task;
 
 typedef union {

@@ -52,7 +52,6 @@ static void copy_context(context* src, context* dest) {
     dest->ra = src->ra;
 }
 void init_pc() {
-    init_CFS();
     // sysctl_sched_latency = 1000000;
     INIT_LIST_HEAD(&all_task);
     INIT_LIST_HEAD(&all_dead);
@@ -79,7 +78,7 @@ void init_pc() {
     add_task(&(new->task), all_task);
 }
 
-// change the reschedule period of CFS, by modifying the interrupt period
+// change the reschedule period of CFS by modifying the interrupt period
 void change_sysctl_sched_latency(unsigned int latency){
     asm volatile(
         "mtc0 $0, $11\n\t"
@@ -87,10 +86,9 @@ void change_sysctl_sched_latency(unsigned int latency){
         : : "r"(latency));
 }
 
-
 void pc_schedule(unsigned int status, unsigned int cause, context* pt_context) {
 
-
+    fair_sched_class.update_vruntime();
 
     copy_context(pt_context, &(current_task->context));
     task_struct *next = current_task;

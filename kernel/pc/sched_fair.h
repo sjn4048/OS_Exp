@@ -42,29 +42,6 @@ static const int prio_to_wmult[40] = {
  /*  15 */ 119304647, 148102320, 186737708, 238609294, 286331153,
 };
 
-struct sched_class {
-
-	struct task_struct * (*pick_next_task) ();
-
-	// void (*enqueue_task) (struct rq *rq, struct task_struct *p, int flags);
-	// void (*dequeue_task) (struct rq *rq, struct task_struct *p, int flags);
-	// void (*yield_task) (struct rq *rq);
-
-	// void (*check_preempt_curr) (struct rq *rq, struct task_struct *p, int flags);
-
-	// void (*put_prev_task) (struct rq *rq, struct task_struct *p);
-
-	// void (*set_curr_task) (struct rq *rq);
-	// void (*task_tick) (struct rq *rq, struct task_struct *p, int queued);
-	// void (*task_fork) (struct task_struct *p);
-
-	// void (*switched_from) (struct rq *this_rq, struct task_struct *task);
-	// void (*switched_to) (struct rq *this_rq, struct task_struct *task);
-	// void (*prio_changed) (struct rq *this_rq, struct task_struct *task, int oldprio);
-
-	// unsigned int (*get_rr_interval) (struct rq *rq, struct task_struct *task);
-
-};
 
 /* CFS-related fields in a runqueue */
 struct cfs_rq {
@@ -97,13 +74,41 @@ struct cfs_rq {
 
 };
 
+struct sched_class {
 
-struct task_struct * (*pick_next_task_fair) ();
+	struct task_struct * (*pick_next_task) ();
+    void (*update_vruntime) ();
+	// void (*enqueue_task) (struct rq *rq, struct task_struct *p, int flags);
+	// void (*dequeue_task) (struct rq *rq, struct task_struct *p, int flags);
+	// void (*yield_task) (struct rq *rq);
+
+	// void (*check_preempt_curr) (struct rq *rq, struct task_struct *p, int flags);
+
+	// void (*put_prev_task) (struct rq *rq, struct task_struct *p);
+
+	// void (*set_curr_task) (struct rq *rq);
+	// void (*task_tick) (struct rq *rq, struct task_struct *p, int queued);
+	// void (*task_fork) (struct task_struct *p);
+
+	// void (*switched_from) (struct rq *this_rq, struct task_struct *task);
+	// void (*switched_to) (struct rq *this_rq, struct task_struct *task);
+	// void (*prio_changed) (struct rq *this_rq, struct task_struct *task, int oldprio);
+
+	// unsigned int (*get_rr_interval) (struct rq *rq, struct task_struct *task);
+
+};
+
+struct task_struct * pick_next_task_fair ();
+
+void update_vruntime_fair();
+
 /*
  * All the scheduling class methods:
  */
-static struct sched_class fair_sched_class;
+static struct sched_class fair_sched_class = {
+    .pick_next_task	= pick_next_task_fair,
+    .update_vruntime = update_vruntime_fair,
+};
 
-void init_CFS();
 
 #endif
