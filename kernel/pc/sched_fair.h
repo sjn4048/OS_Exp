@@ -75,6 +75,7 @@ struct cfs_rq {
 };
 
 
+
 struct task_struct * (*pick_next_task_fair) (struct cfs_rq *rq);
 /*
  * All the scheduling class methods:
