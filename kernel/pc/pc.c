@@ -82,8 +82,8 @@ void init_pc() {
         "mtc0 $v0, $11\n\t"
         "mtc0 $zero, $9");
     current_task = &(new->task);
-    add_task(&(new->task), all_task);
-    add_task(&(new->task), all_ready);
+    add_task(&(new->task.task), all_task);
+    add_task(&(new->task.task), all_ready);
 }
 
 // change the reschedule period of CFS by modifying the interrupt period
