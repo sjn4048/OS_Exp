@@ -146,9 +146,9 @@ void pc_create(char *task_name, void(*entry)(unsigned int argc, void *args), uns
 
     task->state = TASK_READY;
     // add to coresponding task queue(s)
-    add_task(task, all_task);
+    // add_task(task, all_task);
+    list_add_tail(&(task->task_list), &all_task);
     kernel_printf("%d\n", (unsigned int)&(task->task_list));
-    kernel_printf("%d\n", (unsigned int)&(all_task));
 
     // add_task(task, all_ready);
     other = task;
@@ -171,12 +171,12 @@ int pc_kill(unsigned int PID) {
 int print_proc() {
     struct list_head *pos;
     task_struct *next;
-    kernel_printf("%d\n", (unsigned int)&(all_task));
-    list_for_each(pos, &all_task) {
+    for (pos = (&all_task)->next; pos != (&all_task); pos = pos->next)
+     {
         kernel_printf("%d\n", (unsigned int)&(pos));
-        next = container_of(pos, task_struct, task_list);
-        kernel_printf("  PID : %d, name : %s, vruntime : %d\n", next->PID, next->name,
-        next->sched_entity.vruntime);
+        // next = container_of(pos, task_struct, task_list);
+        // kernel_printf("  PID : %d, name : %s, vruntime : %d\n", next->PID, next->name,
+        // next->sched_entity.vruntime);
     }
     return 0;
 }
