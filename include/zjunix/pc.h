@@ -4,6 +4,7 @@
 #define TASK_KERNEL_SIZE 4096
 
 #include <zjunix/list.h>
+#include <zjunix/rbtree.h>
 #include <zjunix/utils.h>
 
 typedef struct {

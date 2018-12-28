@@ -2,7 +2,6 @@
 #define _PC_H
 
 #include <zjunix/pc.h>
-#include "rbtree.h"
 
 /*
  * Nice levels are multiplicative, with a gentle 10% change for every
