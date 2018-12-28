@@ -47,11 +47,9 @@ typedef union {
 
 void init_pc();
 void pc_schedule(unsigned int status, unsigned int cause, context* pt_context);
-int pc_peek();
 void pc_create(char *task_name, void(*entry)(unsigned int argc, void *args), unsigned int argc, void *args);
 void pc_kill_syscall(unsigned int status, unsigned int cause, context* pt_context);
-int pc_kill(int proc);
-task_struct* get_curr_pcb();
+int pc_kill(unsigned int PID);
 int print_proc();
 void change_sysctl_sched_latency(unsigned int latency);
 extern void *kmalloc(unsigned int size);

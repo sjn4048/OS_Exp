@@ -15,6 +15,7 @@ task_struct *taskss1 = 0;
 task_struct *taskss2 = 0;
 struct list_head tasks;
 unsigned int cur_PID = 0;
+
 void add_task(task_struct *task) {
     list_add_tail(&(task->sched), &tasks);
 }
@@ -53,9 +54,9 @@ static void copy_context(context* src, context* dest) {
     dest->ra = src->ra;
 }
 void init_pc() {
-    sysctl_sched_latency = 1000000;
-    po = 0;
-    curtask = 0;
+    // sysctl_sched_latency = 1000000;
+    // po = 0;
+    // curtask = 0;
     INIT_LIST_HEAD(&tasks);
     task_union *new = (task_union*)(kernel_sp - TASK_KERNEL_SIZE);
     new->task.PID = cur_PID++;
@@ -65,7 +66,7 @@ void init_pc() {
     kernel_strcpy(new->task.name, "idle");
     register_syscall(10, pc_kill_syscall);
     register_interrupt_handler(7, pc_schedule);
-    // asm volatile(
+    // asm volatile(   // huge bug here, piece of shit...
     //     //"li $v0, %0\n\t"
     //     "mtc0 $0, $11\n\t"
     //     "mtc0 $zero, $9"
@@ -79,10 +80,9 @@ void init_pc() {
     taskss0 = &(new->task);
 }
 
-//改变cfs调度的周期，通过修改中断时间间隔实现
+// change the reschedule period of CFS, by modifying the interrupt period
 void change_sysctl_sched_latency(unsigned int latency){
     asm volatile(
-        //"li $v0, %0\n\t"
         "mtc0 $0, $11\n\t"
         "mtc0 $zero, $9"
         : : "r"(latency));
@@ -90,18 +90,8 @@ void change_sysctl_sched_latency(unsigned int latency){
 
 
 void pc_schedule(unsigned int status, unsigned int cause, context* pt_context) {
-    // struct list_head *pos;
-    // task_struct *next, *torun, *towait;
+
     copy_context(pt_context, &(current_task->context));
-    // list_for_each(pos, &tasks) {
-    //     next = container_of(pos, task_struct, sched);
-    //     if (next->name != current_task->name) {
-    //         // Load context
-    //         copy_context(&(next->context), pt_context);
-    //         current_task = next;
-    //         break;
-    //     }
-    // }
     task_struct *next;
     curtask = (curtask + 1) % 3;
     if (curtask == 0) 
@@ -116,16 +106,7 @@ void pc_schedule(unsigned int status, unsigned int cause, context* pt_context) {
     
 }
 
-int pc_peek() {
-    // int i = 0;
-    // for (i = 0; i < 8; i++)
-    //     if (pcb[i].ASID < 0)
-    //         break;
-    // if (i == 8)
-    //     return -1;
-    // return i;
-    return 0;
-}
+
 void pc_create(char *task_name, void(*entry)(unsigned int argc, void *args), unsigned int argc, void *args) {
     task_union *new = (task_union*) kmalloc(sizeof(task_union));
     kernel_memset(&(new->task.context), 0, sizeof(context));
@@ -136,7 +117,6 @@ void pc_create(char *task_name, void(*entry)(unsigned int argc, void *args), uns
     unsigned int init_gp;
     asm volatile("la %0, _gp\n\t" : "=r"(init_gp)); 
     new->task.context.gp = init_gp;
-
     new->task.context.a0 = argc;
     new->task.context.a1 = (unsigned int)args;
     new->task.PID = cur_PID++;
@@ -153,35 +133,25 @@ void pc_create(char *task_name, void(*entry)(unsigned int argc, void *args), uns
 }
 
 void pc_kill_syscall(unsigned int status, unsigned int cause, context* pt_context) {
-    if (current_task->state == 0) {
-        current_task->state = 1;
-        pc_schedule(status, cause, pt_context);
-    }
+
+    // pc_kill(current_task);
+    // pc_schedule(status, cause, pt_context);
+    
 }
 
-int pc_kill(int proc) {
+// kill a process by PID
+int pc_kill(unsigned int PID) {
+
     return 0;
-    // proc &= 7;
-    // if (proc != 0 && pcb[proc].ASID >= 0) {
-    //     pcb[proc].ASID = -1;
-    //     return 0;
-    // } else if (proc == 0)
-    //     return 1;
-    // else
-    //     return 2;
 }
 
-task_struct* get_curr_pcb() {
-    // return &pcb[curr_proc];
-    return current_task;
-}
 
 int print_proc() {
-    // int i;
-    // kernel_puts("PID name\n", 0xfff, 0);
-    // for (i = 0; i < 8; i++) {
-    //     if (pcb[i].ASID >= 0)
-    //         kernel_printf(" %x  %s\n", pcb[i].ASID, pcb[i].name);
-    // }
+    struct list_head *pos;
+    task_struct *next;
+    list_for_each(pos, &tasks) {
+        next = container_of(pos, task_struct, sched);
+        kernel_printf("PID : %d, name : %s\n", next->PID, next->name);
+    }
     return 0;
 }

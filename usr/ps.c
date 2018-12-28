@@ -40,14 +40,7 @@ void test_proc() {
 }
 
 int proc_demo_create() {
-    // int asid = pc_peek();
-    // if (asid < 0) {
-    //     kernel_puts("Failed to allocate pid.\n", 0xfff, 0);
-    //     return 1;
-    // }
-    // unsigned int init_gp;
-    // asm volatile("la %0, _gp\n\t" : "=r"(init_gp));
-    // pc_create(asid, test_proc, (unsigned int)kmalloc(4096), init_gp, "test");
+    
     return 0;
 }
 
