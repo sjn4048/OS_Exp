@@ -47,9 +47,9 @@ static struct task_struct * (*pick_next_task_fair) (struct rq *rq);
 /*
  * All the scheduling class methods:
  */
-static const struct fair_sched_class = {
+static const struct sched_class fair_sched_class = {
 
-	.pick_next_task		= pick_next_task_fair
+	.pick_next_task	= pick_next_task_fair,
 
 };
 
