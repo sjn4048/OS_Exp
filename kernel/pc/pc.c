@@ -4,7 +4,7 @@
 #include <arch.h>
 #include <zjunix/syscall.h>
 #include <zjunix/log.h>
-
+#include "sched_fair.h"
 
 unsigned int sysctl_sched_latency = 1000000;
 task_struct *current_task = 0;
