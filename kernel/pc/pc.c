@@ -63,10 +63,9 @@ void init_pc() {
     INIT_LIST_HEAD(&all_dead);
     INIT_LIST_HEAD(&all_waiting);
     INIT_LIST_HEAD(&all_ready);
-    task_union *new = (task_union*)(kernel_sp - TASK_KERNEL_SIZE);
+    task_union *new = (task_union*) kmalloc(sizeof(task_union));
     new->task.PID = cur_PID++;
     new->task.parent = 0;
-    new->task.sched_entity.vruntime = 0;
     new->task.state = 0;
     INIT_LIST_HEAD(&(new->task.task));
     kernel_strcpy(new->task.name, "idle");
@@ -82,8 +81,8 @@ void init_pc() {
         "mtc0 $v0, $11\n\t"
         "mtc0 $zero, $9");
     current_task = &(new->task);
-    add_task(&(new->task.task), all_task);
-    add_task(&(new->task.task), all_ready);
+    add_task(&(new->task), all_task);
+    add_task(&(new->task), all_ready);
 }
 
 // change the reschedule period of CFS by modifying the interrupt period
