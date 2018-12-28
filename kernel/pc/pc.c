@@ -82,6 +82,7 @@ void init_pc() {
         "mtc0 $zero, $9");
     current_task = &(new->task);
     add_task(&(new->task), all_task);
+    add_task(&(new->task), all_ready);
 }
 
 // change the reschedule period of CFS by modifying the interrupt period
@@ -168,7 +169,7 @@ int print_proc() {
     task_struct *next;
     list_for_each(pos, &all_task) {
         next = container_of(pos, task_struct, task);
-        kernel_printf("PID : %d, name : %s, vruntime : %d\n", next->PID, next->name,
+        kernel_printf("  PID : %d, name : %s, vruntime : %d\n", next->PID, next->name,
         next->sched_entity.vruntime);
     }
     return 0;
