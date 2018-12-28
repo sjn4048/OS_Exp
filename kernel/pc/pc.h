@@ -6,7 +6,7 @@
 
 struct sched_class {
 
-	struct task_struct * (*pick_next_task) (struct cfs_rq *rq);
+	struct task_struct * (*pick_next_task) ();
 
 	// void (*enqueue_task) (struct rq *rq, struct task_struct *p, int flags);
 	// void (*dequeue_task) (struct rq *rq, struct task_struct *p, int flags);
