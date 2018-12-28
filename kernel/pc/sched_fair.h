@@ -74,10 +74,6 @@ struct cfs_rq {
 
 };
 
-struct sched_class {
-
-	struct task_struct * (*pick_next_task) ();
-    void (*update_vruntime) ();
 	// void (*enqueue_task) (struct rq *rq, struct task_struct *p, int flags);
 	// void (*dequeue_task) (struct rq *rq, struct task_struct *p, int flags);
 	// void (*yield_task) (struct rq *rq);
@@ -96,16 +92,13 @@ struct sched_class {
 
 	// unsigned int (*get_rr_interval) (struct rq *rq, struct task_struct *task);
 
-};
 
 
 /*
  * All the scheduling class methods:
  */
-struct task_struct * pick_next_task_fair ();
+struct task_struct * pick_next_task_fair();
 
 void update_vruntime_fair();
-
-static struct sched_class fair_sched_class;
 
 #endif

@@ -52,7 +52,6 @@ static void copy_context(context* src, context* dest) {
     dest->ra = src->ra;
 }
 void init_pc() {
-    init_CFS();
     // sysctl_sched_latency = 1000000;
     INIT_LIST_HEAD(&all_task);
     INIT_LIST_HEAD(&all_dead);
@@ -89,7 +88,7 @@ void change_sysctl_sched_latency(unsigned int latency){
 
 void pc_schedule(unsigned int status, unsigned int cause, context* pt_context) {
 
-    fair_sched_class.update_vruntime();
+    update_vruntime_fair();
 
     copy_context(pt_context, &(current_task->context));
     task_struct *next = current_task;
