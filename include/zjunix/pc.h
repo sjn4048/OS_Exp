@@ -46,7 +46,7 @@ typedef struct {
     unsigned int parent;   //parent's pid
     unsigned int state;   //state
     char name[32];  //name
-    struct list_head task; // task pointer
+    struct list_head task_list; // task pointer
     /* usage : 
 	 * record the cpu usage of this task
      * being used to imply it is a I/O task or compute-intensive task

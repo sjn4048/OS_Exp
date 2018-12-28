@@ -19,7 +19,7 @@ struct list_head all_ready;
 unsigned int cur_PID = 0;
 struct cfs_rq rq;
 void add_task(task_struct *task, struct list_head tasks) {
-    list_add_tail(&(task->task), &tasks);
+    list_add_tail(&(task->task_list), &tasks);
 }
 
 static void copy_context(context* src, context* dest) {
@@ -67,7 +67,7 @@ void init_pc() {
     new->task.PID = cur_PID++;
     new->task.parent = 0;
     new->task.state = 0;
-    INIT_LIST_HEAD(&(new->task.task));
+    INIT_LIST_HEAD(&(new->task.task_list));
     kernel_strcpy(new->task.name, "idle");
     register_syscall(10, pc_kill_syscall);
     register_interrupt_handler(7, pc_schedule);
@@ -111,7 +111,7 @@ void pc_create(char *task_name, void(*entry)(unsigned int argc, void *args), uns
     task_union *new = (task_union*) kmalloc(sizeof(task_union));
     task_struct * task = &(new->task);
     kernel_strcpy(task->name, task_name);
-    INIT_LIST_HEAD(&(task->task));
+    INIT_LIST_HEAD(&(task->task_list));
     INIT_LIST_HEAD(&(task->children));
     task->nice = nice;
     task->static_prio = nice + 20;
@@ -147,6 +147,7 @@ void pc_create(char *task_name, void(*entry)(unsigned int argc, void *args), uns
     task->state = TASK_READY;
     // add to coresponding task queue(s)
     add_task(task, all_task);
+
     // add_task(task, all_ready);
     other = task;
 }
@@ -169,7 +170,7 @@ int print_proc() {
     struct list_head *pos;
     task_struct *next;
     list_for_each(pos, &all_task) {
-        next = container_of(pos, task_struct, task);
+        next = container_of(pos, task_struct, task_list);
         kernel_printf("  PID : %d, name : %s, vruntime : %d\n", next->PID, next->name,
         next->sched_entity.vruntime);
     }
