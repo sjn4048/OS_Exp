@@ -61,20 +61,23 @@ void delete_process(struct rb_root *root, struct sched_entity * entity)
 /*
  * DEBUG : print rbtree
  */
-void print_rbtree(struct rb_node *tree, struct sched_entity * entity, int direction)
+void print_rbtree(struct rb_node *tree, struct rb_node *parent, int direction)
 {
     if(tree != Null)
     {
+		struct sched_entity * entity = rb_entry(tree, struct sched_entity, rb_node);
 		task_struct *task = container_of(entity, task_struct, sched_entity);
         if (direction==0)    // tree is root
             kernel_printf("%s(B) is root\n", task->name);
-        else                // tree is not root
-            kernel_printf("%s(%s) is %s's %s child\n", task->name, rb_is_black(tree)?"B":"R", task->name, direction==1?"right" : "left");
-
+        else{                // tree is not root
+			struct sched_entity * parent_entity = rb_entry(parent, struct sched_entity, rb_node);
+			task_struct * parent_task = container_of(parent_entity, task_struct, sched_entity);
+            kernel_printf("%s(%s) is %s's %s child\n", task->name, rb_is_black(tree)?"B":"R", parent_task->name, direction==1?"right" : "left");
+		}
         if (tree->rb_left)
-            print_rbtree(tree->rb_left, rb_entry(tree->rb_left, struct sched_entity, rb_node), -1);
+            print_rbtree(tree->rb_left, tree, -1);
         if (tree->rb_right)
-            print_rbtree(tree->rb_right,rb_entry(tree->rb_right, struct sched_entity, rb_node),  1);
+            print_rbtree(tree->rb_right, tree, 1);
     }
 }
 
@@ -84,6 +87,6 @@ void print_rbtree(struct rb_node *tree, struct sched_entity * entity, int direct
 void print_process(struct rb_root *root)
 {
     if (root!=Null && root->rb_node!=Null)
-        print_rbtree(root->rb_node, rb_entry(root->rb_node, struct sched_entity, rb_node), 0);
+        print_rbtree(root->rb_node, 0, 0);
 }
 
