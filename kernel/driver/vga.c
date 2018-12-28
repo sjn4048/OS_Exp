@@ -38,8 +38,8 @@ void kernel_scroll_screen() {
 
 void kernel_putchar_at(int ch, int fc, int bg, int row, int col) {
     unsigned int *p;
-    row = (row+1) & 31;
-    col = (col+2) & 127;
+    row = row & 31;
+    col = col & 127;
     p = CHAR_VRAM + row * VGA_CHAR_MAX_COL + col;
     *p = ((bg & 0xfff) << 20) + ((fc & 0xfff) << 8) + (ch & 0xff);
 }
