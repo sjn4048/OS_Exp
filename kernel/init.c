@@ -30,9 +30,9 @@ void machine_info() {
 #pragma GCC push_options
 #pragma GCC optimize("O0")
 void create_startup_process() {
-    pc_create("powershell",(void*)ps,0,0);
+    pc_create("powershell",(void*)ps,0,0,0);
     log(LOG_OK, "Shell init");
-    pc_create("time",(void*)system_time_proc,0,0);
+    pc_create("time",(void*)system_time_proc,0,0,0);
     log(LOG_OK, "Timer init");
 }
 #pragma GCC pop_options
