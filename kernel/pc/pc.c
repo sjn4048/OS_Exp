@@ -77,10 +77,9 @@ void init_pc() {
     //     "mtc0 $zero, $9"
     //     : : "r"(sysctl_sched_latency));
     current_task = &(new->task);
-    // add_task(&(new->task), all_task);
+    add_task(&(new->task), all_task);
     // add_task(&(new->task), all_ready);
-    // new->task.sched_entity.vruntime = 0;
-    // print_proc();
+    new->task.sched_entity.vruntime = 0;
     asm volatile(
         "li $v0, 1000000\n\t"
         "mtc0 $v0, $11\n\t"
@@ -148,7 +147,7 @@ void pc_create(char *task_name, void(*entry)(unsigned int argc, void *args), uns
     task->state = TASK_READY;
     // add to coresponding task queue(s)
     add_task(task, all_task);
-    add_task(task, all_ready);
+    // add_task(task, all_ready);
     other = task;
 }
 
@@ -173,7 +172,6 @@ int print_proc() {
         next = container_of(pos, task_struct, task);
         kernel_printf("  PID : %d, name : %s, vruntime : %d\n", next->PID, next->name,
         next->sched_entity.vruntime);
-        break;
     }
     return 0;
 }
