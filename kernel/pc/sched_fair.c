@@ -3,8 +3,8 @@
 
 // struct task_struct * (*pick_next_task) ();
 
-void update_vruntime_fair(){
-
+void update_vruntime_fair(task_struct *current_task){
+    current_task->sched_entity.vruntime += current_task->sched_entity.load.weight;
 };
 
 void init_cfs_rq(struct cfs_rq * rq){

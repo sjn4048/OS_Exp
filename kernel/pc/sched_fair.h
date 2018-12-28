@@ -96,6 +96,6 @@ void init_cfs_rq(struct cfs_rq * rq);
  */
 struct sched_entity * pick_next_task_fair(struct cfs_rq * rq);
 
-void update_vruntime_fair();
+void update_vruntime_fair(task_struct *current_task);
 
 #endif

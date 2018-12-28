@@ -30,10 +30,10 @@ typedef struct {
 
 struct sched_entity {
     struct rb_node rb_node;       // rbtree node
-    unsigned int vruntime;       // vruntime of cfs
+    unsigned long vruntime;       // vruntime of cfs
     load_weight load;		/* for load-balancing */
-	unsigned int exec_start;    // task's start time of this period
-	unsigned int sum_exec_runtime;  // total run time
+	unsigned long exec_start_time;    // task's start time of this period
+	unsigned long sum_exec_runtime;  // total run time
 
 };
 

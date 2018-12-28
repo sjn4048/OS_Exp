@@ -94,7 +94,7 @@ void change_sysctl_sched_latency(unsigned int latency){
 
 void pc_schedule(unsigned int status, unsigned int cause, context* pt_context) {
 
-    update_vruntime_fair();
+    update_vruntime_fair(current_task);
 
     copy_context(pt_context, &(current_task->context));
     task_struct *next = current_task;
@@ -120,7 +120,7 @@ void pc_create(char *task_name, void(*entry)(unsigned int argc, void *args), uns
     // ------- setting schedule entity
     struct sched_entity* entity = &(task->sched_entity);
     entity->vruntime = 0;
-    entity->exec_start = -1;
+    entity->exec_start_time = -1;
     entity->sum_exec_runtime = 0;
     entity->load.weight = prio_to_weight[task->normal_prio];
     entity->load.inv_weight = prio_to_wmult[task->normal_prio];
