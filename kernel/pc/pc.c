@@ -173,6 +173,7 @@ int print_proc() {
         next = container_of(pos, task_struct, task);
         kernel_printf("  PID : %d, name : %s, vruntime : %d\n", next->PID, next->name,
         next->sched_entity.vruntime);
+        break;
     }
     return 0;
 }
