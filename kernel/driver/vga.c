@@ -40,6 +40,8 @@ void kernel_putchar_at(int ch, int fc, int bg, int row, int col) {
     unsigned int *p;
     row = row & 31;
     col = col & 127;
+    row += 2;
+    col += 2;
     p = CHAR_VRAM + row * VGA_CHAR_MAX_COL + col;
     *p = ((bg & 0xfff) << 20) + ((fc & 0xfff) << 8) + (ch & 0xff);
 }
