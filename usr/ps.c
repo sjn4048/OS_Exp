@@ -52,8 +52,9 @@ void ps() {
     ps_buffer_index = 0;
     ps_buffer[0] = 0;
     kernel_clear_screen(31);
-    kernel_puts("PowerShell\n", 0xfff, 0);
-    kernel_puts("PS>", 0xfff, 0);
+    kernel_puts("\n", 0xfff, 0);
+    kernel_puts("  PowerShell\n", 0xfff, 0);
+    kernel_puts("  PS>", 0xfff, 0);
     while (1) {
         c = kernel_getchar();
         if (c == '\n') {

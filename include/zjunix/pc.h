@@ -3,7 +3,6 @@
 
 #define TASK_KERNEL_SIZE 4096
 
-#include <zjunix/rbtree.h>
 #include <zjunix/list.h>
 #include <zjunix/utils.h>
 
@@ -22,29 +21,6 @@ typedef struct {
     unsigned int ra;
 } context;
 
-struct sched_entity {
-    struct rb_node rb_node;       // rbtree node
-    float vruntime;
-};
-
-typedef struct {
-    struct sched_entity sched_entity;
-    context context;
-    unsigned int PID;   //pid
-    unsigned int parent;   //parent's pid
-    unsigned int state;   //state
-    char name[32];  //name
-    struct list_head sched;
-} task_struct;
-
-extern task_struct *current_task;
-
-typedef union {
-    task_struct task;
-    unsigned char kernel_stack[TASK_KERNEL_SIZE];
-} task_union;
-
-
 void init_pc();
 void pc_schedule(unsigned int status, unsigned int cause, context* pt_context);
 void pc_create(char *task_name, void(*entry)(unsigned int argc, void *args), unsigned int argc, void *args);
@@ -53,4 +29,5 @@ int pc_kill(unsigned int PID);
 int print_proc();
 void change_sysctl_sched_latency(unsigned int latency);
 extern void *kmalloc(unsigned int size);
+
 #endif  // !_ZJUNIX_PC_H

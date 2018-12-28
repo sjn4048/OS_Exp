@@ -151,7 +151,8 @@ int print_proc() {
     task_struct *next;
     list_for_each(pos, &tasks) {
         next = container_of(pos, task_struct, sched);
-        kernel_printf("PID : %d, name : %s\n", next->PID, next->name);
+        kernel_printf("PID : %d, name : %s, vruntime : %d\n", next->PID, next->name,
+        (int)(next->sched_entity.vruntime));
     }
     return 0;
 }
