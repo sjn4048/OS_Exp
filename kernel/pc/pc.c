@@ -78,7 +78,7 @@ void init_pc() {
     //     : : "r"(sysctl_sched_latency));
     current_task = &(new->task);
     new->task.sched_entity.vruntime = 0;
-    add_task(&(new->task), all_task);
+    // add_task(&(new->task), all_task);
     // add_task(&(new->task), all_ready);
     asm volatile(
         "li $v0, 1000000\n\t"
