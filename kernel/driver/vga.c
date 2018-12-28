@@ -16,7 +16,8 @@ void kernel_set_cursor() {
 
 void init_vga() {
     unsigned int w = 0x000fff00;
-    cursor_row = cursor_col = 0;
+    cursor_col = 2;
+    cursor_row = 1;
     cursor_freq = 31;
     kernel_set_cursor();
 }
@@ -24,8 +25,8 @@ void init_vga() {
 void kernel_clear_screen(int scope) {
     unsigned int w = 0x000fff00;
     scope &= 31;
-    cursor_col = 0;
-    cursor_row = 0;
+    cursor_col = 2;
+    cursor_row = 1;
     kernel_set_cursor();
     kernel_memset_word(CHAR_VRAM, w, scope * VGA_CHAR_MAX_COL);
 }
