@@ -144,8 +144,8 @@ void pc_create(char *task_name, void(*entry)(unsigned int argc, void *args), uns
 
     task->state = TASK_READY;
     // add to coresponding task queue(s)
-    add_task(&(task), all_task);
-    add_task(&(task), all_ready);
+    add_task(task, all_task);
+    add_task(task, all_ready);
 }
 
 void pc_kill_syscall(unsigned int status, unsigned int cause, context* pt_context) {

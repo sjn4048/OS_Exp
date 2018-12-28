@@ -144,7 +144,7 @@ void parse_cmd() {
         result = pc_kill(pid);
         kernel_printf("kill return with %d\n", result);
     } else if (kernel_strcmp(ps_buffer, "time") == 0) {
-        pc_create("time",system_time_proc,0,0);
+        pc_create("time",system_time_proc,0,0,0);
     } else if (kernel_strcmp(ps_buffer, "proc") == 0) {
         result = proc_demo_create();
         kernel_printf("proc return with %d\n", result);
