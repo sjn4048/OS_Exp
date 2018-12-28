@@ -1,5 +1,5 @@
 #include "sched_fair.h"
-
+#include <driver/vga.h>
 
 // struct task_struct * (*pick_next_task) ();
 
@@ -72,9 +72,9 @@ void print_rbtree(struct rb_node *tree, struct sched_entity * entity, int direct
             kernel_printf("%s(%s) is %s's %s child\n", task->name, rb_is_black(tree)?"B":"R", task->name, direction==1?"right" : "left");
 
         if (tree->rb_left)
-            print_rbtree(tree->rb_left, rb_entry(tree->rb_left, struct sched_entity, rb_node)->vruntime, -1);
+            print_rbtree(tree->rb_left, rb_entry(tree->rb_left, struct sched_entity, rb_node), -1);
         if (tree->rb_right)
-            print_rbtree(tree->rb_right,rb_entry(tree->rb_right, struct sched_entity, rb_node)->vruntime,  1);
+            print_rbtree(tree->rb_right,rb_entry(tree->rb_right, struct sched_entity, rb_node),  1);
     }
 }
 
