@@ -68,11 +68,11 @@ void print_rbtree(struct rb_node *tree, struct rb_node *parent, int direction)
 		struct sched_entity * entity = rb_entry(tree, struct sched_entity, rb_node);
 		task_struct *task = container_of(entity, task_struct, sched_entity);
         if (direction==0)    // tree is root
-            kernel_printf("%s(B) is root\n", task->name);
+            kernel_printf("  %s(B) is root\n", task->name);
         else{                // tree is not root
 			struct sched_entity * parent_entity = rb_entry(parent, struct sched_entity, rb_node);
 			task_struct * parent_task = container_of(parent_entity, task_struct, sched_entity);
-            kernel_printf("%s(%s) is %s's %s child\n", task->name, rb_is_black(tree)?"B":"R", parent_task->name, direction==1?"right" : "left");
+            kernel_printf("  %s(%s) is %s's %s child\n", task->name, rb_is_black(tree)?"B":"R", parent_task->name, direction==1?"right" : "left");
 		}
         if (tree->rb_left)
             print_rbtree(tree->rb_left, tree, -1);

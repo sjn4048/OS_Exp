@@ -21,7 +21,10 @@ struct cfs_rq rq;
 void add_task(task_struct *task, struct list_head * tasks) {
     list_add_tail(&(task->task_list), tasks);
 }
-
+void remove_task(task_struct *task) {
+    list_del(&(task->task_list));
+    INIT_LIST_HEAD(&(task->task_list));
+}
 static void copy_context(context* src, context* dest) {
     dest->epc = src->epc;
     dest->at = src->at;
@@ -168,7 +171,8 @@ void pc_create(char *task_name, void(*entry)(unsigned int argc, void *args), uns
     // add to coresponding task queue(s)
     add_task(task, &all_task);
     insert_process(&(rq.tasks_timeline),&(task->sched_entity));
-    other = task;
+    if (task_name[0] == 'p')
+        other = task;
 }
 
 void pc_kill_syscall(unsigned int status, unsigned int cause, context* pt_context) {
@@ -180,7 +184,36 @@ void pc_kill_syscall(unsigned int status, unsigned int cause, context* pt_contex
 
 // kill a process by PID
 int pc_kill(unsigned int PID) {
+    if (PID == 0) {
+        kernel_printf("You are killing idle process!!!\n");
+        return 1;
+    }
+    // can't kill itself
+    if (PID == current_task->PID) {
+        kernel_printf("You can't kill current task!\n");
+        return 1;
+    }
+    disable_interrupts();
+    // find that task
+    struct list_head *pos;
+    task_struct *task;
+    int find = 0;
+    list_for_each(pos, (&all_task)) {
+        task = container_of(pos, task_struct, task_list);
+        if (task->PID == PID){
+            find = 1;
+            break;
+        }
+    }
+    if (find == 0){
+        kernel_printf("Process not found!\n");
+        return 1;
+    }
+    task->state = TASK_DEAD;
+    remove_task(&(task->task_list));
+    delete_process(&(rq.tasks_timeline), &(task->sched_entity));
 
+    enable_interrupts();
     return 0;
 }
 
