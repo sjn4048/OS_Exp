@@ -98,17 +98,14 @@ struct sched_class {
 
 };
 
-struct task_struct * pick_next_task_fair ();
-
-void update_vruntime_fair();
 
 /*
  * All the scheduling class methods:
  */
-static struct sched_class fair_sched_class = {
-    .pick_next_task	= pick_next_task_fair,
-    .update_vruntime = update_vruntime_fair,
-};
+struct task_struct * pick_next_task_fair ();
 
+void update_vruntime_fair();
+
+static struct sched_class fair_sched_class;
 
 #endif
