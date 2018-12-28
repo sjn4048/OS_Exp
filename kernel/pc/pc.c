@@ -174,9 +174,9 @@ int print_proc() {
     for (pos = (&all_task)->next; pos != (&all_task); pos = pos->next)
      {
         kernel_printf("%d\n", (unsigned int)&(pos));
-        // next = container_of(pos, task_struct, task_list);
-        // kernel_printf("  PID : %d, name : %s, vruntime : %d\n", next->PID, next->name,
-        // next->sched_entity.vruntime);
+        next = container_of(pos, task_struct, task_list);
+        kernel_printf("  PID : %d, name : %s, vruntime : %d\n", next->PID, next->name,
+        next->sched_entity.vruntime);
     }
     return 0;
 }
