@@ -43,7 +43,39 @@ static const int prio_to_wmult[40] = {
 };
 
 
-struct task_struct * (*pick_next_task_fair) (struct rq *rq);
+/* CFS-related fields in a runqueue */
+struct cfs_rq {
+	load_weight load; // total load in queue
+	unsigned long nr_running; // total tasks in queue
+
+	unsigned int exec_clock; // cur time clock of cpu
+	unsigned int min_vruntime; // min vruntime in queue (leftmost leaf's task)
+
+	struct rb_root tasks_timeline; // cur task
+	struct rb_node *rb_leftmost;
+
+	/*
+	 * 'curr' points to currently running entity on this cfs_rq.
+	 * It is set to NULL otherwise (i.e when none are currently running).
+	 */
+	struct sched_entity *curr, *next, *last, *skip;
+
+	/*
+	 * leaf_cfs_rq_list ties together list of leaf cfs_rq's in a cpu. This
+	 * list is used during load balance.
+     * defines all tasks on cfs queue, indentical to 'all_ready' defined in pc.c
+	 */
+	struct list_head leaf_cfs_rq_list;
+
+	/*
+	 * the part of load.weight contributed by tasks
+	 */
+	unsigned long task_weight;
+
+};
+
+
+struct task_struct * (*pick_next_task_fair) (struct cfs_rq *rq);
 /*
  * All the scheduling class methods:
  */

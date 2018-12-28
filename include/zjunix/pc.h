@@ -28,23 +28,28 @@ typedef struct {
 
 struct sched_entity {
     struct rb_node rb_node;       // rbtree node
+    unsigned long weight;
     unsigned int vruntime;
     load_weight load;		/* for load-balancing */
 	unsigned int exec_start;
 	unsigned int sum_exec_runtime;
 	unsigned int prev_sum_exec_runtime;
-	unsigned int nr_migrations;
 };
 
 typedef struct {
+    int nice;    // nice value of this task
     struct sched_entity sched_entity;
     context context;
     unsigned int PID;   //pid
     unsigned int parent;   //parent's pid
     unsigned int state;   //state
     char name[32];  //name
-    struct list_head task;
-    unsigned int usage;
+    struct list_head task; // task pointer
+    /*
+	 * record the cpu usage of this task
+     * being used to imply it is a I/O task or compute-intensive task
+	 */
+    unsigned int usage; 
     int prio, static_prio, normal_prio;
     const struct sched_class *sched_class;
     struct list_head children;
@@ -57,52 +62,9 @@ typedef union {
     unsigned char kernel_stack[TASK_KERNEL_SIZE];
 } task_union;
 
-/* CFS-related fields in a runqueue */
-struct cfs_rq {
-	load_weight load;
-	unsigned long nr_running;
-
-	unsigned int exec_clock;
-	unsigned int min_vruntime;
-
-	struct rb_root tasks_timeline;
-	struct rb_node *rb_leftmost;
-
-	struct list_head tasks;
-	struct list_head *balance_iterator;
-
-	/*
-	 * 'curr' points to currently running entity on this cfs_rq.
-	 * It is set to NULL otherwise (i.e when none are currently running).
-	 */
-	struct sched_entity *curr, *next, *last, *skip;
-
-	unsigned int nr_spread_over;
-
-	struct rq *rq;	/* cpu runqueue to which this cfs_rq is attached */
-
-	/*
-	 * leaf cfs_rqs are those that hold tasks (lowest schedulable entity in
-	 * a hierarchy). Non-leaf lrqs hold other higher schedulable entities
-	 * (like users, containers etc.)
-	 *
-	 * leaf_cfs_rq_list ties together list of leaf cfs_rq's in a cpu. This
-	 * list is used during load balance.
-	 */
-	int on_list;
-	struct list_head leaf_cfs_rq_list;
-	struct task_group *tg;	/* group that "owns" this runqueue */
-
-	/*
-	 * the part of load.weight contributed by tasks
-	 */
-	unsigned long task_weight;
-
-};
-
 struct sched_class {
 
-	struct task_struct * (*pick_next_task) (struct rq *rq);
+	struct task_struct * (*pick_next_task) (struct cfs_rq *rq);
 
 	// void (*enqueue_task) (struct rq *rq, struct task_struct *p, int flags);
 	// void (*dequeue_task) (struct rq *rq, struct task_struct *p, int flags);
