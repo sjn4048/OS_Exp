@@ -11,7 +11,7 @@ int cursor_col;
 int cursor_freq = 31;
 
 void kernel_set_cursor() {
-    *GPIO_CURSOR = ((cursor_freq & 0xff) << 16) + ((cursor_row & 0xff) << 8) + (cursor_col & 0xff);
+    *GPIO_CURSOR = ((cursor_freq & 0xff) << 16) + (((cursor_row+1) & 0xff) << 8) + ((cursor_col+2) & 0xff);
 }
 
 void init_vga() {
