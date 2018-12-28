@@ -79,7 +79,7 @@ void init_pc() {
     current_task = &(new->task);
     new->task.sched_entity.vruntime = 0;
     // add_task(&(new->task), all_task);
-    add_task(&(new->task), &all_ready);
+    add_task(&(new->task), &all_task);
     asm volatile(
         "li $v0, 1000000\n\t"
         "mtc0 $v0, $11\n\t"
@@ -150,7 +150,7 @@ void pc_create(char *task_name, void(*entry)(unsigned int argc, void *args), uns
     // list_add_tail(&(task->task_list), &all_task);
     kernel_printf("%d\n", (unsigned int)&(task->task_list));
 
-    add_task(task, &all_ready);
+    add_task(task, &all_task);
     other = task;
 }
 
