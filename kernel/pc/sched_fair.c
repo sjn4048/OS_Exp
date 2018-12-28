@@ -22,3 +22,68 @@ void init_cfs_rq(struct cfs_rq * rq){
 struct sched_entity * pick_next_task_fair(struct cfs_rq * rq){
     return rb_entry(rq->rb_leftmost, struct sched_entity, rb_node);
 }
+
+
+/*
+ * insert a node into rbtree
+ */
+int insert_process(struct rb_root *root, struct sched_entity *entity)
+{
+	unsigned long vruntime = entity->vruntime;
+    struct rb_node **tmp = &(root->rb_node), *parent = Null;
+
+    /* Figure out where to put new node */
+    while (*tmp)
+    {
+        struct sched_entity *entity = container_of(*tmp, struct sched_entity, rb_node);
+
+        parent = *tmp;
+        if (vruntime <= entity->vruntime)
+            tmp = &((*tmp)->rb_left);
+        else if (vruntime > entity->vruntime)
+            tmp = &((*tmp)->rb_right);
+    }
+
+    /* Add new node and rebalance tree. */
+    rb_link_node(&(entity->rb_node), parent, tmp);
+    rb_insert_color(&(entity->rb_node), root);
+
+    return 0;
+}
+
+void delete_process(struct rb_root *root, struct sched_entity * entity)
+{
+    // delete process
+    rb_erase(&(entity->rb_node), root);
+    
+}
+
+/*
+ * DEBUG : print rbtree
+ */
+void print_rbtree(struct rb_node *tree, struct sched_entity * entity, int direction)
+{
+    if(tree != Null)
+    {
+		task_struct *task = container_of(entity, task_struct, sched_entity);
+        if (direction==0)    // tree is root
+            kernel_printf("%s(B) is root\n", task->name);
+        else                // tree is not root
+            kernel_printf("%s(%s) is %s's %s child\n", task->name, rb_is_black(tree)?"B":"R", task->name, direction==1?"right" : "left");
+
+        if (tree->rb_left)
+            print_rbtree(tree->rb_left, rb_entry(tree->rb_left, struct sched_entity, rb_node)->vruntime, -1);
+        if (tree->rb_right)
+            print_rbtree(tree->rb_right,rb_entry(tree->rb_right, struct sched_entity, rb_node)->vruntime,  1);
+    }
+}
+
+/*
+ * DEBUG : print rbtree
+ */
+void print_process(struct rb_root *root)
+{
+    if (root!=Null && root->rb_node!=Null)
+        print_rbtree(root->rb_node, rb_entry(root->rb_node, struct sched_entity, rb_node), 0);
+}
+

@@ -98,4 +98,9 @@ struct sched_entity * pick_next_task_fair(struct cfs_rq * rq);
 
 void update_vruntime_fair(task_struct *current_task);
 
+int insert_process(struct rb_root *root, struct sched_entity *entity);
+void delete_process(struct rb_root *root, struct sched_entity * entity);
+void print_process(struct rb_root *root);
+
+
 #endif

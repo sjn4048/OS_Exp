@@ -63,12 +63,33 @@ void init_pc() {
     INIT_LIST_HEAD(&all_dead);
     INIT_LIST_HEAD(&all_waiting);
     INIT_LIST_HEAD(&all_ready);
+    // ---------------------------------------------------
+    // ---------- setting idle task ----------------------
     task_union *new = (task_union*)(kernel_sp - TASK_KERNEL_SIZE);
-    new->task.PID = cur_PID++;
-    new->task.parent = 0;
-    new->task.state = 0;
-    INIT_LIST_HEAD(&(new->task.task_list));
-    kernel_strcpy(new->task.name, "idle");
+    task_struct * task = &(new->task);
+    task->PID = cur_PID++;
+    task->parent = -1;
+    task->state = TASK_RUNNING;
+    INIT_LIST_HEAD(&(task->task_list));
+    INIT_LIST_HEAD(&(task->children));
+    kernel_strcpy(task->name, "idle");
+    task->nice = 0; // default nice value
+    task->static_prio = task->nice + 20;
+    task->normal_prio = task->nice + 20;
+    task->PID = cur_PID++;
+    task->usage = 0;
+    // ------- setting schedule entity
+    struct sched_entity* entity = &(task->sched_entity);
+    entity->vruntime = 0;
+    entity->exec_start_time = -1;
+    entity->sum_exec_runtime = 0;
+    entity->load.weight = prio_to_weight[task->normal_prio];
+    entity->load.inv_weight = prio_to_wmult[task->normal_prio];
+    // ------- done setting schedule entity
+    add_task(&(new->task), &all_task);
+    insert_process(&(rq.tasks_timeline),&(task->sched_entity));
+    // ---------- done setting idle task -----------------
+    // ---------------------------------------------------
     register_syscall(10, pc_kill_syscall);
     register_interrupt_handler(7, pc_schedule);
     // asm volatile(   // huge bug here, piece of shit...
@@ -77,9 +98,6 @@ void init_pc() {
     //     "mtc0 $zero, $9"
     //     : : "r"(sysctl_sched_latency));
     current_task = &(new->task);
-    new->task.sched_entity.vruntime = 0;
-    // add_task(&(new->task), all_task);
-    add_task(&(new->task), &all_task);
     asm volatile(
         "li $v0, 1000000\n\t"
         "mtc0 $v0, $11\n\t"
@@ -141,16 +159,15 @@ void pc_create(char *task_name, void(*entry)(unsigned int argc, void *args), uns
 
     // task's parent is current task (who create it) 
     task->parent = current_task->PID;
+    
     // add new task to parents' children list
     // list_add_tail(&(task->task), &(current_task->children));
 
     task->state = TASK_READY;
-    // add to coresponding task queue(s)
-    // add_task(task, all_task);
-    // list_add_tail(&(task->task_list), &all_task);
-    kernel_printf("%d\n", (unsigned int)&(task->task_list));
 
+    // add to coresponding task queue(s)
     add_task(task, &all_task);
+    insert_process(&(rq.tasks_timeline),&(task->sched_entity));
     other = task;
 }
 
@@ -171,12 +188,11 @@ int pc_kill(unsigned int PID) {
 int print_proc() {
     struct list_head *pos;
     task_struct *next;
-    for (pos = (&all_task)->next; pos != (&all_task); pos = pos->next)
-     {
-        kernel_printf("%d\n", (unsigned int)&(pos));
+    list_for_each(pos, (&all_task)) {
         next = container_of(pos, task_struct, task_list);
         kernel_printf("  PID : %d, name : %s, vruntime : %d\n", next->PID, next->name,
         next->sched_entity.vruntime);
     }
+    print_process(&(rq.tasks_timeline));
     return 0;
 }
