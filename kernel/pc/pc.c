@@ -285,7 +285,7 @@ void pc_kill_syscall(unsigned int status, unsigned int cause, context* pt_contex
     /* 
      * if powershell is exiting, create a new powershell process
      * to prevent OS from dead, this is quite useful when a unhandled
-     * exception occurs
+     * exception occurs, it keeps the OS running almost forever!!!
      */
     if (!kernel_strcmp(current_task->name, "powershell")){
         kernel_printf("----------PowerShell Process exiting-------------\n");
@@ -470,7 +470,9 @@ int exec_from_file(char* filename) {
         kernel_memcpy((void*)(ENTRY + j * CACHE_BLOCK_SIZE), buffer, CACHE_BLOCK_SIZE);
         kernel_cache(ENTRY + j * CACHE_BLOCK_SIZE);
     }
-    pc_create("seg",(void *)ENTRY,0,0,0,1);
+    int (*f)() = (int (*)())(ENTRY);
+    int ret = f();
+    // pc_create("seg",(void *)ENTRY,0,0,0,1);
 //     kfree((void*)ENTRY);
     return 0;
 }
