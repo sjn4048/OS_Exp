@@ -447,3 +447,30 @@ int print_rbtree_test() {
     return 0;
 
 }
+
+
+int exec_from_file(char* filename) {
+
+    FILE file;
+    const unsigned int CACHE_BLOCK_SIZE = 64;
+    unsigned char buffer[512];
+    int result = fs_open(&file, filename);
+    if (result != 0) {
+        kernel_printf("File %s not exist\n", filename);
+        return 1;
+    }
+    unsigned int size = get_entry_filesize(file.entry.data);
+    unsigned int n = size / CACHE_BLOCK_SIZE + 1;
+    unsigned int i = 0;
+    unsigned int j = 0;
+    kernel_printf("%d\n", size);
+    unsigned int ENTRY = (unsigned int)kmalloc(4096);
+    for (j = 0; j < n; j++) {
+        fs_read(&file, buffer, CACHE_BLOCK_SIZE);
+        kernel_memcpy((void*)(ENTRY + j * CACHE_BLOCK_SIZE), buffer, CACHE_BLOCK_SIZE);
+        kernel_cache(ENTRY + j * CACHE_BLOCK_SIZE);
+    }
+    pc_create("seg",(void *)ENTRY,0,0,0,1);
+//     kfree((void*)ENTRY);
+    return 0;
+}

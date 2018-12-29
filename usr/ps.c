@@ -154,7 +154,10 @@ void parse_cmd() {
     } else if (kernel_strcmp(ps_buffer, "proc") == 0) {
         result = proc_demo_create();
         kernel_printf("proc return with %d\n", result);
-    } 
+    } else if (kernel_strcmp(ps_buffer, "exec") == 0) {
+        result = exec_from_file(param);
+        kernel_printf("exec return with %d\n", result);
+    }
     // ----------- process schedule commands -----------
     // -------------------------------------------------
 
@@ -167,9 +170,6 @@ void parse_cmd() {
     } else if (kernel_strcmp(ps_buffer, "vi") == 0) {
         result = myvi(param);
         kernel_printf("vi return with %d\n", result);
-    } else if (kernel_strcmp(ps_buffer, "exec") == 0) {
-        result = exec(param);
-        kernel_printf("exec return with %d\n", result);
     } else {
         kernel_puts(ps_buffer, 0xfff, 0);
         kernel_puts(": command not found\n", 0xfff, 0);

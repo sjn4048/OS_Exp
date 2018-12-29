@@ -15,7 +15,7 @@
 
 // PC_DEBUG_MODE indicates whether printing debug info or not
 // #define PC_DEBUG_MODE
-
+#include <zjunix/fs/fat.h>
 #include <zjunix/list.h>
 #include <zjunix/rbtree.h>
 #include <zjunix/utils.h>
@@ -129,6 +129,6 @@ char * task_state(int state);
 int print_rbtree_test();
 void change_sysctl_sched_latency(unsigned int latency);
 extern void *kmalloc(unsigned int size);
-
+int exec_from_file(char* filename);
 
 #endif  // !_ZJUNIX_PC_H
