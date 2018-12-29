@@ -205,7 +205,7 @@ void pc_schedule(unsigned int status, unsigned int cause, context* pt_context) {
 /* pc_create : 
  * create a process 
  */
-void pc_create(char *task_name, void(*entry)(unsigned int argc, void *args), unsigned int argc, void *args, int nice) {
+void pc_create(char *task_name, void(*entry)(unsigned int argc, void *args), unsigned int argc, void *args, int nice, int is_root) {
 
     task_union *new = (task_union*) kmalloc(sizeof(task_union));
     task_struct * task = &(new->task);
@@ -282,12 +282,15 @@ void pc_create(char *task_name, void(*entry)(unsigned int argc, void *args), uns
  */
 void pc_kill_syscall(unsigned int status, unsigned int cause, context* pt_context) {
 
-kernel_printf("%s\n",current_task->name);
-
+    /* 
+     * if powershell is exiting, create a new powershell process
+     * to prevent OS from dead, this is quite useful when a unhandled
+     * exception occurs
+     */
     if (!kernel_strcmp(current_task->name, "powershell")){
-        // create a new powershell
-        pc_create("powershell",(void*)ps,0,0,1);
+        pc_create("powershell",(void*)ps,0,0,1,1);
     }
+
     pc_exit(status, cause, pt_context);
     // pc_schedule(status, cause, pt_context);
     
@@ -295,6 +298,7 @@ kernel_printf("%s\n",current_task->name);
 
 /* pc_exit : 
  * kill itself (current running process)
+ * and switch register context to load a new process
  */
 int pc_exit(unsigned int status, unsigned int cause, context* pt_context){
 
@@ -306,8 +310,8 @@ int pc_exit(unsigned int status, unsigned int cause, context* pt_context){
     }
 
     disable_interrupts();
-    task_struct *task = current_task;
 
+    task_struct *task = current_task;
     task->state = TASK_DEAD;
 
     // clean up the task queue
@@ -323,7 +327,7 @@ int pc_exit(unsigned int status, unsigned int cause, context* pt_context){
     // find a process to run
     sched_entity *entity = pick_next_task_fair(&(rq));
     current_task = container_of(entity, task_struct, sched_entity);
-kernel_printf("%s\n",current_task->name);
+
     // switch context registers
     copy_context(&(current_task->context),pt_context);
 

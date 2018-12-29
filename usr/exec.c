@@ -29,25 +29,26 @@ int exec(char* filename) {
         kernel_memcpy((void*)(ENTRY + j * CACHE_BLOCK_SIZE), buffer, CACHE_BLOCK_SIZE);
         kernel_cache(ENTRY + j * CACHE_BLOCK_SIZE);
     }
-    unsigned int cp0EntryLo0 = ((ENTRY >> 6) & 0x01ffffc0) | 0x1e;
-    asm volatile(
-        "li $t0, 1\n\t"
-        "mtc0 $t0, $10\n\t"
-        "mtc0 $zero, $5\n\t"
-        "move $t0, %0\n\t"
-        "mtc0 $t0, $2\n\t"
-        "mtc0 $zero, $3\n\t"
-        "mtc0 $zero, $0\n\t"
-        "nop\n\t"
-        "nop\n\t"
-        "tlbwi"
-        : "=r"(cp0EntryLo0));
-    int (*f)() = (int (*)())(0);
-#ifdef EXEC_DEBUG
-    kernel_printf("Exec load at: 0x%x\n", ENTRY);
-#endif  // ! EXEC_DEBUG
-    int r = f();
-    kfree((void*)ENTRY);
-    return r;
+    pc_create("seg",(void *)ENTRY,0,0,0,1);
+//     unsigned int cp0EntryLo0 = ((ENTRY >> 6) & 0x01ffffc0) | 0x1e;
+//     asm volatile(
+//         "li $t0, 1\n\t"
+//         "mtc0 $t0, $10\n\t"
+//         "mtc0 $zero, $5\n\t"
+//         "move $t0, %0\n\t"
+//         "mtc0 $t0, $2\n\t"
+//         "mtc0 $zero, $3\n\t"
+//         "mtc0 $zero, $0\n\t"
+//         "nop\n\t"
+//         "nop\n\t"
+//         "tlbwi"
+//         : "=r"(cp0EntryLo0));
+//     int (*f)() = (int (*)())(0);
+// #ifdef EXEC_DEBUG
+//     kernel_printf("Exec load at: 0x%x\n", ENTRY);
+// #endif  // ! EXEC_DEBUG
+//     int r = f();
+//     kfree((void*)ENTRY);
+    return 0;
 }
 #pragma GCC pop_options

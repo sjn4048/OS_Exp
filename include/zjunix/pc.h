@@ -120,7 +120,7 @@ typedef union {
 
 void init_pc();
 void pc_schedule(unsigned int status, unsigned int cause, context* pt_context);
-void pc_create(char *task_name, void(*entry)(unsigned int argc, void *args), unsigned int argc, void *args, int nice);
+void pc_create(char *task_name, void(*entry)(unsigned int argc, void *args), unsigned int argc, void *args, int nice, int is_root);
 void pc_kill_syscall(unsigned int status, unsigned int cause, context* pt_context);
 int pc_kill(unsigned int PID);
 int pc_exit(unsigned int status, unsigned int cause, context* pt_context);
