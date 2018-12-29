@@ -314,7 +314,7 @@ int pc_kill_current(){
                     "addi $sp, $sp, -32\n\t"
                     : "=r"(sp)); 
     pc_exit((context * )sp);
-    asm volatile(   "nop"
+    asm volatile(   "nop\n\t"
 	                "addi $sp, $sp, 32"); 
     restore_context();
     enable_interrupts();

@@ -129,6 +129,7 @@ char * task_state(int state);
 int print_rbtree_test();
 void change_sysctl_sched_latency(unsigned int latency);
 extern void *kmalloc(unsigned int size);
+extern void restore_context();
 int exec_from_file(char* filename);
 int pc_kill_current();
 #endif  // !_ZJUNIX_PC_H
