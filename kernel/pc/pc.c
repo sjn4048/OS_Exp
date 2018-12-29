@@ -63,6 +63,7 @@ static void copy_context(context* src, context* dest) {
 }
 void init_pc() {
     // sysctl_sched_latency = 1000000;
+    counter = 0;
     init_cfs_rq(&rq);
     INIT_LIST_HEAD(&all_task);
     INIT_LIST_HEAD(&all_dead);
@@ -225,13 +226,13 @@ int pc_kill(unsigned int PID) {
 int print_proc() {
     struct list_head *pos;
     task_struct *next;
-    // kernel_printf("----------ALL PROCESSES--------------");
+    kernel_printf("----------ALL PROCESSES--------------");
     list_for_each(pos, (&all_task)) {
         next = container_of(pos, task_struct, task_list);
         kernel_printf("  PID : %d, name : %s, vruntime : %d\n", next->PID, next->name,
         next->sched_entity.vruntime);
     }
-    // kernel_printf("----------ALL PROCESSES--------------");
+    kernel_printf("----------ALL PROCESSES--------------");
 
     // #ifdef DEBUG_MODE
     //     kernel_printf("----------CFS structure(Red Black Tree)--------------");
