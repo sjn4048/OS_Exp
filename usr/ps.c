@@ -157,7 +157,11 @@ void parse_cmd() {
     } else if (kernel_strcmp(ps_buffer, "exec") == 0) {
         result = exec_from_file(param);
         kernel_printf("exec return with %d\n", result);
+    } else if (kernel_strcmp(ps_buffer, "kill_cur") == 0) {
+        result = pc_kill_current(param);
+        kernel_printf("pc_kill_current return with %d\n", result);
     }
+    
     // ----------- process schedule commands -----------
     // -------------------------------------------------
 

@@ -1,6 +1,7 @@
 .extern init_kernel
 .globl start
 .globl exception
+.globl restore_context
 .extern kernel_sp
 .extern exception_handler
 .extern interrupt_handler

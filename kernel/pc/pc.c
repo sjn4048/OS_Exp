@@ -275,18 +275,13 @@ void pc_create(char *task_name, void(*entry)(unsigned int argc, void *args), uns
 
 }
 
-/* pc_kill_syscall : 
- * process kill system call, it can be used to forcely terminate 
- * a process when a unhandled exception occurs
- * see more info in 'exc.c'
+/* check_if_ps_exit :
+ * if powershell is exiting, create a new powershell process
+ * to prevent OS from dead, this is quite useful when a unhandled
+ * exception occurs, it keeps the OS running almost forever!!!
  */
-void pc_kill_syscall(unsigned int status, unsigned int cause, context* pt_context) {
-
-    /* 
-     * if powershell is exiting, create a new powershell process
-     * to prevent OS from dead, this is quite useful when a unhandled
-     * exception occurs, it keeps the OS running almost forever!!!
-     */
+void check_if_ps_exit(){
+    
     if (!kernel_strcmp(current_task->name, "powershell")){
         kernel_printf("----------PowerShell Process exiting-------------\n");
         kernel_printf("----------Recreating PowerShell Process----------\n");
@@ -294,16 +289,43 @@ void pc_kill_syscall(unsigned int status, unsigned int cause, context* pt_contex
         kernel_printf("----------PowerShell Process created----------\n");
     }
 
-    pc_exit(status, cause, pt_context);
-    // pc_schedule(status, cause, pt_context);
+}
+
+/* pc_kill_syscall : 
+ * process kill system call, it can be used to forcely terminate 
+ * a process when a unhandled exception occurs
+ * see more info in 'exc.c'
+ */
+void pc_kill_syscall(unsigned int status, unsigned int cause, context* pt_context) {
     
+    disable_interrupts();
+    check_if_ps_exit();
+    pc_exit(pt_context);
+    // pc_schedule(status, cause, pt_context);
+    enable_interrupts();
+}
+
+int pc_kill_current(){
+    disable_interrupts();
+    check_if_ps_exit();
+
+    unsigned int sp = 0;
+    asm volatile(   "move %0, $sp\n\t"
+                    "addi $sp, $sp, -32\n\t"
+                    : "=r"(sp)); 
+    pc_exit((context * )sp);
+    asm volatile(   "nop"
+	                "addi $sp, $sp, 32"); 
+    restore_context();
+    enable_interrupts();
+    return 0;
 }
 
 /* pc_exit : 
  * kill itself (current running process)
  * and switch register context to load a new process
  */
-int pc_exit(unsigned int status, unsigned int cause, context* pt_context){
+int pc_exit(context* pt_context){
 
     // idle task is dead
     if (current_task->PID == 0) {
@@ -311,8 +333,6 @@ int pc_exit(unsigned int status, unsigned int cause, context* pt_context){
         while(1)
         ;
     }
-
-    disable_interrupts();
 
     task_struct *task = current_task;
     task->state = TASK_DEAD;
@@ -334,7 +354,6 @@ int pc_exit(unsigned int status, unsigned int cause, context* pt_context){
     // switch context registers
     copy_context(&(current_task->context),pt_context);
 
-    enable_interrupts();
     return 0;
 }
 
@@ -473,6 +492,6 @@ int exec_from_file(char* filename) {
     int (*f)() = (int (*)())(ENTRY);
     int ret = f();
     // pc_create("seg",(void *)ENTRY,0,0,0,1);
-//     kfree((void*)ENTRY);
-    return 0;
+    // kfree((void*)ENTRY);
+    return ret;
 }
