@@ -8,6 +8,7 @@
 #include <zjunix/slab.h>
 #include <zjunix/time.h>
 #include <zjunix/log.h>
+#include <zjunix/syscall.h>
 #include <zjunix/utils.h>
 #include "../usr/ls.h"
 #include "exec.h"

@@ -27,7 +27,7 @@ void register_syscall(int index, sys_fn fn) {
 
 int syscall(unsigned int code){
     asm volatile(
-        "li $v0, %0\n\t"
+        "move $v0, %0\n\t"
         "syscall\n\t"
         "nop\n\t"
         : : "r"(code));
