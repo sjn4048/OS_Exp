@@ -11,7 +11,6 @@
 #define TASK_READY 2
 #define TASK_DEAD 3
 task_struct *other = 0;
-int counter = 0;
 unsigned int sysctl_sched_latency = 1000000;
 task_struct *current_task = 0;
 struct list_head all_task;
@@ -63,7 +62,6 @@ static void copy_context(context* src, context* dest) {
 }
 void init_pc() {
     // sysctl_sched_latency = 1000000;
-    counter = 0;
     init_cfs_rq(&rq);
     INIT_LIST_HEAD(&all_task);
     INIT_LIST_HEAD(&all_dead);
@@ -119,9 +117,7 @@ void change_sysctl_sched_latency(unsigned int latency){
 }
 
 void pc_schedule(unsigned int status, unsigned int cause, context* pt_context) {
-    counter++;
-    if (counter % 100 == 0)
-        kernel_printf("%d\n",counter);
+
     update_vruntime_fair(current_task);
     copy_context(pt_context, &(current_task->context));
     task_struct *next = other;
@@ -235,9 +231,9 @@ int print_proc() {
     kernel_printf("----------ALL PROCESSES--------------\n");
 
     // #ifdef DEBUG_MODE
-    //     kernel_printf("----------CFS structure(Red Black Tree)--------------");
-    //     print_process(&(rq.tasks_timeline));
-    //     kernel_printf("----------CFS structure(Red Black Tree)--------------");
+        kernel_printf("----------CFS structure(Red Black Tree)--------------");
+        print_process(&(rq.tasks_timeline));
+        kernel_printf("----------CFS structure(Red Black Tree)--------------");
     // #endif
 
     return 0;
