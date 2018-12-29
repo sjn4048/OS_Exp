@@ -7,6 +7,7 @@
 #include <zjunix/fs/fat.h>
 #include <zjunix/slab.h>
 #include <zjunix/time.h>
+#include <zjunix/log.h>
 #include <zjunix/utils.h>
 #include "../usr/ls.h"
 #include "exec.h"
@@ -39,14 +40,7 @@ void test_proc() {
 }
 
 int proc_demo_create() {
-    int asid = pc_peek();
-    if (asid < 0) {
-        kernel_puts("Failed to allocate pid.\n", 0xfff, 0);
-        return 1;
-    }
-    unsigned int init_gp;
-    asm volatile("la %0, _gp\n\t" : "=r"(init_gp));
-    pc_create(asid, test_proc, (unsigned int)kmalloc(4096), init_gp, "test");
+    
     return 0;
 }
 
@@ -57,6 +51,7 @@ void ps() {
     ps_buffer_index = 0;
     ps_buffer[0] = 0;
     kernel_clear_screen(31);
+    kernel_puts("\n", 0xfff, 0);
     kernel_puts("PowerShell\n", 0xfff, 0);
     kernel_puts("PS>", 0xfff, 0);
     while (1) {
@@ -66,7 +61,7 @@ void ps() {
             if (kernel_strcmp(ps_buffer, "exit") == 0) {
                 ps_buffer_index = 0;
                 ps_buffer[0] = 0;
-                kernel_printf("\nPowerShell exit.\n");
+                kernel_printf("\n  PowerShell exit.\n");
             } else
                 parse_cmd();
             ps_buffer_index = 0;
@@ -139,22 +134,31 @@ void parse_cmd() {
         buddy_info();
     } else if (kernel_strcmp(ps_buffer, "mmtest") == 0) {
         kernel_printf("kmalloc : %x, size = 1KB\n", kmalloc(1024));
-    } else if (kernel_strcmp(ps_buffer, "ps") == 0) {
+    } 
+    
+    // -------------------------------------------------
+    // ----------- process schedule commands -----------
+    else if (kernel_strcmp(ps_buffer, "ps") == 0) {
         result = print_proc();
         kernel_printf("ps return with %d\n", result);
+    } else if (kernel_strcmp(ps_buffer, "rbtree") == 0) {
+        result = print_rbtree_test();
+        kernel_printf("rbtree return with %d\n", result);
     } else if (kernel_strcmp(ps_buffer, "kill") == 0) {
         int pid = param[0] - '0';
         kernel_printf("Killing process %d\n", pid);
         result = pc_kill(pid);
         kernel_printf("kill return with %d\n", result);
     } else if (kernel_strcmp(ps_buffer, "time") == 0) {
-        unsigned int init_gp;
-        asm volatile("la %0, _gp\n\t" : "=r"(init_gp));
-        pc_create(2, system_time_proc, (unsigned int)kmalloc(4096), init_gp, "time");
+        pc_create("time",system_time_proc,0,0,0);
     } else if (kernel_strcmp(ps_buffer, "proc") == 0) {
         result = proc_demo_create();
         kernel_printf("proc return with %d\n", result);
-    } else if (kernel_strcmp(ps_buffer, "cat") == 0) {
+    } 
+    // ----------- process schedule commands -----------
+    // -------------------------------------------------
+
+    else if (kernel_strcmp(ps_buffer, "cat") == 0) {
         result = fs_cat(param);
         kernel_printf("cat return with %d\n", result);
     } else if (kernel_strcmp(ps_buffer, "ls") == 0) {

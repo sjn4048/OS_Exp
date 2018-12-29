@@ -30,11 +30,11 @@ void machine_info() {
 #pragma GCC push_options
 #pragma GCC optimize("O0")
 void create_startup_process() {
-    unsigned int init_gp;
-    asm volatile("la %0, _gp\n\t" : "=r"(init_gp));
-    pc_create(1, ps, (unsigned int)kmalloc(4096) + 4096, init_gp, "powershell");
+    // nice value of 1, just for test
+    pc_create("powershell",(void*)ps,0,0,1);
     log(LOG_OK, "Shell init");
-    pc_create(2, system_time_proc, (unsigned int)kmalloc(4096) + 4096, init_gp, "time");
+    // nice value of 2, just for test
+    pc_create("time",(void*)system_time_proc,0,0,2);
     log(LOG_OK, "Timer init");
 }
 #pragma GCC pop_options

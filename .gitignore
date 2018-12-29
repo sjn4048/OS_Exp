@@ -1,19 +1,12 @@
-# self defined
-# Disable .idea once for all
-.idea/
-# tasks.json
-tasks.json
-
 # Object files
 *.o
 *.ko
 *.obj
 *.elf
-
 # Precompiled Headers
 *.gch
 *.pch
-
+.DS_Store
 # Libraries
 *.lib
 *.a
@@ -367,3 +360,4 @@ fabric.properties
 
 # Android studio 3.1+ serialized cache file
 .idea/caches/build_file_checksums.ser
+!kernel.bin
