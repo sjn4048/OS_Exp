@@ -2,7 +2,6 @@
 
 The repo for OS experiments of ZJU.
 
-**process shedule branch**
 
 ## Platforms
 

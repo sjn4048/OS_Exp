@@ -588,7 +588,10 @@ int print_rbtree_test() {
 
 }
 
-
+/* exec_from_file : 
+ * loading .bin file from disk and run it
+ * currently only run it in kernel mode
+ */
 int exec_from_file(char* filename) {
 
     FILE file;
@@ -615,4 +618,5 @@ int exec_from_file(char* filename) {
     // pc_create("seg",(void *)ENTRY,0,0,0,1);
     // kfree((void*)ENTRY);
     return ret;
+    
 }
