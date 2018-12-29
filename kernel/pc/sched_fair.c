@@ -18,17 +18,16 @@ unsigned long calc_delta_mine(unsigned long delta_exec, load_weight *lw){
 	* Note : ----------------------------------------------------------
 	*/
 	tmp = (unsigned long)delta_exec * lw->inv_weight;
-
+kernel_printf("%d\n",(unsigned long)min(tmp, LONG_MAX));
 	return (unsigned long)min(tmp, LONG_MAX);
 }
 
 unsigned long calc_delta_fair(unsigned long delta, sched_entity *se)
 {
 	if (se->load.weight != NICE_0_LOAD)
-		delta = prio_to_wmult[20];
+		delta = calc_delta_mine(delta, &(se->load));
 	else
 		delta *= prio_to_wmult[20];
-	kernel_printf("%d\n",delta);
 	return delta;
 }
 
