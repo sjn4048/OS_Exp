@@ -5,7 +5,7 @@
 
 #define NICE_0_LOAD 1024
 // #define LONG_MAX ((unsigned long)(~0UL>>1))
-#define LONG_MAX ((unsigned long)4294967295)
+#define LONG_MAX ((unsigned long)(4294967295 / 2 - 1))
 #define min(x, y) (	x > y ? x : y )
 
 #define max(x, y) (	x < y ? x : y )

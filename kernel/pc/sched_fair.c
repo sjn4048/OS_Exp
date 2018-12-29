@@ -64,7 +64,7 @@ void clear_cfs(struct cfs_rq *rq, struct list_head * all_task){
 	
 	struct list_head *pos;
     task_struct *next;
-	kernel_printf("-----------------clear_cfs-----------------");
+	kernel_printf("-----------------clear_cfs-----------------\n");
     list_for_each(pos, all_task) {
         next = container_of(pos, task_struct, task_list);
         next->sched_entity.vruntime = 0;
@@ -78,7 +78,7 @@ void clear_cfs(struct cfs_rq *rq, struct list_head * all_task){
 
 	rq->rb_leftmost = find_rb_leftmost(rq);
 	rq->min_vruntime = 0;
-	kernel_printf("-----------------done clear_cfs------------");
+	kernel_printf("-----------------done clear_cfs------------\n");
 }
 
 void update_vruntime_fair(struct cfs_rq *rq, sched_entity *curr, struct list_head * all_task,
