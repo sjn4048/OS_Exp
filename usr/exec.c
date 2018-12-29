@@ -14,21 +14,27 @@ const unsigned int CACHE_BLOCK_SIZE = 64;
 
 int exec(char* filename) {
     unsigned char buffer[512];
+    kernel_printf("1\n");
     int result = fs_open(&file, filename);
+    kernel_printf("2\n");
     if (result != 0) {
         kernel_printf("File %s not exist\n", filename);
         return 1;
     }
+    kernel_printf("2\n");
     unsigned int size = get_entry_filesize(file.entry.data);
+    kernel_printf("3\n");
     unsigned int n = size / CACHE_BLOCK_SIZE + 1;
     unsigned int i = 0;
     unsigned int j = 0;
     unsigned int ENTRY = (unsigned int)kmalloc(4096);
+    kernel_printf("5\n");
     for (j = 0; j < n; j++) {
         fs_read(&file, buffer, CACHE_BLOCK_SIZE);
         kernel_memcpy((void*)(ENTRY + j * CACHE_BLOCK_SIZE), buffer, CACHE_BLOCK_SIZE);
         kernel_cache(ENTRY + j * CACHE_BLOCK_SIZE);
     }
+    kernel_printf("6\n");
     unsigned int cp0EntryLo0 = ((ENTRY >> 6) & 0x01ffffc0) | 0x1e;
     asm volatile(
         "li $t0, 1\n\t"

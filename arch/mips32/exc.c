@@ -22,8 +22,6 @@ void do_exceptions(unsigned int status, unsigned int cause, context* pt_context)
         kernel_printf("\nProcess %s exited due to exception cause=%x;\n", pcb->name, cause);
         kernel_printf("status=%x, EPC=%x, BadVaddr=%x\n", status, pcb->context.epc, badVaddr);
         pc_kill_syscall(status, cause, pt_context);
-        while (1)
-            ;
     }
 }
 
