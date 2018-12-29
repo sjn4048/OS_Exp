@@ -96,12 +96,14 @@ void init_pc() {
     INIT_LIST_HEAD(&all_waiting);
     INIT_LIST_HEAD(&all_ready);
 
+kernel_printf("----all_task--%x(------",(unsigned int)&all_task);
 
     // ---------------------------------------------------
     // ---------- setting idle task ----------------------
     task_union *new = (task_union*)(kernel_sp - TASK_KERNEL_SIZE);
     task_struct * task = &(new->task);
-
+kernel_printf("--kernel_sp----%x(------",(unsigned int)kernel_sp);
+kernel_printf("--&kernel_sp----%x(------",(unsigned int)&kernel_sp);
     // allocate a PID
     task->PID = cur_PID++;
     // idle task does not has parent
@@ -209,6 +211,7 @@ void pc_schedule(unsigned int status, unsigned int cause, context* pt_context) {
 void pc_create(char *task_name, void(*entry)(unsigned int argc, void *args), unsigned int argc, void *args, int nice) {
 
     task_union *new = (task_union*) kmalloc(sizeof(task_union));
+    kernel_printf("--kmalloc----%x(------",(unsigned int)new);
     task_struct * task = &(new->task);
     kernel_strcpy(task->name, task_name);
     INIT_LIST_HEAD(&(task->task_list));
@@ -268,6 +271,12 @@ void pc_create(char *task_name, void(*entry)(unsigned int argc, void *args), uns
     add_task(task, &all_task, task_list);
     add_task(task, &all_ready, state_list);
     insert_process(&(rq.tasks_timeline),&(task->sched_entity));
+
+    // update leftmost task
+	rq.rb_leftmost = find_rb_leftmost(rq);
+	// update min vruntime of CFS queue
+	update_min_vruntime(rq);
+
 }
 
 /* pc_kill_syscall : 
@@ -277,7 +286,7 @@ void pc_create(char *task_name, void(*entry)(unsigned int argc, void *args), uns
  */
 void pc_kill_syscall(unsigned int status, unsigned int cause, context* pt_context) {
 
-    pc_exit();
+    pc_exit(status, cause, pt_context);
     pc_schedule(status, cause, pt_context);
     
 }
@@ -285,10 +294,39 @@ void pc_kill_syscall(unsigned int status, unsigned int cause, context* pt_contex
 /* pc_exit : 
  * kill itself (current running process)
  */
-int pc_exit(){
+int pc_exit(unsigned int status, unsigned int cause, context* pt_context){
 
+    // idle task is dead
+    if (current_task->PID == 0) {
+        kernel_printf("IDLE PROCESS IS EXITTING!\n");
+        while(1)
+        ;
+    }
+
+    disable_interrupts();
+    task_struct *task = current_task;
+
+    task->state = TASK_DEAD;
+
+    // clean up the task queue
+    remove_task(task, state_list);
+    add_task(task, &all_dead, state_list);
+    delete_process(&(rq.tasks_timeline), &(task->sched_entity));
+
+    // update leftmost task
+	rq.rb_leftmost = find_rb_leftmost(rq);
+	// update min vruntime of CFS queue
+	update_min_vruntime(rq);
+
+    // find a process to run
+    sched_entity *entity = pick_next_task_fair(&(rq));
+    current_task = container_of(entity, task_struct, sched_entity);
+
+    // switch context registers
+    copy_context(pt_context,&(current_task->context));
+
+    return 0;
 }
-
 
 /* pc_kill : 
  * kill a process by PID
@@ -329,7 +367,13 @@ int pc_kill(unsigned int PID) {
 
     // clean up the task queue
     remove_task(task, state_list);
+    add_task(task, &all_dead, state_list);
     delete_process(&(rq.tasks_timeline), &(task->sched_entity));
+
+    // update leftmost task
+	rq.rb_leftmost = find_rb_leftmost(rq);
+	// update min vruntime of CFS queue
+	update_min_vruntime(rq);
 
     enable_interrupts();
     return 0;
