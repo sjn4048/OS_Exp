@@ -119,10 +119,8 @@ void change_sysctl_sched_latency(unsigned int latency){
 void pc_schedule(unsigned int status, unsigned int cause, context* pt_context) {
 
     disable_interrupts();
-    update_vruntime_fair(&(rq),&(current_task->sched_entity),1);
-    if (rq.min_vruntime >= LONG_MAX - 1){
-		clear_cfs(&(rq), &(all_task));
-	}
+    update_vruntime_fair(&(rq),&(current_task->sched_entity),&(all_task),1);
+    
     sched_entity *entity = pick_next_task_fair(&(rq));
     task_struct * next = container_of(entity, task_struct, sched_entity);
     copy_context(pt_context, &(current_task->context));

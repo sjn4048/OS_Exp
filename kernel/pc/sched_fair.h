@@ -4,8 +4,8 @@
 #include <zjunix/rbtree.h>
 
 #define NICE_0_LOAD 1024
-#define LONG_MAX ((unsigned long)(~0UL>>1))
-
+// #define LONG_MAX ((unsigned long)(~0UL>>1))
+#define LONG_MAX ((unsigned long)4294967295)
 #define min(x, y) ({				\
 	typeof(x) _min1 = (x);			\
 	typeof(y) _min2 = (y);			\
@@ -112,7 +112,7 @@ void clear_cfs(struct cfs_rq *rq, struct list_head * all_task);
  */
 sched_entity * pick_next_task_fair(struct cfs_rq * rq);
 
-void update_vruntime_fair(struct cfs_rq *cfs_rq, sched_entity *curr, unsigned long delta_exec);
+void update_vruntime_fair(struct cfs_rq *cfs_rq, sched_entity *curr, struct list_head * all_task, unsigned long delta_exec);
 int insert_process(struct rb_root *root, sched_entity *entity);
 void delete_process(struct rb_root *root, sched_entity * entity);
 void print_process(struct rb_root *root);

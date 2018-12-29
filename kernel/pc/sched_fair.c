@@ -26,6 +26,8 @@ unsigned long calc_delta_fair(unsigned long delta, sched_entity *se)
 {
 	if (se->load.weight != NICE_0_LOAD)
 		delta = calc_delta_mine(delta, &(se->load));
+	else
+		delta *= NICE_0_LOAD;
 
 	return delta;
 }
@@ -78,13 +80,20 @@ void clear_cfs(struct cfs_rq *rq, struct list_head * all_task){
 	kernel_printf("-----------------done clear_cfs------------");
 }
 
-void update_vruntime_fair(struct cfs_rq *rq, sched_entity *curr,
+void update_vruntime_fair(struct cfs_rq *rq, sched_entity *curr, struct list_head * all_task,
 	      unsigned long delta_exec)
 {
 	unsigned long delta_exec_weighted;
 	curr->sum_exec_runtime += delta_exec;
 	delta_exec_weighted = calc_delta_fair(delta_exec, curr);
-	curr->vruntime += delta_exec_weighted;
+	// check if overflow 
+	if ((LONG_MAX - curr->vruntime) <= delta_exec_weighted){
+		// overflow !!!
+		curr->vruntime = LONG_MAX - 1;
+	}else{
+		// regular situation
+		curr->vruntime += delta_exec_weighted;
+	}
 	// rebalance the rb tree
 	delete_process(&(rq->tasks_timeline), curr);
 	insert_process(&(rq->tasks_timeline), curr);
@@ -92,6 +101,10 @@ void update_vruntime_fair(struct cfs_rq *rq, sched_entity *curr,
 	rq->rb_leftmost = find_rb_leftmost(rq);
 	// update min vruntime of CFS queue
 	update_min_vruntime(rq);
+	// check if period' time running out
+	if (rq->min_vruntime >= LONG_MAX - 10){
+		clear_cfs(rq, all_task);
+	}
 }
 
 
