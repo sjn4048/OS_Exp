@@ -19,6 +19,7 @@
 #include <zjunix/list.h>
 #include <zjunix/rbtree.h>
 #include <zjunix/utils.h>
+#include "../../usr/ps.h"
 
 /* context : 
  * defines the context registers

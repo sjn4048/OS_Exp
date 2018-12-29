@@ -286,8 +286,12 @@ kernel_printf("--kmalloc----%x(-----\n",(unsigned int)new);
  */
 void pc_kill_syscall(unsigned int status, unsigned int cause, context* pt_context) {
 
+    if (current_task->name == "powershell"){
+        // create a new powershell
+        pc_create("powershell",(void*)ps,0,0,1);
+    }
     pc_exit(status, cause, pt_context);
-    pc_schedule(status, cause, pt_context);
+    // pc_schedule(status, cause, pt_context);
     
 }
 
