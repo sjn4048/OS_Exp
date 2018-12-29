@@ -109,6 +109,7 @@ void init_pc() {
     task->state = TASK_READY;
 
     INIT_LIST_HEAD(&(task->task_list));
+    INIT_LIST_HEAD(&(task->state_list));
     INIT_LIST_HEAD(&(task->children));
 
     kernel_strcpy(task->name, "idle");
@@ -131,6 +132,7 @@ void init_pc() {
     // ------- done setting schedule entity
 
     add_task(&(new->task), &all_task, task_list);
+    add_task(&(new->task), &all_ready, state_list);
     insert_process(&(rq.tasks_timeline),&(task->sched_entity));
     // ---------- done setting idle task -----------------
     // ---------------------------------------------------
@@ -174,7 +176,7 @@ void pc_schedule(unsigned int status, unsigned int cause, context* pt_context) {
     disable_interrupts();
     
     // update vruntime of current task
-    update_vruntime_fair(&(rq),&(current_task->sched_entity),&(all_task),1);
+    update_vruntime_fair(&(rq),&(current_task->sched_entity),&(all_ready),1);
 
     // find next task to run
     sched_entity *entity = pick_next_task_fair(&(rq));
@@ -210,6 +212,7 @@ void pc_create(char *task_name, void(*entry)(unsigned int argc, void *args), uns
     task_struct * task = &(new->task);
     kernel_strcpy(task->name, task_name);
     INIT_LIST_HEAD(&(task->task_list));
+    INIT_LIST_HEAD(&(task->state_list));
     INIT_LIST_HEAD(&(task->children));
 
     // sets nice values and coresponding priorities
@@ -263,6 +266,7 @@ void pc_create(char *task_name, void(*entry)(unsigned int argc, void *args), uns
 
     // add to coresponding task queue(s)
     add_task(task, &all_task, task_list);
+    add_task(task, &all_ready, state_list);
     insert_process(&(rq.tasks_timeline),&(task->sched_entity));
 }
 
@@ -308,7 +312,7 @@ int pc_kill(unsigned int PID) {
     struct list_head *pos;
     task_struct *task;
     int find = 0;
-    list_for_each(pos, (&all_task)) {
+    list_for_each(pos, (&all_ready)) {
         task = container_of(pos, task_struct, task_list);
         if (task->PID == PID){
             find = 1;
@@ -324,7 +328,7 @@ int pc_kill(unsigned int PID) {
     task->state = TASK_DEAD;
 
     // clean up the task queue
-    remove_task(task, task_list);
+    remove_task(task, state_list);
     delete_process(&(rq.tasks_timeline), &(task->sched_entity));
 
     enable_interrupts();
