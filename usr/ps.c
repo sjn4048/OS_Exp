@@ -138,7 +138,7 @@ void parse_cmd() {
         result = print_proc();
         kernel_printf("ps return with %d\n", result);
     } else if (kernel_strcmp(ps_buffer, "rbtree") == 0) {
-        result = print_rbtree();
+        result = print_rbtree_test();
         kernel_printf("ps return with %d\n", result);
     } else if (kernel_strcmp(ps_buffer, "kill") == 0) {
         int pid = param[0] - '0';

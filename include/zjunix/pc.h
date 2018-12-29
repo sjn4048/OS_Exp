@@ -99,7 +99,7 @@ void pc_create(char *task_name, void(*entry)(unsigned int argc, void *args), uns
 void pc_kill_syscall(unsigned int status, unsigned int cause, context* pt_context);
 int pc_kill(unsigned int PID);
 int print_proc();
-int print_rbtree();
+int print_rbtree_test();
 void change_sysctl_sched_latency(unsigned int latency);
 extern void *kmalloc(unsigned int size);
 
