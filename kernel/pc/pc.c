@@ -39,10 +39,10 @@ unsigned int cur_PID = 0;
 struct cfs_rq rq;
 
 // delete a task into list
-#define remove_task(task, pointer) {  \
+#define remove_task(task, pointer) do {  \
     list_del(&((task)->pointer));        \
     INIT_LIST_HEAD(&((task)->pointer));  \
-}
+} while(0)
 
 // copy register context
 static void copy_context(context* src, context* dest) {
