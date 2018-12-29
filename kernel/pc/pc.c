@@ -313,7 +313,7 @@ int pc_kill(unsigned int PID) {
     task_struct *task;
     int find = 0;
     list_for_each(pos, (&all_ready)) {
-        task = container_of(pos, task_struct, task_list);
+        task = container_of(pos, task_struct, state_list);
         if (task->PID == PID){
             find = 1;
             break;

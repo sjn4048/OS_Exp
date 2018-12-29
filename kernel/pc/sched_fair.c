@@ -84,7 +84,7 @@ struct rb_node * find_rb_leftmost(struct cfs_rq *rq){
  * clear all vruntimes of tasks in queue
  * rebalance the red black tree
  */
-void clear_cfs(struct cfs_rq *rq, struct list_head * all_task){
+void clear_cfs(struct cfs_rq *rq, struct list_head * all_ready){
 	
 	struct list_head *pos;
     task_struct *next;
@@ -94,16 +94,16 @@ void clear_cfs(struct cfs_rq *rq, struct list_head * all_task){
 	#endif
 
 	// delete the rb-tree
-    list_for_each(pos, all_task) {
-        next = container_of(pos, task_struct, task_list);
+    list_for_each(pos, all_ready) {
+        next = container_of(pos, task_struct, state_list);
 		// reset all vruntimes to 0
         next->sched_entity.vruntime = 0;
 		delete_process(&(rq->tasks_timeline), &next->sched_entity);
     }
 
 	// re-construct the rb-tree
-	list_for_each(pos, all_task) {
-        next = container_of(pos, task_struct, task_list);
+	list_for_each(pos, all_ready) {
+        next = container_of(pos, task_struct, state_list);
 		insert_process(&(rq->tasks_timeline), &next->sched_entity);
     }
 
@@ -120,7 +120,7 @@ void clear_cfs(struct cfs_rq *rq, struct list_head * all_task){
  * update vruntime of current task
  * being used when a interrupts comes(inside pc_schedule function)
  */
-void update_vruntime_fair(struct cfs_rq *rq, sched_entity *curr, struct list_head * all_task,
+void update_vruntime_fair(struct cfs_rq *rq, sched_entity *curr, struct list_head * all_ready,
 	      unsigned long delta_exec)
 {
 	unsigned long delta_exec_weighted;
@@ -149,7 +149,7 @@ void update_vruntime_fair(struct cfs_rq *rq, sched_entity *curr, struct list_hea
 
 	// check if period' time running out
 	if (rq->min_vruntime >= LONG_MAX - 10){
-		clear_cfs(rq, all_task);
+		clear_cfs(rq, all_ready);
 	}
 }
 

@@ -108,13 +108,13 @@ struct cfs_rq {
 };
 
 void init_cfs_rq(struct cfs_rq * rq);
-void clear_cfs(struct cfs_rq *rq, struct list_head * all_task);
+void clear_cfs(struct cfs_rq *rq, struct list_head * all_ready);
 
 /*
  * All the scheduling class methods:
  */
 sched_entity * pick_next_task_fair(struct cfs_rq * rq);
-void update_vruntime_fair(struct cfs_rq *cfs_rq, sched_entity *curr, struct list_head * all_task, unsigned long delta_exec);
+void update_vruntime_fair(struct cfs_rq *cfs_rq, sched_entity *curr, struct list_head * all_ready, unsigned long delta_exec);
 int insert_process(struct rb_root *root, sched_entity *entity);
 void delete_process(struct rb_root *root, sched_entity * entity);
 void print_process(struct rb_root *root);
