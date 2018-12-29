@@ -134,12 +134,16 @@ void parse_cmd() {
         buddy_info();
     } else if (kernel_strcmp(ps_buffer, "mmtest") == 0) {
         kernel_printf("kmalloc : %x, size = 1KB\n", kmalloc(1024));
-    } else if (kernel_strcmp(ps_buffer, "ps") == 0) {
+    } 
+    
+    // -------------------------------------------------
+    // ----------- process schedule commands -----------
+    else if (kernel_strcmp(ps_buffer, "ps") == 0) {
         result = print_proc();
         kernel_printf("ps return with %d\n", result);
     } else if (kernel_strcmp(ps_buffer, "rbtree") == 0) {
         result = print_rbtree_test();
-        kernel_printf("ps return with %d\n", result);
+        kernel_printf("rbtree return with %d\n", result);
     } else if (kernel_strcmp(ps_buffer, "kill") == 0) {
         int pid = param[0] - '0';
         kernel_printf("Killing process %d\n", pid);
@@ -150,7 +154,11 @@ void parse_cmd() {
     } else if (kernel_strcmp(ps_buffer, "proc") == 0) {
         result = proc_demo_create();
         kernel_printf("proc return with %d\n", result);
-    } else if (kernel_strcmp(ps_buffer, "cat") == 0) {
+    } 
+    // ----------- process schedule commands -----------
+    // -------------------------------------------------
+
+    else if (kernel_strcmp(ps_buffer, "cat") == 0) {
         result = fs_cat(param);
         kernel_printf("cat return with %d\n", result);
     } else if (kernel_strcmp(ps_buffer, "ls") == 0) {

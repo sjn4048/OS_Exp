@@ -32,6 +32,7 @@ unsigned long calc_delta_fair(unsigned long delta, sched_entity *se)
 		delta = calc_delta_mine(delta, &(se->load));
 	else
 		delta *= prio_to_wmult[20];
+	delta = 1;
 	return delta;
 }
 
@@ -199,9 +200,12 @@ void print_rbtree(struct rb_node *tree, struct rb_node *parent, int direction)
     {
 		sched_entity * entity = rb_entry(tree, sched_entity, rb_node);
 		task_struct *task = container_of(entity, task_struct, sched_entity);
-        if (direction==0)    // tree is root
+        if (direction==0){
+			// tree is root
             kernel_printf("  %s(B) is root\n", task->name);
-        else{                // tree is not root
+		}
+        else{                
+			// tree is not root
 			sched_entity * parent_entity = rb_entry(parent, sched_entity, rb_node);
 			task_struct * parent_task = container_of(parent_entity, task_struct, sched_entity);
             kernel_printf("  %s(%s) is %s's %s child\n", task->name, rb_is_black(tree)?"B":"R", parent_task->name, direction==1?"right" : "left");
