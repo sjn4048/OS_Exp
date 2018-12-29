@@ -122,16 +122,15 @@ void init_pc() {
 
     register_syscall(10, pc_kill_syscall);
     register_interrupt_handler(7, pc_schedule);
-    // asm volatile(   // huge bug here, waiting to be reimplemented
-    //     //"li $v0, %0\n\t"
-    //     "mtc0 $0, $11\n\t"
-    //     "mtc0 $zero, $9"
-    //     : : "r"(sysctl_sched_latency));
     current_task = &(new->task);
-    asm volatile(
-        "li $v0, 1000000\n\t"
-        "mtc0 $v0, $11\n\t"
-        "mtc0 $zero, $9");
+    asm volatile(   // huge bug here, waiting to be reimplemented
+        "mtc0 %0, $11\n\t"
+        "mtc0 $zero, $9"
+        : : "r"(sysctl_sched_latency));
+    // asm volatile(
+    //     "li $v0, 1000000\n\t"
+    //     "mtc0 $v0, $11\n\t"
+    //     "mtc0 $zero, $9");
 }
 
 /* change_sysctl_sched_latency : 
