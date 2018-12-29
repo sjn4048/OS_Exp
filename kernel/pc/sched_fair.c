@@ -18,6 +18,8 @@ unsigned long calc_delta_mine(unsigned long delta_exec, load_weight *lw){
 	* Note : ----------------------------------------------------------
 	*/
 	tmp = (unsigned long)delta_exec * lw->inv_weight;
+kernel_printf("%d\n",tmp);
+kernel_printf("%d\n",LONG_MAX);
 kernel_printf("%d\n",(unsigned long)min(tmp, LONG_MAX));
 	return (unsigned long)min(tmp, LONG_MAX);
 }
