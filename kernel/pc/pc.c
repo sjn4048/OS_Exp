@@ -5,7 +5,7 @@
 #include <zjunix/syscall.h>
 #include <zjunix/log.h>
 
-#define DEBUG_MODE 1
+#define DEBUG_MODE
 #define TASK_RUNNING 0
 #define TASK_WAITING 1
 #define TASK_READY 2
@@ -230,11 +230,11 @@ int print_proc() {
     }
     kernel_printf("----------ALL PROCESSES--------------\n");
 
-    // #ifdef DEBUG_MODE
-        kernel_printf("----------CFS structure(Red Black Tree)--------------");
+    #ifdef DEBUG_MODE
+        kernel_printf("----------CFS structure(Red Black Tree)--------------\n");
         print_process(&(rq.tasks_timeline));
-        kernel_printf("----------CFS structure(Red Black Tree)--------------");
-    // #endif
+        kernel_printf("----------CFS structure(Red Black Tree)--------------\n");
+    #endif
 
     return 0;
 }
