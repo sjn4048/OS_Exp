@@ -1,3 +1,12 @@
+/*
+ *  pc/pc.h
+ *
+ *  Kernel scheduler and related syscalls
+ *
+ *  Copyright (C) 2018  Zhenxin Xiao, Zhejiang University
+ * 
+ */
+
 #ifndef _ZJUNIX_PC_H
 #define _ZJUNIX_PC_H
 
@@ -45,6 +54,7 @@ typedef struct {
  * And most importantly, the red black tree's node of this task
  */
 typedef struct {
+
     struct rb_node rb_node;       // rbtree node
     unsigned long vruntime;       // vruntime of cfs
     load_weight load;		/* for load-balancing */
@@ -58,25 +68,39 @@ typedef struct {
  */
 typedef struct {
     int nice;    // nice value of this task
+    
+    /* static_prio, normal_prio : 
+     * static_prio is the prioity defined when the task is created and will 
+     * never change again
+     * however, normal_prio will change due to the task's behavior( I/O task 
+     * or compute-intensive task), normally implied by 'usage' defined below
+     */
     int static_prio, normal_prio;
+
     sched_entity sched_entity; // schedule entity
     context context; // context register
+
     unsigned int PID;   //pid
     unsigned int parent;   //parent's pid
     unsigned int state;   //state
     char name[32];  //name
+
     struct list_head task_list; // task pointer
+
     /* usage : 
 	 * record the cpu usage of this task
      * being used to imply it is a I/O task or compute-intensive task
 	 */
+
     unsigned int usage; 
     /* children : 
 	 * a list contains all chrildren of this task
      * when this task is terminated
      * kill all children of this task recursivelly
 	 */
+
     struct list_head children;
+
 } task_struct;
 
 // current running task pointer
@@ -98,6 +122,7 @@ void pc_schedule(unsigned int status, unsigned int cause, context* pt_context);
 void pc_create(char *task_name, void(*entry)(unsigned int argc, void *args), unsigned int argc, void *args, int nice);
 void pc_kill_syscall(unsigned int status, unsigned int cause, context* pt_context);
 int pc_kill(unsigned int PID);
+int pc_exit();
 int print_proc();
 int print_rbtree_test();
 void change_sysctl_sched_latency(unsigned int latency);

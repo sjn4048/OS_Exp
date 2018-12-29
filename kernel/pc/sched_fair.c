@@ -1,3 +1,12 @@
+/*
+ *  pc/sched_fair.c
+ *
+ *  CFS (Complete Fair Scheduler) implementation 
+ *
+ *  Copyright (C) 2018  Zhenxin Xiao, Zhejiang University
+ * 
+ */
+
 #include "sched_fair.h"
 #include <driver/vga.h>
 
@@ -54,7 +63,9 @@ static void update_min_vruntime(struct cfs_rq *rq)
  * find out the left most node of rbtree
  */
 struct rb_node * find_rb_leftmost(struct cfs_rq *rq){
+
 	struct rb_node *tree = rq->tasks_timeline.rb_node;
+
 	while(tree->rb_left != Null)
     {
         tree = tree->rb_left;
@@ -77,15 +88,20 @@ void clear_cfs(struct cfs_rq *rq, struct list_head * all_task){
 	
 	struct list_head *pos;
     task_struct *next;
+
 	#ifdef PC_DEBUG_MODE
 		kernel_printf("-----------------clear_cfs-----------------\n");
 	#endif
+
+	// delete the rb-tree
     list_for_each(pos, all_task) {
         next = container_of(pos, task_struct, task_list);
+		// reset all vruntimes to 0
         next->sched_entity.vruntime = 0;
 		delete_process(&(rq->tasks_timeline), &next->sched_entity);
     }
 
+	// re-construct the rb-tree
 	list_for_each(pos, all_task) {
         next = container_of(pos, task_struct, task_list);
 		insert_process(&(rq->tasks_timeline), &next->sched_entity);
@@ -93,9 +109,11 @@ void clear_cfs(struct cfs_rq *rq, struct list_head * all_task){
 
 	rq->rb_leftmost = find_rb_leftmost(rq);
 	rq->min_vruntime = 0;
+
 	#ifdef PC_DEBUG_MODE
 		kernel_printf("-----------------done clear_cfs------------\n");
 	#endif
+
 }
 
 /* update_vruntime_fair : 
@@ -107,7 +125,10 @@ void update_vruntime_fair(struct cfs_rq *rq, sched_entity *curr, struct list_hea
 {
 	unsigned long delta_exec_weighted;
 	curr->sum_exec_runtime += delta_exec;
+
+	// get calculated vruntime
 	delta_exec_weighted = calc_delta_fair(delta_exec, curr);
+
 	// check if overflow 
 	if ((LONG_MAX - curr->vruntime) <= delta_exec_weighted){
 		// overflow !!!
@@ -116,13 +137,16 @@ void update_vruntime_fair(struct cfs_rq *rq, sched_entity *curr, struct list_hea
 		// regular situation
 		curr->vruntime += delta_exec_weighted;
 	}
+
 	// rebalance the rb tree
 	delete_process(&(rq->tasks_timeline), curr);
 	insert_process(&(rq->tasks_timeline), curr);
+
 	// update leftmost task
 	rq->rb_leftmost = find_rb_leftmost(rq);
 	// update min vruntime of CFS queue
 	update_min_vruntime(rq);
+
 	// check if period' time running out
 	if (rq->min_vruntime >= LONG_MAX - 10){
 		clear_cfs(rq, all_task);
@@ -135,7 +159,6 @@ void update_vruntime_fair(struct cfs_rq *rq, sched_entity *curr, struct list_hea
 void init_cfs_rq(struct cfs_rq * rq){
     rq->task_weight = 0;
 	rq->nr_running = 0;
-
 	rq->exec_clock = 0;
 	rq->min_vruntime = 0;
 	rq->tasks_timeline = RB_ROOT;
@@ -199,16 +222,20 @@ void print_rbtree(struct rb_node *tree, struct rb_node *parent, int direction)
     {
 		sched_entity * entity = rb_entry(tree, sched_entity, rb_node);
 		task_struct *task = container_of(entity, task_struct, sched_entity);
-        if (direction==0){
+        
+		if (direction==0){
 			// tree is root
-            kernel_printf("  %s(B) is root\n", task->name);
+            kernel_printf("  %s(PID : %d)(B) is root\n", task->name, (int)task->PID);
 		}
         else{                
 			// tree is not root
 			sched_entity * parent_entity = rb_entry(parent, sched_entity, rb_node);
 			task_struct * parent_task = container_of(parent_entity, task_struct, sched_entity);
-            kernel_printf("  %s(%s) is %s's %s child\n", task->name, rb_is_black(tree)?"B":"R", parent_task->name, direction==1?"right" : "left");
+            kernel_printf("  %s(PID : %d)(%s) is %s's %s child\n", task->name, 
+					(int)task->PID, rb_is_black(tree)?"B":"R", 
+					parent_task->name, direction==1?"right" : "left");
 		}
+
         if (tree->rb_left)
             print_rbtree(tree->rb_left, tree, -1);
         if (tree->rb_right)

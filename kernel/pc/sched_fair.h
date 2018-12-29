@@ -1,3 +1,12 @@
+/*
+ *  pc/sched_fair.h
+ *
+ *  CFS (Complete Fair Scheduler) implementation 
+ *
+ *  Copyright (C) 2018  Zhenxin Xiao, Zhejiang University
+ * 
+ */
+
 #ifndef SCHED_FAIR
 #define SCHED_FAIR
 #include <zjunix/pc.h>
