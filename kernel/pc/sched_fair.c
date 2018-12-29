@@ -82,19 +82,22 @@ void update_vruntime_fair(struct cfs_rq *rq, sched_entity *curr,
 	      unsigned long delta_exec)
 {
 	unsigned long delta_exec_weighted;
-
+kernel_printf("0\n");
 	curr->sum_exec_runtime += delta_exec;
 	delta_exec_weighted = calc_delta_fair(delta_exec, curr);
-
+kernel_printf("1\n");
 	curr->vruntime += delta_exec_weighted;
 	// rebalance the rb tree
 	delete_process(&(rq->tasks_timeline), curr);
+kernel_printf("2\n");
 	insert_process(&(rq->tasks_timeline), curr);
+kernel_printf("3\n");
 	// update leftmost task
 	rq->rb_leftmost = find_rb_leftmost(rq);
+kernel_printf("4\n");
 	// update min vruntime of CFS queue
 	update_min_vruntime(rq);
-
+kernel_printf("5\n");
 }
 
 
