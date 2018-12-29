@@ -96,14 +96,14 @@ void init_pc() {
     INIT_LIST_HEAD(&all_waiting);
     INIT_LIST_HEAD(&all_ready);
 
-// kernel_printf("----all_task--%x(------",(unsigned int)&all_task);
+kernel_printf("----all_task--%x(------",(unsigned int)&all_task);
 
     // ---------------------------------------------------
     // ---------- setting idle task ----------------------
     task_union *new = (task_union*)(kernel_sp - TASK_KERNEL_SIZE);
     task_struct * task = &(new->task);
-// kernel_printf("--kernel_sp----%x(------",(unsigned int)kernel_sp);
-// kernel_printf("--&kernel_sp----%x(------",(unsigned int)&kernel_sp);
+kernel_printf("--kernel_sp----%x(------",kernel_sp);
+kernel_printf("--&kernel_sp----%x(------",(unsigned int)&kernel_sp);
     // allocate a PID
     task->PID = cur_PID++;
     // idle task does not has parent
