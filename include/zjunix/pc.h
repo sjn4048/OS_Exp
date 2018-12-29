@@ -28,19 +28,19 @@ typedef struct {
 	unsigned long weight, inv_weight;  // task's weight 
 } load_weight;
 
-struct sched_entity {
+typedef struct {
     struct rb_node rb_node;       // rbtree node
     unsigned long vruntime;       // vruntime of cfs
     load_weight load;		/* for load-balancing */
 	unsigned long exec_start_time;    // task's start time of this period
 	unsigned long sum_exec_runtime;  // total run time
 
-};
+}sched_entity;
 
 typedef struct {
     int nice;    // nice value of this task
     int static_prio, normal_prio;
-    struct sched_entity sched_entity; // schedule entity
+    sched_entity sched_entity; // schedule entity
     context context; // context register
     unsigned int PID;   //pid
     unsigned int parent;   //parent's pid

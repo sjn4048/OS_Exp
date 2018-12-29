@@ -2,6 +2,22 @@
 #define SCHED_FAIR
 #include <zjunix/pc.h>
 #include <zjunix/rbtree.h>
+
+#define NICE_0_LOAD 1024
+#define LONG_MAX ((unsigned long)(~0UL>>1))
+
+#define min(x, y) ({				\
+	typeof(x) _min1 = (x);			\
+	typeof(y) _min2 = (y);			\
+	(void) (&_min1 == &_min2);		\
+	_min1 < _min2 ? _min1 : _min2; })
+
+#define max(x, y) ({				\
+	typeof(x) _max1 = (x);			\
+	typeof(y) _max2 = (y);			\
+	(void) (&_max1 == &_max2);		\
+	_max1 > _max2 ? _max1 : _max2; })
+
 /*
  * Nice levels are multiplicative, with a gentle 10% change for every
  * nice level changed. I.e. when a CPU-bound task goes from nice 0 to
@@ -14,7 +30,7 @@
  * If a task goes up by ~10% and another task goes down by ~10% then
  * the relative distance between them is ~25%.)
  */
-static const int prio_to_weight[40] = {
+static const long prio_to_weight[40] = {
  /* -20 */     88761,     71755,     56483,     46273,     36291,
  /* -15 */     29154,     23254,     18705,     14949,     11916,
  /* -10 */      9548,      7620,      6100,      4904,      3906,
@@ -31,7 +47,7 @@ static const int prio_to_weight[40] = {
  * precalculated inverse to speed up arithmetics by turning divisions
  * into multiplications:
  */
-static const int prio_to_wmult[40] = {
+static const long prio_to_wmult[40] = {
  /* -20 */     48388,     59856,     76040,     92818,    118348,
  /* -15 */    147320,    184698,    229616,    287308,    360437,
  /* -10 */    449829,    563644,    704093,    875809,   1099582,
@@ -51,8 +67,8 @@ struct cfs_rq {
 	unsigned long task_weight;
 	unsigned long nr_running; // total tasks in queue
 
-	unsigned int exec_clock; // cur time clock of cpu
-	unsigned int min_vruntime; // min vruntime in queue (leftmost leaf's task)
+	unsigned long exec_clock; // cur time clock of cpu
+	unsigned long min_vruntime; // min vruntime in queue (leftmost leaf's task)
 	struct rb_root tasks_timeline; // cur task
 	struct rb_node *rb_leftmost;
 
@@ -60,7 +76,7 @@ struct cfs_rq {
 	 * 'curr' points to currently running entity on this cfs_rq.
 	 * It is set to NULL otherwise (i.e when none are currently running).
 	 */
-	struct sched_entity *curr, *next, *last, *skip;
+	sched_entity *curr, *next, *last, *skip;
 
 	/*
 	 * leaf_cfs_rq_list ties together list of leaf cfs_rq's in a cpu. This
@@ -90,16 +106,15 @@ struct cfs_rq {
 	// unsigned int (*get_rr_interval) (struct rq *rq, struct task_struct *task);
 
 void init_cfs_rq(struct cfs_rq * rq);
-
+void clear_cfs(struct cfs_rq *rq, struct list_head * all_task);
 /*
  * All the scheduling class methods:
  */
-struct sched_entity * pick_next_task_fair(struct cfs_rq * rq);
+sched_entity * pick_next_task_fair(struct cfs_rq * rq);
 
-void update_vruntime_fair(task_struct *current_task);
-
-int insert_process(struct rb_root *root, struct sched_entity *entity);
-void delete_process(struct rb_root *root, struct sched_entity * entity);
+void update_vruntime_fair(struct cfs_rq *cfs_rq, sched_entity *curr, unsigned long delta_exec);
+int insert_process(struct rb_root *root, sched_entity *entity);
+void delete_process(struct rb_root *root, sched_entity * entity);
 void print_process(struct rb_root *root);
 
 

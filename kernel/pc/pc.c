@@ -83,7 +83,7 @@ void init_pc() {
     task->PID = cur_PID++;
     task->usage = 0;
     // ------- setting schedule entity
-    struct sched_entity* entity = &(task->sched_entity);
+    sched_entity* entity = &(task->sched_entity);
     entity->vruntime = 0;
     entity->exec_start_time = -1;
     entity->sum_exec_runtime = 0;
@@ -118,14 +118,21 @@ void change_sysctl_sched_latency(unsigned int latency){
 
 void pc_schedule(unsigned int status, unsigned int cause, context* pt_context) {
 
-    update_vruntime_fair(current_task);
+    disable_interrupts();
+    update_vruntime_fair(&(rq),&(current_task->sched_entity),1);
+    if (rq.min_vruntime >= LONG_MAX - 1){
+		clear_cfs(&(rq), &(all_task));
+	}
+    enable_interrupts();
+
+    task_struct *next = pick_next_task_fair(&(rq));
+
     copy_context(pt_context, &(current_task->context));
-    task_struct *next = other;
-    other = current_task;
     copy_context(&(next->context), pt_context);
+    current_task->state = TASK_READY;
+    next->state = TASK_RUNNING;
     current_task = next;
     asm volatile("mtc0 $zero, $9\n\t");
-
 }
 
 
@@ -142,7 +149,7 @@ void pc_create(char *task_name, void(*entry)(unsigned int argc, void *args), uns
     task->usage = 0;
 
     // ------- setting schedule entity
-    struct sched_entity* entity = &(task->sched_entity);
+    sched_entity* entity = &(task->sched_entity);
     entity->vruntime = 0;
     entity->exec_start_time = -1;
     entity->sum_exec_runtime = 0;
