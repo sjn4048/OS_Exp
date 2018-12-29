@@ -85,7 +85,9 @@ void update_vruntime_fair(struct cfs_rq *rq, sched_entity *curr, struct list_hea
 {
 	unsigned long delta_exec_weighted;
 	curr->sum_exec_runtime += delta_exec;
+kernel_printf("aa");
 	delta_exec_weighted = calc_delta_fair(delta_exec, curr);
+kernel_printf("bb");
 	// check if overflow 
 	if ((LONG_MAX - curr->vruntime) <= delta_exec_weighted){
 		// overflow !!!
@@ -102,9 +104,11 @@ void update_vruntime_fair(struct cfs_rq *rq, sched_entity *curr, struct list_hea
 	// update min vruntime of CFS queue
 	update_min_vruntime(rq);
 	// check if period' time running out
+kernel_printf("cc");
 	if (rq->min_vruntime >= LONG_MAX - 10){
 		clear_cfs(rq, all_task);
 	}
+kernel_printf("dd");
 }
 
 
