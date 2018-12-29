@@ -306,18 +306,25 @@ void pc_kill_syscall(unsigned int status, unsigned int cause, context* pt_contex
 }
 
 int pc_kill_current(){
-    disable_interrupts();
-    check_if_ps_exit();
 
-    unsigned int sp = 0;
-    asm volatile(   "move %0, $sp\n\t"
-                    "addi $sp, $sp, -32\n\t"
-                    : "=r"(sp)); 
-    pc_exit((context * )sp);
-    asm volatile(   "nop\n\t"
-	                "addi $sp, $sp, 32"); 
-    restore_context();
-    enable_interrupts();
+    asm volatile(
+        "li $v0, 10\n\t"
+        "syscall\n\t"
+        "nop\n\t");
+    
+    // disable_interrupts();
+    // check_if_ps_exit();
+
+    // unsigned int sp = 0;
+    // asm volatile(   "move %0, $sp\n\t"
+    //                 "addi $sp, $sp, -32\n\t"
+    //                 : "=r"(sp)); 
+    // pc_exit((context * )sp);
+    // asm volatile(   "nop\n\t"
+	//                 "addi $sp, $sp, 32"); 
+    // restore_context();
+    // enable_interrupts();
+
     return 0;
 }
 
