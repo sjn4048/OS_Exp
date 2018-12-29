@@ -38,10 +38,6 @@ unsigned int cur_PID = 0;
 // cfs running queue structure
 struct cfs_rq rq;
 
-// append a task into list
-#define add_task(task, tasks, pointer) \
-            (list_add_tail(&((task)->pointer), (tasks)))
-
 // delete a task into list
 #define remove_task(task, pointer) {  \
     list_del(&((task)->pointer));        \
@@ -130,7 +126,7 @@ void init_pc() {
     entity->load.inv_weight = prio_to_wmult[task->normal_prio];
     // ------- done setting schedule entity
 
-    add_task(&(new->task), &all_task, task_list);
+    list_add_tail(&(new->task.task_list),&all_task);
     insert_process(&(rq.tasks_timeline),&(task->sched_entity));
     // ---------- done setting idle task -----------------
     // ---------------------------------------------------
@@ -262,7 +258,7 @@ void pc_create(char *task_name, void(*entry)(unsigned int argc, void *args), uns
     task->state = TASK_READY;
 
     // add to coresponding task queue(s)
-    add_task(task, &all_task, task_list);
+    list_add_tail(&(task->task_list),&all_task);
     insert_process(&(rq.tasks_timeline),&(task->sched_entity));
 }
 
