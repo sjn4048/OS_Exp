@@ -39,14 +39,13 @@ unsigned int cur_PID = 0;
 struct cfs_rq rq;
 
 // append a task into list
-void add_task(task_struct *task, struct list_head * tasks) {
-    list_add_tail(&(task->task_list), tasks);
-}
+#define add_task(task, tasks, pointer) \
+            (list_add_tail(&((task)->pointer), (tasks)))
 
 // delete a task into list
-void remove_task(task_struct *task) {
-    list_del(&(task->task_list));
-    INIT_LIST_HEAD(&(task->task_list));
+#define remove_task(task, pointer) {  \
+    list_del(&((task)->pointer));        \
+    INIT_LIST_HEAD(&((task)->pointer));  \
 }
 
 // copy register context
@@ -131,7 +130,7 @@ void init_pc() {
     entity->load.inv_weight = prio_to_wmult[task->normal_prio];
     // ------- done setting schedule entity
 
-    add_task(&(new->task), &all_task);
+    add_task(&(new->task), &all_task, task_list);
     insert_process(&(rq.tasks_timeline),&(task->sched_entity));
     // ---------- done setting idle task -----------------
     // ---------------------------------------------------
@@ -263,7 +262,7 @@ void pc_create(char *task_name, void(*entry)(unsigned int argc, void *args), uns
     task->state = TASK_READY;
 
     // add to coresponding task queue(s)
-    add_task(task, &all_task);
+    add_task(task, &all_task, task_list);
     insert_process(&(rq.tasks_timeline),&(task->sched_entity));
 }
 
@@ -325,7 +324,7 @@ int pc_kill(unsigned int PID) {
     task->state = TASK_DEAD;
 
     // clean up the task queue
-    remove_task(task);
+    remove_task(task, task_list);
     delete_process(&(rq.tasks_timeline), &(task->sched_entity));
 
     enable_interrupts();
@@ -356,16 +355,18 @@ int print_proc() {
  * print red black tree's structure
  */
 int print_rbtree_test() {
-    
+
     /* 
      * disable interrupts to avoid the rb tree being modified 
      * during the printing process
      * it is crucial because we schedule the process in a very short time
      */
     disable_interrupts();
+    kernel_printf("-----------------------------------------------------\n");
     kernel_printf("----------CFS structure(Red Black Tree)--------------\n");
     print_process(&(rq.tasks_timeline));
     kernel_printf("----------CFS structure(Red Black Tree)--------------\n");
+    kernel_printf("-----------------------------------------------------\n");
     enable_interrupts();
     return 0;
 

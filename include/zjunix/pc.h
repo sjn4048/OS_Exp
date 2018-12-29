@@ -68,7 +68,7 @@ typedef struct {
  */
 typedef struct {
     int nice;    // nice value of this task
-    
+
     /* static_prio, normal_prio : 
      * static_prio is the prioity defined when the task is created and will 
      * never change again
@@ -86,7 +86,7 @@ typedef struct {
     char name[32];  //name
 
     struct list_head task_list; // task pointer
-
+    struct list_head state_list; // state pointer
     /* usage : 
 	 * record the cpu usage of this task
      * being used to imply it is a I/O task or compute-intensive task
