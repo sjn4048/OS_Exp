@@ -288,7 +288,10 @@ void pc_kill_syscall(unsigned int status, unsigned int cause, context* pt_contex
      * exception occurs
      */
     if (!kernel_strcmp(current_task->name, "powershell")){
+        kernel_printf("----------PowerShell Process exiting-------------\n");
+        kernel_printf("----------Recreating PowerShell Process----------\n");
         pc_create("powershell",(void*)ps,0,0,1,1);
+        kernel_printf("----------PowerShell Process created----------\n");
     }
 
     pc_exit(status, cause, pt_context);
