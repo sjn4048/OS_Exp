@@ -47,7 +47,7 @@ unsigned long calc_delta_fair(unsigned long delta, sched_entity *se)
 /* update_min_vruntime : 
  * updates the mininum vruntime of cfs queue
  */
-static void update_min_vruntime(struct cfs_rq *rq)
+void update_min_vruntime(struct cfs_rq *rq)
 {
 	unsigned long vruntime = rq->min_vruntime;
 
