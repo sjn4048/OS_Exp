@@ -363,10 +363,11 @@ int pc_kill_current(){
      * use syscall to call "pc_kill_syscall" function and kill the 
      * current process. 
      */
-    asm volatile(
-        "li $v0, 10\n\t"
-        "syscall\n\t"
-        "nop\n\t");
+    syscall(10);
+    // asm volatile(
+    //     "li $v0, 10\n\t"
+    //     "syscall\n\t"
+    //     "nop\n\t");
     
     /* Another implementation : 
      * ( NOTE : still some unknown bugs, maybe unstatble!!! )
@@ -618,5 +619,5 @@ int exec_from_file(char* filename) {
     // pc_create("seg",(void *)ENTRY,0,0,0,1);
     // kfree((void*)ENTRY);
     return ret;
-    
+
 }

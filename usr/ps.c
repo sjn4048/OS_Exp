@@ -17,11 +17,12 @@ char ps_buffer[64];
 int ps_buffer_index;
 
 void test_syscall4() {
-    asm volatile(
-        "li $a0, 0x00ff\n\t"
-        "li $v0, 4\n\t"
-        "syscall\n\t"
-        "nop\n\t");
+    syscall(4);
+    // asm volatile(
+    //     "li $a0, 0x00ff\n\t"
+    //     "li $v0, 4\n\t"
+    //     "syscall\n\t"
+    //     "nop\n\t");
 }
 
 void test_proc() {
