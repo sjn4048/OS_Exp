@@ -125,8 +125,8 @@ void pc_schedule(unsigned int status, unsigned int cause, context* pt_context) {
 	}
     enable_interrupts();
 
-    task_struct *next = pick_next_task_fair(&(rq));
-
+    sched_entity *entity = pick_next_task_fair(&(rq));
+    task_struct * next = container_of(entity, task_struct, sched_entity);
     copy_context(pt_context, &(current_task->context));
     copy_context(&(next->context), pt_context);
     current_task->state = TASK_READY;

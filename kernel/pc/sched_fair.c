@@ -84,12 +84,12 @@ void update_vruntime_fair(struct cfs_rq *rq, sched_entity *curr,
 	unsigned long delta_exec_weighted;
 
 	curr->sum_exec_runtime += delta_exec;
-	delta_exec_weighted = calc_delta_fair(delta_exec, &(curr->load));
+	delta_exec_weighted = calc_delta_fair(delta_exec, curr);
 
 	curr->vruntime += delta_exec_weighted;
 	// rebalance the rb tree
-	delete_process(&(rq->tasks_timeline), &curr);
-	insert_process(&(rq->tasks_timeline), &curr);
+	delete_process(&(rq->tasks_timeline), curr);
+	insert_process(&(rq->tasks_timeline), curr);
 	// update leftmost task
 	rq->rb_leftmost = find_rb_leftmost(rq);
 	// update min vruntime of CFS queue
