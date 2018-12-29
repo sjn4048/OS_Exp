@@ -5,27 +5,42 @@
 #include <zjunix/syscall.h>
 #include <zjunix/log.h>
 
-#define DEBUG_MODE
+// defines the task's possible state
 #define TASK_RUNNING 0
 #define TASK_WAITING 1
 #define TASK_READY 2
 #define TASK_DEAD 3
-task_struct *other = 0;
+
+// intervl between two schedule interrupts
 unsigned int sysctl_sched_latency = 1000000;
+
+//current task pointer
 task_struct *current_task = 0;
+
+// lists contain different kinds of tasks
 struct list_head all_task;
 struct list_head all_dead;
 struct list_head all_waiting;
 struct list_head all_ready;
+
+// PID allocating system
 unsigned int cur_PID = 0;
+
+// cfs running queue structure
 struct cfs_rq rq;
+
+// append a task into list
 void add_task(task_struct *task, struct list_head * tasks) {
     list_add_tail(&(task->task_list), tasks);
 }
+
+// delete a task into list
 void remove_task(task_struct *task) {
     list_del(&(task->task_list));
     INIT_LIST_HEAD(&(task->task_list));
 }
+
+// copy register context
 static void copy_context(context* src, context* dest) {
     dest->epc = src->epc;
     dest->at = src->at;
@@ -60,13 +75,20 @@ static void copy_context(context* src, context* dest) {
     dest->fp = src->fp;
     dest->ra = src->ra;
 }
+
+/* init_pc : 
+ * initialize the process schedule module
+ */
 void init_pc() {
     // sysctl_sched_latency = 1000000;
     init_cfs_rq(&rq);
+
     INIT_LIST_HEAD(&all_task);
     INIT_LIST_HEAD(&all_dead);
     INIT_LIST_HEAD(&all_waiting);
     INIT_LIST_HEAD(&all_ready);
+
+
     // ---------------------------------------------------
     // ---------- setting idle task ----------------------
     task_union *new = (task_union*)(kernel_sp - TASK_KERNEL_SIZE);
@@ -82,6 +104,7 @@ void init_pc() {
     task->normal_prio = task->nice + 20;
     task->PID = cur_PID++;
     task->usage = 0;
+
     // ------- setting schedule entity
     sched_entity* entity = &(task->sched_entity);
     entity->vruntime = 0;
@@ -90,13 +113,16 @@ void init_pc() {
     entity->load.weight = prio_to_weight[task->normal_prio];
     entity->load.inv_weight = prio_to_wmult[task->normal_prio];
     // ------- done setting schedule entity
+
     add_task(&(new->task), &all_task);
     insert_process(&(rq.tasks_timeline),&(task->sched_entity));
     // ---------- done setting idle task -----------------
     // ---------------------------------------------------
+
+
     register_syscall(10, pc_kill_syscall);
     register_interrupt_handler(7, pc_schedule);
-    // asm volatile(   // huge bug here, piece of shit...
+    // asm volatile(   // huge bug here, waiting to be reimplemented
     //     //"li $v0, %0\n\t"
     //     "mtc0 $0, $11\n\t"
     //     "mtc0 $zero, $9"
@@ -108,10 +134,13 @@ void init_pc() {
         "mtc0 $zero, $9");
 }
 
-// change the reschedule period of CFS by modifying the interrupt period
+/* change_sysctl_sched_latency : 
+ * change the reschedule period of CFS by modifying the interrupt period
+ * it is done by modifying the CP0's 11th register
+ */
 void change_sysctl_sched_latency(unsigned int latency){
     asm volatile(
-        "mtc0 $0, $11\n\t"
+        "mtc0 %0, $11\n\t"
         "mtc0 $zero, $9"
         : : "r"(latency));
 }
@@ -121,6 +150,11 @@ void pc_schedule(unsigned int status, unsigned int cause, context* pt_context) {
     disable_interrupts();
     update_vruntime_fair(&(rq),&(current_task->sched_entity),&(all_task),1);
     sched_entity *entity = pick_next_task_fair(&(rq));
+    if (entity == &(current_task->sched_entity)){
+        asm volatile("mtc0 $zero, $9\n\t");
+        enable_interrupts();
+        return;
+    }
     task_struct * next = container_of(entity, task_struct, sched_entity);
     copy_context(pt_context, &(current_task->context));
     copy_context(&(next->context), pt_context);
@@ -176,14 +210,12 @@ void pc_create(char *task_name, void(*entry)(unsigned int argc, void *args), uns
     // add to coresponding task queue(s)
     add_task(task, &all_task);
     insert_process(&(rq.tasks_timeline),&(task->sched_entity));
-    if (task_name[0] == 'p')
-        other = task;
 }
 
 void pc_kill_syscall(unsigned int status, unsigned int cause, context* pt_context) {
 
-    // pc_kill(current_task);
-    // pc_schedule(status, cause, pt_context);
+    pc_kill(current_task->PID);
+    pc_schedule(status, cause, pt_context);
     
 }
 
@@ -234,7 +266,7 @@ int print_proc() {
     }
     kernel_printf("----------ALL PROCESSES--------------\n");
 
-    #ifdef DEBUG_MODE
+    #ifdef PC_DEBUG_MODE
         kernel_printf("----------CFS structure(Red Black Tree)--------------\n");
         print_process(&(rq.tasks_timeline));
         kernel_printf("----------CFS structure(Red Black Tree)--------------\n");

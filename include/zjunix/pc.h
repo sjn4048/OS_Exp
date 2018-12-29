@@ -1,14 +1,18 @@
 #ifndef _ZJUNIX_PC_H
 #define _ZJUNIX_PC_H
 
+// TASK_KERNEL_SIZE indicates the task structure's kernel size
 #define TASK_KERNEL_SIZE 4096
+// PC_DEBUG_MODE indicates whether printing debug info or not
+#define PC_DEBUG_MODE
 
 #include <zjunix/list.h>
 #include <zjunix/rbtree.h>
 #include <zjunix/utils.h>
 
-
-
+/* context : 
+ * defines the context registers
+ */
 typedef struct {
     unsigned int epc;
     unsigned int at;
@@ -24,10 +28,21 @@ typedef struct {
     unsigned int ra;
 } context;
 
+/* load_weight : 
+ * the CFS weight and pre-calculated Inverse (2^32/x) values of the weight
+ * inv_weight is being used to speed up the calculation
+ * by transforming division to multiplication
+ * such inspiration also comes from Linux Kernel Code
+ */
 typedef struct {
 	unsigned long weight, inv_weight;  // task's weight 
 } load_weight;
 
+/* sched_entity : 
+ * this structure defines the CFS schedule class
+ * it mainly stores the running info about this task
+ * And most importantly, the red black tree's node of this task
+ */
 typedef struct {
     struct rb_node rb_node;       // rbtree node
     unsigned long vruntime;       // vruntime of cfs
@@ -37,6 +52,9 @@ typedef struct {
 
 }sched_entity;
 
+/* task_struct : 
+ * this structure mainly defines the basic info about this task
+ */
 typedef struct {
     int nice;    // nice value of this task
     int static_prio, normal_prio;
@@ -60,14 +78,18 @@ typedef struct {
     struct list_head children;
 } task_struct;
 
-// current running task
+// current running task pointer
 extern task_struct *current_task;
 
+/* task_union : 
+ * this union makes sure that the task_struct's size is forced to be 4096 bits
+ * we do this because we store the registers in the end of the task_struct
+ * see more info in 'start.s'
+ */
 typedef union {
     task_struct task;
     unsigned char kernel_stack[TASK_KERNEL_SIZE];
 } task_union;
-
 
 
 void init_pc();

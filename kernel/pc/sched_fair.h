@@ -3,13 +3,18 @@
 #include <zjunix/pc.h>
 #include <zjunix/rbtree.h>
 
+// the weight value of nice 0 (baseline)
 #define NICE_0_LOAD 1024
+
+// if we use the first code, it will cause overflow on hardware
 // #define LONG_MAX ((unsigned long)(~0UL>>1))
 #define LONG_MAX ((unsigned long)(4294967295 / 2 - 1))
 #define min(x, y) (	x > y ? x : y )
-
 #define max(x, y) (	x < y ? x : y )
 
+// ------------------------------------------------------------------
+// ------------------------------------------------------------------
+// the following prio_to_weight and prio_to_wmult come from Linux Kernel
 /*
  * Nice levels are multiplicative, with a gentle 10% change for every
  * nice level changed. I.e. when a CPU-bound task goes from nice 0 to
@@ -49,19 +54,33 @@ static const long prio_to_wmult[40] = {
  /*  10 */  39045157,  49367440,  61356676,  76695844,  95443717,
  /*  15 */ 119304647, 148102320, 186737708, 238609294, 286331153,
 };
-
+// ------------------------------------------------------------------
+// ------------------------------------------------------------------
 
 /* CFS-related fields in a runqueue */
 struct cfs_rq {
     /*
 	 * the part of load.weight contributed by tasks
 	 */
-	unsigned long task_weight;
+	unsigned long task_weight; // total task's weight in cfs queue
 	unsigned long nr_running; // total tasks in queue
 
-	unsigned long exec_clock; // cur time clock of cpu
-	unsigned long min_vruntime; // min vruntime in queue (leftmost leaf's task)
-	struct rb_root tasks_timeline; // cur task
+	unsigned long exec_clock; // current time clock of cpu
+	/* min_vruntime :
+	 * min vruntime in queue (leftmost leaf's task)
+	 * being used as cache, it can quickly finds out whether this period is over
+	 * meaning, the min_vruntime has exceeded LONG_MAX
+	 */
+	unsigned long min_vruntime;
+	/* tasks_timeline :
+	 * the root of red black tree
+	 */
+	struct rb_root tasks_timeline;
+	/* rb_leftmost :
+	 * the left most rb node of rb tree
+	 * being used as cache, it can quickly locate the task that has the 
+	 * mininum vruntime in rb tree, which is scheduled to run in the next turn
+	 */
 	struct rb_node *rb_leftmost;
 
 	/*
@@ -79,31 +98,13 @@ struct cfs_rq {
 
 };
 
-	// void (*enqueue_task) (struct rq *rq, struct task_struct *p, int flags);
-	// void (*dequeue_task) (struct rq *rq, struct task_struct *p, int flags);
-	// void (*yield_task) (struct rq *rq);
-
-	// void (*check_preempt_curr) (struct rq *rq, struct task_struct *p, int flags);
-
-	// void (*put_prev_task) (struct rq *rq, struct task_struct *p);
-
-	// void (*set_curr_task) (struct rq *rq);
-	// void (*task_tick) (struct rq *rq, struct task_struct *p, int queued);
-	// void (*task_fork) (struct task_struct *p);
-
-	// void (*switched_from) (struct rq *this_rq, struct task_struct *task);
-	// void (*switched_to) (struct rq *this_rq, struct task_struct *task);
-	// void (*prio_changed) (struct rq *this_rq, struct task_struct *task, int oldprio);
-
-	// unsigned int (*get_rr_interval) (struct rq *rq, struct task_struct *task);
-
 void init_cfs_rq(struct cfs_rq * rq);
 void clear_cfs(struct cfs_rq *rq, struct list_head * all_task);
+
 /*
  * All the scheduling class methods:
  */
 sched_entity * pick_next_task_fair(struct cfs_rq * rq);
-
 void update_vruntime_fair(struct cfs_rq *cfs_rq, sched_entity *curr, struct list_head * all_task, unsigned long delta_exec);
 int insert_process(struct rb_root *root, sched_entity *entity);
 void delete_process(struct rb_root *root, sched_entity * entity);
