@@ -96,14 +96,14 @@ void init_pc() {
     INIT_LIST_HEAD(&all_waiting);
     INIT_LIST_HEAD(&all_ready);
 
-kernel_printf("----all_task--%x(------",(unsigned int)&all_task);
+// kernel_printf("----all_task--%x(------",(unsigned int)&all_task);
 
     // ---------------------------------------------------
     // ---------- setting idle task ----------------------
     task_union *new = (task_union*)(kernel_sp - TASK_KERNEL_SIZE);
     task_struct * task = &(new->task);
-kernel_printf("--kernel_sp----%x(------",(unsigned int)kernel_sp);
-kernel_printf("--&kernel_sp----%x(------",(unsigned int)&kernel_sp);
+// kernel_printf("--kernel_sp----%x(------",(unsigned int)kernel_sp);
+// kernel_printf("--&kernel_sp----%x(------",(unsigned int)&kernel_sp);
     // allocate a PID
     task->PID = cur_PID++;
     // idle task does not has parent
@@ -211,7 +211,7 @@ void pc_schedule(unsigned int status, unsigned int cause, context* pt_context) {
 void pc_create(char *task_name, void(*entry)(unsigned int argc, void *args), unsigned int argc, void *args, int nice) {
 
     task_union *new = (task_union*) kmalloc(sizeof(task_union));
-    kernel_printf("--kmalloc----%x(------",(unsigned int)new);
+    // kernel_printf("--kmalloc----%x(------",(unsigned int)new);
     task_struct * task = &(new->task);
     kernel_strcpy(task->name, task_name);
     INIT_LIST_HEAD(&(task->task_list));
@@ -273,9 +273,9 @@ void pc_create(char *task_name, void(*entry)(unsigned int argc, void *args), uns
     insert_process(&(rq.tasks_timeline),&(task->sched_entity));
 
     // update leftmost task
-	rq.rb_leftmost = find_rb_leftmost(rq);
+	rq.rb_leftmost = find_rb_leftmost(&(rq));
 	// update min vruntime of CFS queue
-	update_min_vruntime(rq);
+	update_min_vruntime(&(rq));
 
 }
 
@@ -314,9 +314,9 @@ int pc_exit(unsigned int status, unsigned int cause, context* pt_context){
     delete_process(&(rq.tasks_timeline), &(task->sched_entity));
 
     // update leftmost task
-	rq.rb_leftmost = find_rb_leftmost(rq);
+	rq.rb_leftmost = find_rb_leftmost(&(rq));
 	// update min vruntime of CFS queue
-	update_min_vruntime(rq);
+	update_min_vruntime((&(rq)));
 
     // find a process to run
     sched_entity *entity = pick_next_task_fair(&(rq));
@@ -371,9 +371,9 @@ int pc_kill(unsigned int PID) {
     delete_process(&(rq.tasks_timeline), &(task->sched_entity));
 
     // update leftmost task
-	rq.rb_leftmost = find_rb_leftmost(rq);
+	rq.rb_leftmost = find_rb_leftmost(&(rq));
 	// update min vruntime of CFS queue
-	update_min_vruntime(rq);
+	update_min_vruntime(&(rq));
 
     enable_interrupts();
     return 0;
