@@ -5,6 +5,8 @@
 #include <zjunix/syscall.h>
 #include <zjunix/log.h>
 
+#define DEBUG_MODE 1
+int counter = 0;
 #define TASK_RUNNING 0
 #define TASK_WAITING 1
 #define TASK_READY 2
@@ -116,7 +118,9 @@ void change_sysctl_sched_latency(unsigned int latency){
 }
 
 void pc_schedule(unsigned int status, unsigned int cause, context* pt_context) {
-    
+    counter++;
+    if (counter % 10000 == 0)
+        kernel_printf("%d\n",counter);
     update_vruntime_fair(current_task);
     copy_context(pt_context, &(current_task->context));
     task_struct *next = other;
@@ -221,11 +225,19 @@ int pc_kill(unsigned int PID) {
 int print_proc() {
     struct list_head *pos;
     task_struct *next;
+    kernel_printf("----------ALL PROCESSES--------------");
     list_for_each(pos, (&all_task)) {
         next = container_of(pos, task_struct, task_list);
         kernel_printf("  PID : %d, name : %s, vruntime : %d\n", next->PID, next->name,
         next->sched_entity.vruntime);
     }
-    print_process(&(rq.tasks_timeline));
+    kernel_printf("----------ALL PROCESSES--------------");
+
+    #ifdef DEBUG_MODE
+        kernel_printf("----------CFS structure(Red Black Tree)--------------");
+        print_process(&(rq.tasks_timeline));
+        kernel_printf("----------CFS structure(Red Black Tree)--------------");
+    #endif
+
     return 0;
 }

@@ -45,27 +45,27 @@ int proc_demo_create() {
 }
 
 void ps() {
-    kernel_printf("  Press any key to enter shell.\n");
+    kernel_printf("Press any key to enter shell.\n");
     kernel_getchar();
     char c;
     ps_buffer_index = 0;
     ps_buffer[0] = 0;
     kernel_clear_screen(31);
     kernel_puts("\n", 0xfff, 0);
-    kernel_puts("  PowerShell\n", 0xfff, 0);
-    kernel_puts("  PS>", 0xfff, 0);
+    kernel_puts("PowerShell\n", 0xfff, 0);
+    kernel_puts("PS>", 0xfff, 0);
     while (1) {
         c = kernel_getchar();
         if (c == '\n') {
             ps_buffer[ps_buffer_index] = 0;
-            if (kernel_strcmp(ps_buffer, "  exit") == 0) {
+            if (kernel_strcmp(ps_buffer, "exit") == 0) {
                 ps_buffer_index = 0;
                 ps_buffer[0] = 0;
                 kernel_printf("\n  PowerShell exit.\n");
             } else
                 parse_cmd();
             ps_buffer_index = 0;
-            kernel_puts("  PS>", 0xfff, 0);
+            kernel_puts("PS>", 0xfff, 0);
         } else if (c == 0x08) {
             if (ps_buffer_index) {
                 ps_buffer_index--;
