@@ -592,6 +592,7 @@ int print_rbtree_test() {
 /* exec_from_file : 
  * loading .bin file from disk and run it
  * currently only run it in kernel mode
+ * the program will use syscall to trap into kernel mode
  */
 int exec_from_file(char* filename) {
 
