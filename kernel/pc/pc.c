@@ -110,6 +110,7 @@ void init_pc() {
     INIT_LIST_HEAD(&(task->task_list));
     INIT_LIST_HEAD(&(task->state_list));
     INIT_LIST_HEAD(&(task->children));
+    INIT_LIST_HEAD(&(task->children_head));
 
     kernel_strcpy(task->name, "idle");
 
@@ -202,10 +203,50 @@ void pc_schedule(unsigned int status, unsigned int cause, context* pt_context) {
 
 }
 
+/* hangup_parent : 
+ * hang up parent process, waiting the child completes
+ */
+void hangup_parent(task_struct * parent){
+
+    remove_task(parent,state_list);
+    add_task(parent,&all_waiting,state_list);
+    parent->state = TASK_WAITING;
+    delete_process(&(rq.tasks_timeline),&(parent->sched_entity));
+
+}
+
+/* wakeup_parent : 
+ * wake up parent process, after the child completes
+ */
+void wakeup_parent(unsigned long pid){
+    struct list_head *pos;
+    task_struct *next;
+
+    int find_flag = 0;
+    list_for_each(pos, (&all_waiting)){
+        next = container_of(pos, task_struct, state_list);
+        if (next->PID == pid){
+            find_flag = 1;
+            break;
+        }
+    }
+    if (find_flag == 0){
+        // NOTE : not a bug, meaning the parent is not waiting the child
+        // just return and do nothing 
+        return;
+    }
+
+    remove_task(next,state_list);
+    add_task(next,&all_ready,state_list);
+    next->state = TASK_READY;
+    insert_process(&(rq.tasks_timeline),&(next->sched_entity));
+
+}
+
 /* pc_create : 
  * create a process 
  */
-void pc_create(char *task_name, void(*entry)(unsigned int argc, void *args), unsigned int argc, void *args, int nice, int is_root) {
+void pc_create(char *task_name, void(*entry)(unsigned int argc, void *args), unsigned int argc, void *args, int nice, int is_root, int need_wait) {
 
     task_union *new = (task_union*) kmalloc(sizeof(task_union));
     task_struct * task = &(new->task);
@@ -213,6 +254,7 @@ void pc_create(char *task_name, void(*entry)(unsigned int argc, void *args), uns
     INIT_LIST_HEAD(&(task->task_list));
     INIT_LIST_HEAD(&(task->state_list));
     INIT_LIST_HEAD(&(task->children));
+    INIT_LIST_HEAD(&(task->children_head));
 
     // sets nice values and coresponding priorities
     task->nice = nice;
@@ -256,10 +298,21 @@ void pc_create(char *task_name, void(*entry)(unsigned int argc, void *args), uns
     // ------- done setting context registers
 
     // task's parent is current task (who create it) 
-    task->parent = current_task->PID;
+    if (is_root == 0){
+        task->parent = current_task->PID;
+    }else{
+        task->parent = -1;
+    }
     
-    // add new task to parents' children list
-    // list_add_tail(&(task->task), &(current_task->children));
+    if (is_root == 0 && need_wait == 1){
+        hangup_parent(current_task);
+    }
+
+    // if this task is not root task
+    // add new task to parents' children_head list
+    if (is_root == 0){
+        list_add_tail(&(task->children), &(current_task->children_head));
+    }
 
     task->state = TASK_READY;
 
@@ -285,7 +338,7 @@ void check_if_ps_exit(){
     if (!kernel_strcmp(current_task->name, "powershell")){
         kernel_printf("----------PowerShell Process exiting-------------\n");
         kernel_printf("----------Recreating PowerShell Process----------\n");
-        pc_create("powershell",(void*)ps,0,0,1,1);
+        pc_create("powershell",(void*)ps,0,0,1,1,0);
         kernel_printf("----------PowerShell Process created----------\n");
     }
 
@@ -306,15 +359,24 @@ void pc_kill_syscall(unsigned int status, unsigned int cause, context* pt_contex
 }
 
 int pc_kill_current(){
-
+    /* stable implementation :
+     * use syscall to call "pc_kill_syscall" function and kill the 
+     * current process. 
+     */
     asm volatile(
         "li $v0, 10\n\t"
         "syscall\n\t"
         "nop\n\t");
     
+    /* Another implementation : 
+     * ( NOTE : still some unknown bugs, maybe unstatble!!! )
+     * in order to get 'pt_context' info which can't be accessed directly 
+     * if it's not exception or interrupts, we use inline assemble code to
+     * get "sp" register, save context registers to it and call restore_context
+     * function in 'start.s'
+     */
     // disable_interrupts();
     // check_if_ps_exit();
-
     // unsigned int sp = 0;
     // asm volatile(   "move %0, $sp\n\t"
     //                 "addi $sp, $sp, -32\n\t"
@@ -348,6 +410,21 @@ int pc_exit(context* pt_context){
     remove_task(task, state_list);
     add_task(task, &all_dead, state_list);
     delete_process(&(rq.tasks_timeline), &(task->sched_entity));
+
+    // check if this task has belongs to any father
+    // if true, remove it from it's father's children list
+    if (!list_empty(&(task->children))){
+        remove_task(task,children);
+    }
+
+    // check if this task has any children 
+    // if true, recursively kill all children of it
+    if (!list_empty(&(task->children_head))){
+        kill_all_children(&(task->children_head));
+    }
+
+    // check if parent is waiting
+    wakeup_parent(task->parent);
 
     // update leftmost task
 	rq.rb_leftmost = find_rb_leftmost(&(rq));
@@ -406,6 +483,21 @@ int pc_kill(unsigned int PID) {
     add_task(task, &all_dead, state_list);
     delete_process(&(rq.tasks_timeline), &(task->sched_entity));
 
+    // check if this task has belongs to any father
+    // if true, remove it from it's father's children list
+    if (!list_empty(&(task->children))){
+        remove_task(task,children);
+    }
+
+    // check if this task has any children 
+    // if true, recursively kill all children of it
+    if (!list_empty(&(task->children_head))){
+        kill_all_children(&(task->children_head));
+    }
+
+    // check if parent is waiting
+    wakeup_parent(task->parent);
+
     // update leftmost task
 	rq.rb_leftmost = find_rb_leftmost(&(rq));
 	// update min vruntime of CFS queue
@@ -415,6 +507,28 @@ int pc_kill(unsigned int PID) {
     return 0;
 
 }
+
+/* kill_all_children : 
+ * kill all children's tasks when the father task exits
+ */
+void kill_all_children(struct list_head * head){
+    struct list_head *pos;
+    task_struct *next;
+    list_for_each(pos, head){
+        next = container_of(pos, task_struct, children);
+        /* NOTE : 
+         * we need to check the process we are killing is running right
+         * now or not, this is crucial because if we kill the current 
+         * running process by "pc_kill", the OS will be dead
+         */
+        if (next == current_task){
+            pc_kill_current();
+        }else{
+            pc_kill(next->PID);
+        }
+    }
+}
+
 
 /* print_proc : 
  * print all processes

@@ -88,18 +88,19 @@ typedef struct {
 
     struct list_head task_list; // task pointer
     struct list_head state_list; // state pointer
+
     /* usage : 
 	 * record the cpu usage of this task
      * being used to imply it is a I/O task or compute-intensive task
 	 */
-
     unsigned int usage; 
-    /* children : 
+
+    /* children and children_head: 
 	 * a list contains all chrildren of this task
      * when this task is terminated
      * kill all children of this task recursivelly
 	 */
-
+    struct list_head children_head;
     struct list_head children;
 
 } task_struct;
@@ -120,7 +121,7 @@ typedef union {
 
 void init_pc();
 void pc_schedule(unsigned int status, unsigned int cause, context* pt_context);
-void pc_create(char *task_name, void(*entry)(unsigned int argc, void *args), unsigned int argc, void *args, int nice, int is_root);
+void pc_create(char *task_name, void(*entry)(unsigned int argc, void *args), unsigned int argc, void *args, int nice, int is_root, int need_wait);
 void pc_kill_syscall(unsigned int status, unsigned int cause, context* pt_context);
 int pc_kill(unsigned int PID);
 int pc_exit(context* pt_context);
@@ -132,4 +133,7 @@ extern void *kmalloc(unsigned int size);
 extern void restore_context();
 int exec_from_file(char* filename);
 int pc_kill_current();
+void kill_all_children(struct list_head * head);
+
+
 #endif  // !_ZJUNIX_PC_H
