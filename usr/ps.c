@@ -137,6 +137,9 @@ void parse_cmd() {
     } else if (kernel_strcmp(ps_buffer, "ps") == 0) {
         result = print_proc();
         kernel_printf("ps return with %d\n", result);
+    } else if (kernel_strcmp(ps_buffer, "rbtree") == 0) {
+        result = print_rbtree();
+        kernel_printf("ps return with %d\n", result);
     } else if (kernel_strcmp(ps_buffer, "kill") == 0) {
         int pid = param[0] - '0';
         kernel_printf("Killing process %d\n", pid);

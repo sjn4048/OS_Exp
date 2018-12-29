@@ -273,3 +273,12 @@ int print_proc() {
 
     return 0;
 }
+
+int print_rbtree() {
+
+    kernel_printf("----------CFS structure(Red Black Tree)--------------\n");
+    print_process(&(rq.tasks_timeline));
+    kernel_printf("----------CFS structure(Red Black Tree)--------------\n");
+
+    return 0;
+}

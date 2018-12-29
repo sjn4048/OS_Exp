@@ -30,10 +30,10 @@ void machine_info() {
 #pragma GCC push_options
 #pragma GCC optimize("O0")
 void create_startup_process() {
-    // nice value of 1
+    // nice value of 1, just for test
     pc_create("powershell",(void*)ps,0,0,1);
     log(LOG_OK, "Shell init");
-    // nice value of 2
+    // nice value of 2, just for test
     pc_create("time",(void*)system_time_proc,0,0,2);
     log(LOG_OK, "Timer init");
 }
