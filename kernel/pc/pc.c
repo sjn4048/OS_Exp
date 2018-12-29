@@ -180,7 +180,10 @@ void pc_create(char *task_name, void(*entry)(unsigned int argc, void *args), uns
 
     // ------- setting schedule entity
     sched_entity* entity = &(task->sched_entity);
-    entity->vruntime = 0;
+    /* vruntime : 
+     * updates the mininum vruntime of cfs queue
+     */
+    entity->vruntime = current_task->sched_entity.vruntime;
     entity->exec_start_time = -1;
     entity->sum_exec_runtime = 0;
     entity->load.weight = prio_to_weight[task->normal_prio];
@@ -275,10 +278,10 @@ int print_proc() {
 }
 
 int print_rbtree_test() {
-
+    disable_interrupts();
     kernel_printf("----------CFS structure(Red Black Tree)--------------\n");
     print_process(&(rq.tasks_timeline));
     kernel_printf("----------CFS structure(Red Black Tree)--------------\n");
-
+    enable_interrupts();
     return 0;
 }
