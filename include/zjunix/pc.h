@@ -3,8 +3,9 @@
 
 // TASK_KERNEL_SIZE indicates the task structure's kernel size
 #define TASK_KERNEL_SIZE 4096
+
 // PC_DEBUG_MODE indicates whether printing debug info or not
-#define PC_DEBUG_MODE
+// #define PC_DEBUG_MODE
 
 #include <zjunix/list.h>
 #include <zjunix/rbtree.h>
