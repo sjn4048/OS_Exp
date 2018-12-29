@@ -8,6 +8,7 @@
 #include <zjunix/slab.h>
 #include <zjunix/time.h>
 #include <zjunix/log.h>
+#include <zjunix/syscall.h>
 #include <zjunix/utils.h>
 #include "../usr/ls.h"
 #include "exec.h"
@@ -17,11 +18,12 @@ char ps_buffer[64];
 int ps_buffer_index;
 
 void test_syscall4() {
-    asm volatile(
-        "li $a0, 0x00ff\n\t"
-        "li $v0, 4\n\t"
-        "syscall\n\t"
-        "nop\n\t");
+    syscall(4);
+    // asm volatile(
+    //     "li $a0, 0x00ff\n\t"
+    //     "li $v0, 4\n\t"
+    //     "syscall\n\t"
+    //     "nop\n\t");
 }
 
 void test_proc() {
@@ -135,7 +137,7 @@ void parse_cmd() {
     } else if (kernel_strcmp(ps_buffer, "mmtest") == 0) {
         kernel_printf("kmalloc : %x, size = 1KB\n", kmalloc(1024));
     } 
-    
+
     // -------------------------------------------------
     // ----------- process schedule commands -----------
     else if (kernel_strcmp(ps_buffer, "ps") == 0) {
@@ -150,11 +152,18 @@ void parse_cmd() {
         result = pc_kill(pid);
         kernel_printf("kill return with %d\n", result);
     } else if (kernel_strcmp(ps_buffer, "time") == 0) {
-        pc_create("time",system_time_proc,0,0,0);
+        pc_create("time",system_time_proc,0,0,0,1,0);
     } else if (kernel_strcmp(ps_buffer, "proc") == 0) {
         result = proc_demo_create();
         kernel_printf("proc return with %d\n", result);
-    } 
+    } else if (kernel_strcmp(ps_buffer, "exec") == 0) {
+        result = exec_from_file(param);
+        kernel_printf("exec return with %d\n", result);
+    } else if (kernel_strcmp(ps_buffer, "kill_cur") == 0) {
+        result = pc_kill_current(param);
+        kernel_printf("pc_kill_current return with %d\n", result);
+    }
+    
     // ----------- process schedule commands -----------
     // -------------------------------------------------
 
@@ -167,9 +176,6 @@ void parse_cmd() {
     } else if (kernel_strcmp(ps_buffer, "vi") == 0) {
         result = myvi(param);
         kernel_printf("vi return with %d\n", result);
-    } else if (kernel_strcmp(ps_buffer, "exec") == 0) {
-        result = exec(param);
-        kernel_printf("exec return with %d\n", result);
     } else {
         kernel_puts(ps_buffer, 0xfff, 0);
         kernel_puts(": command not found\n", 0xfff, 0);

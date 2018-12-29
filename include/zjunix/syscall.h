@@ -8,7 +8,8 @@ typedef void (*sys_fn)(unsigned int status, unsigned int cause, context* pt_cont
 extern sys_fn syscalls[256];
 
 void init_syscall();
-void syscall(unsigned int status, unsigned int cause, context* pt_context);
+void __syscall(unsigned int status, unsigned int cause, context* pt_context);
 void register_syscall(int index, sys_fn fn);
+int syscall(unsigned int code);
 
 #endif // ! _ZJUNIX_SYSCALL_H
