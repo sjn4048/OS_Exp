@@ -28,7 +28,7 @@ unsigned long calc_delta_fair(unsigned long delta, sched_entity *se)
 		delta = calc_delta_mine(delta, &(se->load));
 	else
 		delta *= prio_to_wmult[20];
-
+	kernel_printf("%d\n",delta);
 	return delta;
 }
 
