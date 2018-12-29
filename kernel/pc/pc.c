@@ -6,12 +6,12 @@
 #include <zjunix/log.h>
 
 #define DEBUG_MODE 1
-int counter = 0;
 #define TASK_RUNNING 0
 #define TASK_WAITING 1
 #define TASK_READY 2
 #define TASK_DEAD 3
 task_struct *other = 0;
+int counter = 0;
 unsigned int sysctl_sched_latency = 1000000;
 task_struct *current_task = 0;
 struct list_head all_task;
