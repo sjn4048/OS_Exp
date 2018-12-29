@@ -321,7 +321,7 @@ int pc_exit(unsigned int status, unsigned int cause, context* pt_context){
     // find a process to run
     sched_entity *entity = pick_next_task_fair(&(rq));
     current_task = container_of(entity, task_struct, sched_entity);
-
+kernel_printf("%s\n",current_task->name);
     // switch context registers
     copy_context(&(current_task->context),pt_context);
 
