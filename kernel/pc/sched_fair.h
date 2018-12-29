@@ -5,18 +5,10 @@
 
 #define NICE_0_LOAD 1024
 // #define LONG_MAX ((unsigned long)(~0UL>>1))
-#define LONG_MAX ((unsigned long)(4294967295 / 2 - 1))
-#define min(x, y) ({				\
-	typeof(x) _min1 = (x);			\
-	typeof(y) _min2 = (y);			\
-	(void) (&_min1 == &_min2);		\
-	_min1 < _min2 ? _min1 : _min2; })
+#define LONG_MAX ((unsigned long)4294967295)
+#define min(x, y) (	x > y ? x : y )
 
-#define max(x, y) ({				\
-	typeof(x) _max1 = (x);			\
-	typeof(y) _max2 = (y);			\
-	(void) (&_max1 == &_max2);		\
-	_max1 > _max2 ? _max1 : _max2; })
+#define max(x, y) (	x < y ? x : y )
 
 /*
  * Nice levels are multiplicative, with a gentle 10% change for every
