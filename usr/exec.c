@@ -49,11 +49,13 @@ int exec(char* filename) {
         "tlbwi"
         : "=r"(cp0EntryLo0));
     int (*f)() = (int (*)())(0);
+    kernel_printf("7\n");
 #ifdef EXEC_DEBUG
     kernel_printf("Exec load at: 0x%x\n", ENTRY);
 #endif  // ! EXEC_DEBUG
     int r = f();
     kfree((void*)ENTRY);
+    kernel_printf("7\n");
     return r;
 }
 #pragma GCC pop_options
