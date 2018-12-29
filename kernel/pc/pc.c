@@ -284,7 +284,7 @@ void pc_kill_syscall(unsigned int status, unsigned int cause, context* pt_contex
 
 kernel_printf("%s\n",current_task->name);
 
-    if (current_task->name == "powershell"){
+    if (!kernel_strcmp(current_task->name, "powershell")){
         // create a new powershell
         pc_create("powershell",(void*)ps,0,0,1);
     }
