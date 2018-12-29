@@ -323,7 +323,7 @@ int pc_exit(unsigned int status, unsigned int cause, context* pt_context){
     current_task = container_of(entity, task_struct, sched_entity);
 
     // switch context registers
-    copy_context(pt_context,&(current_task->context));
+    copy_context(&(current_task->context),pt_context);
 
     return 0;
 }
