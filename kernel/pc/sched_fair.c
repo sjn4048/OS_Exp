@@ -46,8 +46,7 @@ struct rb_node * find_rb_leftmost(struct cfs_rq *rq){
 	struct rb_node *tree = rq->tasks_timeline.rb_node;
 	while(tree->rb_left != Null)
     {
-        if (!(tree->rb_left))
-			break;
+        tree = tree->rb_left;
     }
 
 	if (tree->rb_right){
@@ -78,6 +77,7 @@ void clear_cfs(struct cfs_rq *rq, struct list_head * all_task){
 	rq->min_vruntime = 0;
 	kernel_printf("-----------------done clear_cfs------------");
 }
+
 void update_vruntime_fair(struct cfs_rq *rq, sched_entity *curr,
 	      unsigned long delta_exec)
 {
