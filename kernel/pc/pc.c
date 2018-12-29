@@ -125,7 +125,6 @@ void pc_schedule(unsigned int status, unsigned int cause, context* pt_context) {
     if (rq.min_vruntime >= LONG_MAX - 1){
 		clear_cfs(&(rq), &(all_task));
 	}
-    enable_interrupts();
     kernel_printf("2\n");
     sched_entity *entity = pick_next_task_fair(&(rq));
     kernel_printf("3\n");
@@ -136,6 +135,8 @@ void pc_schedule(unsigned int status, unsigned int cause, context* pt_context) {
     next->state = TASK_RUNNING;
     current_task = next;
     asm volatile("mtc0 $zero, $9\n\t");
+    enable_interrupts();
+
 }
 
 
