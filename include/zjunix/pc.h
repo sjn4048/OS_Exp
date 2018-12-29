@@ -124,6 +124,7 @@ void pc_kill_syscall(unsigned int status, unsigned int cause, context* pt_contex
 int pc_kill(unsigned int PID);
 int pc_exit();
 int print_proc();
+char * task_state(int state);
 int print_rbtree_test();
 void change_sysctl_sched_latency(unsigned int latency);
 extern void *kmalloc(unsigned int size);

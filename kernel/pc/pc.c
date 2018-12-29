@@ -347,12 +347,30 @@ int print_proc() {
     kernel_printf("----------ALL PROCESSES--------------\n");
     list_for_each(pos, (&all_task)) {
         next = container_of(pos, task_struct, task_list);
-        kernel_printf("  PID : %d, name : %s, vruntime : %d\n", next->PID, next->name,
+        kernel_printf("  PID : %d, name : %s, state : %s, vruntime : %d\n", next->PID, next->name, task_state(next->state),
         next->sched_entity.vruntime);
     }
     kernel_printf("----------ALL PROCESSES--------------\n");
 
     return 0;
+}
+
+/* task_state : 
+ * return task state in string
+ */
+char * task_state(int state){
+    if (state == TASK_RUNNING){
+        return "TASK_RUNNING";
+    }
+    else if (state == TASK_READY){
+        return "TASK_READY";
+    }
+    else if (state == TASK_WAITING){
+        return "TASK_WAITING";
+    }
+    else{
+        return "TASK_DEAD" ;
+    }
 }
 
 /* print_rbtree_test : 
