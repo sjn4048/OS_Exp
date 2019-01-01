@@ -23,12 +23,12 @@
 
 #define get_ret_value ({                        \
     int tmp = 0;                                \
-    asm volatile("la %0, $v0\n\t" : "=r"(tmp)); \
+    asm volatile("move %0, $v0\n\t" : "=r"(tmp)); \
     tmp;  })
 
 #define sys_test4 __syscall(4)
 
-#define sys_fork ({                             \
+#define sys_fork(__hold) ({                             \
     __syscall(8);                              \
     get_ret_value;   })
 
