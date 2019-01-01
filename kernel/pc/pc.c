@@ -341,7 +341,7 @@ unsigned int pc_create_syscall(unsigned int status, unsigned int cause, context*
     // no need to wait for parent
     // is not root
     pc_create(current_task->name,(void *)(GetPC()),current_task->context.a0,
-    current_task->context.a1, current_task->nice,0,0);
+    (void *)current_task->context.a1, current_task->nice,0,0);
     enable_interrupts();
     return cur_PID - 1;
 }
