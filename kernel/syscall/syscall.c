@@ -13,7 +13,7 @@ void init_syscall() {
 
 void __syscall(unsigned int status, unsigned int cause, context* pt_context) {
     unsigned int code;
-    code = pt_context->v0;
+    code = pt_context->t0;
     pt_context->epc += 4;
     if (syscalls[code]) {
         syscalls[code](status, cause, pt_context);
@@ -27,7 +27,7 @@ void register_syscall(int index, sys_fn fn) {
 
 int syscall(unsigned int code){
     asm volatile(
-        "move $v0, %0\n\t"
+        "move $t0, %0\n\t"
         "syscall\n\t"
         "nop\n\t"
         : : "r"(code));
