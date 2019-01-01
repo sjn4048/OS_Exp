@@ -1,5 +1,5 @@
 # source dirs and current dir's objects
-DIRS := entry src
+DIRS := sdk src
 OBJS := 
 
 # compile options
@@ -65,12 +65,12 @@ install: default
 .PHONY: find-all-objs
 find-all-objs:
 	$(eval ALL_OBJS += $(call rwildcard,$(DIRS),*.o))
-	@$(eval ALL_OBJS=$(subst entry/start.o,,$(ALL_OBJS)))
-	@$(eval ALL_OBJS = entry/start.o $(ALL_OBJS))
+	@$(eval ALL_OBJS=$(subst sdk/start.o,,$(ALL_OBJS)))
+	@$(eval ALL_OBJS = sdk/start.o $(ALL_OBJS))
 
 .PHONY: show-info
 show-info:
-	@echo Building ZJUNIX usrprog for entry
+	@echo Building ZJUNIX usrprog for sdk
 
 # need to be placed at the end of the file
 mkfile_path := $(abspath $(lastword $(MAKEFILE_LIST)))
@@ -79,5 +79,6 @@ export CONFIG_PATH=$(PROJECT_PATH)/config
 export MAKE_INCLUDE=$(CONFIG_PATH)/make.global
 export SUB_MAKE_INCLUDE=$(CONFIG_PATH)/submake.global
 export INCLUDE_PATH := $(PROJECT_PATH)/include
-export ENTRY_PATH := $(PROJECT_PATH)/entry
+export SDK_INCLUDE_PATH := $(PROJECT_PATH)/sdk/include
+export ENTRY_PATH := $(PROJECT_PATH)/sdk
 include $(MAKE_INCLUDE)
