@@ -181,8 +181,7 @@ exception_save_context:
 
 .org 0x0900
 transform:
-	move $t0, $a0
-	add $t0, $t0, $a1
+	add $t0, $a0, $a1
 	move $a0, $a2
 	move $a1, $a3
 	j $t0

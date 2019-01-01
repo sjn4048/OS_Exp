@@ -3,18 +3,21 @@
 
 #define test4(arg1) SYSCALL_DEFINE1(_test4, arg1)
 
-#define SYSCALL_DEFINE1(name, _arg1) (((unsigned int (*)(unsigned int func, unsigned int entry, void * arg1)) \
-(TRANSFORM))((unsigned int)sys##name,ENTRY_ADDR,(void *)_arg1))
+#define SYSCALL_DEFINE1(name, arg1) do {                          \
+    asm volatile("move $a0, %0\n\t" : : "r"((unsigned int)arg1)); \
+             sys##name;                                           \
+} while(0);
 
 
-#define __syscall(code){ \
+#define sys_test4 ( __syscall(4) )
+
+#define __syscall(code) ( \
     asm volatile(           \
         "move $t0, %0\n\t"  \
         "syscall\n\t"       \
         "nop\n\t"           \
         : : "r"(code));     \
-    return 0;               \
-}
+)
 
 // #define SYSCALL_DEFINE1(name, ...) SYSCALL_DEFINEx(1, _##name, __VA_ARGS__)
 // #define SYSCALL_DEFINE2(name, ...) SYSCALL_DEFINEx(2, _##name, __VA_ARGS__)
