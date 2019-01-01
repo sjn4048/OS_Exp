@@ -615,10 +615,10 @@ int exec_from_file(char* filename) {
         kernel_memcpy((void*)(ENTRY + j * CACHE_BLOCK_SIZE), buffer, CACHE_BLOCK_SIZE);
         kernel_cache(ENTRY + j * CACHE_BLOCK_SIZE);
     }
-    int (*f)(unsigned int argc, void *args[], unsigned int addr) = (int (*)(unsigned int argc, void *args[], unsigned int addr))(ENTRY);
+    int (*f)(unsigned int argc, void *args, unsigned int addr) = (int (*)(unsigned int argc, void *args, unsigned int addr))(ENTRY);
     char argv[1][10];
-    kernel_memset(argv[1],0,10);
-    kernel_memcpy(argv[1],"test",5);
+    // kernel_memset(argv[1],0,10);
+    // kernel_memcpy(argv[1],"test",5);
     int ret = f(1,(void *)argv,ENTRY);
     // pc_create("seg",(void *)ENTRY,0,0,0,1);
     // kfree((void*)ENTRY);
