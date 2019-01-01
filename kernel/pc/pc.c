@@ -616,8 +616,8 @@ int exec_from_file(char* filename) {
         kernel_memcpy((void*)(ENTRY + j * CACHE_BLOCK_SIZE), buffer, CACHE_BLOCK_SIZE);
         kernel_cache(ENTRY + j * CACHE_BLOCK_SIZE);
     }
-    int (*f)() = (int (*)())(ENTRY);
-    int ret = f();
+    int (*f)(unsigned int addr) = (int (*)(unsigned int addr))(ENTRY);
+    int ret = f(ENTRY);
     // pc_create("seg",(void *)ENTRY,0,0,0,1);
     // kfree((void*)ENTRY);
     return ret;
