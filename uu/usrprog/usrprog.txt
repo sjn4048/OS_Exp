@@ -1,0 +1,52 @@
+
+usrprog.elf:     file format elf32-tradlittlemips
+
+
+Disassembly of section .text:
+
+00000000 <_ftext>:
+   0:	3c080000 	lui	t0,0x0
+   4:	25080014 	addiu	t0,t0,20
+   8:	01064020 	add	t0,t0,a2
+   c:	01000008 	jr	t0
+  10:	00000000 	nop
+
+00000014 <sdk_init>:
+  14:	27bdfff8 	addiu	sp,sp,-8
+  18:	afbe0004 	sw	s8,4(sp)
+  1c:	03a0f025 	move	s8,sp
+  20:	afc40008 	sw	a0,8(s8)
+  24:	afc5000c 	sw	a1,12(s8)
+  28:	afc60010 	sw	a2,16(s8)
+  2c:	8fc20010 	lw	v0,16(s8)
+  30:	af828018 	sw	v0,-32744(gp)
+  34:	3c080000 	lui	t0,0x0
+  38:	25080060 	addiu	t0,t0,96
+  3c:	01064020 	add	t0,t0,a2
+  40:	01000008 	jr	t0
+  44:	00000000 	nop
+  48:	00000000 	nop
+  4c:	03c0e825 	move	sp,s8
+  50:	8fbe0004 	lw	s8,4(sp)
+  54:	27bd0008 	addiu	sp,sp,8
+  58:	03e00008 	jr	ra
+  5c:	00000000 	nop
+
+00000060 <main>:
+  60:	27bdfff8 	addiu	sp,sp,-8
+  64:	afbe0004 	sw	s8,4(sp)
+  68:	03a0f025 	move	s8,sp
+  6c:	afc40008 	sw	a0,8(s8)
+  70:	afc5000c 	sw	a1,12(s8)
+  74:	24020017 	li	v0,23
+  78:	00402025 	move	a0,v0
+  7c:	24020004 	li	v0,4
+  80:	00404025 	move	t0,v0
+  84:	0000000c 	syscall
+  88:	00000000 	nop
+  8c:	8fc20008 	lw	v0,8(s8)
+  90:	03c0e825 	move	sp,s8
+  94:	8fbe0004 	lw	s8,4(sp)
+  98:	27bd0008 	addiu	sp,sp,8
+  9c:	03e00008 	jr	ra
+  a0:	00000000 	nop
