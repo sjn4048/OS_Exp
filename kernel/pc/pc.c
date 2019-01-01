@@ -609,7 +609,6 @@ int exec_from_file(char* filename) {
     unsigned int n = size / CACHE_BLOCK_SIZE + 1;
     unsigned int i = 0;
     unsigned int j = 0;
-    kernel_printf("%d\n", size);
     unsigned int ENTRY = (unsigned int)kmalloc(4096);
     for (j = 0; j < n; j++) {
         fs_read(&file, buffer, CACHE_BLOCK_SIZE);
