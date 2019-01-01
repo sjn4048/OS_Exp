@@ -12,3 +12,4 @@ entry:
 	# so when main func returns , it directly returns back to OS 
 	j $t0
 	nop
+
