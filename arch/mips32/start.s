@@ -179,6 +179,15 @@ exception_save_context:
 	j restore_context
 	nop
 
+.org 0x0900
+transform:
+	la $t0, $a0
+	add $t0, $t0, $a1
+	move $a0, $a2
+	move $a1, $a3
+	j $t0
+
+
 .org 0x1000
 start:
 	lui $sp, 0x8100
