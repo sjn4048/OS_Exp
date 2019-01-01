@@ -633,7 +633,7 @@ int exec_from_file(char* filename) {
         "tlbwi"
         : "=r"(cp0EntryLo0));
     int ret = f(1,(void *)argv,ENTRY);
-    
+    kfree((void*)ENTRY);
     // pc_create("seg",(void *)ENTRY,0,0,0,1);
     // kfree((void*)ENTRY);
     return ret;
