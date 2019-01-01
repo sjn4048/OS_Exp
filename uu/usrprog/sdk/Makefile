@@ -1,4 +1,4 @@
 OBJS := start.o 
-DIRS := 
+DIRS := src
 
 include $(SUB_MAKE_INCLUDE)
