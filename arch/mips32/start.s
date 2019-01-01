@@ -182,10 +182,16 @@ exception_save_context:
 .org 0x0900
 transform:
 	add $t0, $a0, $a1
+	addiu $sp, $sp, -4
+	sw $a1, 0($sp)
 	move $a0, $a2
 	move $a1, $a3
-	j $t0
-
+	jal $t0
+	nop
+	lw $t0, 0($sp)
+	addiu $sp, $sp, 4
+	add $t0, $t0, $ra
+	jr $ra
 
 .org 0x1000
 start:

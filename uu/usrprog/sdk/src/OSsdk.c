@@ -4,9 +4,9 @@
 unsigned int ENTRY_ADDR = 0;
 const unsigned int TRANSFORM_ADDR = 0x80000900;
 
-#define TRANSFORM(name) (((unsigned int (*)(unsigned int func, \
+#define TRANSFORM(name, _arg1) (((unsigned int (*)(unsigned int func, \
  unsigned int entry, void * arg1))                                          \
-(TRANSFORM_ADDR))((unsigned int)name,ENTRY_ADDR,))
+(TRANSFORM_ADDR))((unsigned int)name, ENTRY_ADDR, (void *)_arg1))
 
 void sdk_init(unsigned int argc, void *args, unsigned int entry_point){
     ENTRY_ADDR = entry_point;
