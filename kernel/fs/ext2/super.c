@@ -12,7 +12,7 @@
  */
 int sb_fill(struct ext2_super_block *sb, void *data) {
     *sb = *(struct ext2_super_block *) data;
-    return SUCCESS;
+    return EXT2_SUCCESS;
 }
 
 /**
@@ -23,5 +23,5 @@ int sb_fill(struct ext2_super_block *sb, void *data) {
  */
 int group_desc_fill(struct ext2_group_desc *group_desc, void *data) {
     *group_desc = *(struct ext2_group_desc *) data;
-    return SUCCESS;
+    return EXT2_SUCCESS;
 }

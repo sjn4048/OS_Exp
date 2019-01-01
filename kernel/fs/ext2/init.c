@@ -13,7 +13,7 @@ void *memory_set(void *dest, int value, int len) { return memset(dest, value, (s
 int find_linux_par(__u8 *buffer) {
     if (disk_read(0, buffer, 1) == 0) {
         debug_cat(DEBUG_ERROR, "find_linux_par: failed due to disk error.\n");
-        return FAIL;
+        return EXT2_FAIL;
     }
     // get partition table
     struct partition_entry par[4];
@@ -24,11 +24,11 @@ int find_linux_par(__u8 *buffer) {
         if (par[i].status == 0x80 && par[i].partition_type == 0x83) {
             // this partition is active and partition type is Linux
             fs_info.par_start_address = par[i].start_address;
-            return SUCCESS;
+            return EXT2_SUCCESS;
         }
     }
 
-    return FAIL;
+    return EXT2_FAIL;
 }
 
 int find_ext2_fs(__u8 *buffer) {
@@ -36,7 +36,7 @@ int find_ext2_fs(__u8 *buffer) {
     struct ext2_super_block sb;
     if (disk_read(fs_info.par_start_address + 2, buffer, 2) == 0) {
         debug_cat(DEBUG_ERROR, "find_ext2_fs: failed due to disk error.\n");
-        return FAIL;
+        return EXT2_FAIL;
     }
     sb_fill(&sb, buffer);
     if (sb.s_magic == 0xEF53) {
@@ -54,9 +54,9 @@ int find_ext2_fs(__u8 *buffer) {
         fs_info.inode_size = sb.s_inode_size;
         fs_info.inode_count = sb.s_inodes_count;
         fs_info.inode_per_bg = sb.s_inodes_per_group;
-        return SUCCESS;
+        return EXT2_SUCCESS;
     }
-    return FAIL;
+    return EXT2_FAIL;
 }
 
 int load_root_inode() {
@@ -66,10 +66,10 @@ int load_root_inode() {
     current_dir.child = NULL;
     current_dir.inode.id = 2;
 
-    if (SUCCESS == get_root_inode(&(current_dir.inode.info))) {
-        return SUCCESS;
+    if (EXT2_SUCCESS == get_root_inode(&(current_dir.inode.info))) {
+        return EXT2_SUCCESS;
     } else {
-        return FAIL;
+        return EXT2_FAIL;
     }
 }
 
@@ -104,7 +104,7 @@ int ext2_init() {
     __u8 buffer[1024];
 
     // find Linux partition
-    if (SUCCESS == find_linux_par(buffer)) {
+    if (EXT2_SUCCESS == find_linux_par(buffer)) {
         debug_cat(DEBUG_LOG, "ext2_init: found Linux partition at %d.\n", fs_info.par_start_address);
     } else {
         debug_cat(DEBUG_ERROR, "ext2_init: cannot find an active primary Linux partition.\n");
@@ -112,7 +112,7 @@ int ext2_init() {
     }
 
     // whether this Linux partition is Ext2
-    if (SUCCESS == find_ext2_fs(buffer)) {
+    if (EXT2_SUCCESS == find_ext2_fs(buffer)) {
         debug_cat(DEBUG_LOG, "ext2_init: confirmed that Linux partition is an Ext2 file system.\n");
         debug_cat(DEBUG_LOG, "ext2_init: loaded essential information into memory.\n");
     } else {
@@ -121,10 +121,10 @@ int ext2_init() {
     }
 
     // find root inode
-    if (SUCCESS == load_root_inode()) {
+    if (EXT2_SUCCESS == load_root_inode()) {
         debug_cat(DEBUG_LOG, "ext2_init: loaded root directory inode.\n");
         debug_cat(DEBUG_LOG, "ext2_init: initialized Ext2 file system.\n");
-        return SUCCESS;
+        return EXT2_SUCCESS;
     } else {
         debug_cat(DEBUG_ERROR, "ext2_init: this Linux partition is not in Ext2 file system.\n");
         goto error;
@@ -133,5 +133,5 @@ int ext2_init() {
     // cannot find Ext2 file system in primary partitions
     error:
     debug_cat(DEBUG_ERROR, "ext2_init: fail to initialize the Ext2 file system.\n");
-    return FAIL;
+    return EXT2_FAIL;
 }

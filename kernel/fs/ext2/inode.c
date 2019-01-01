@@ -12,7 +12,7 @@
  */
 int inode_fill(struct ext2_inode *inode, void *data) {
     *inode = *(struct ext2_inode *) data;
-    return SUCCESS;
+    return EXT2_SUCCESS;
 }
 
 /**
@@ -32,13 +32,13 @@ int dir_entry_fill(struct ext2_dir_entry *dir, void *data) {
     dir->name = memory.allocate(dir->name_len + 1);
     if (dir->name == NULL) {
         debug_cat(DEBUG_ERROR, "dir_entry_fill: failed due to memory error.\n");
-        return FAIL;
+        return EXT2_FAIL;
     }
     // copy file name
     memory.copy(dir->name, data + 8, dir->name_len);
     // append end
     dir->name[dir->name_len] = '\0';
-    return SUCCESS;
+    return EXT2_SUCCESS;
 }
 
 /**
@@ -73,7 +73,7 @@ int is_equal(__u8 *s1, __u8 *s2) {
 int find_inode(__u32 id, struct ext2_inode *inode) {
     if (id <= 2 || id > fs_info.inode_count) {
         // no such inode, inode ID is in [2, inode_count]
-        return FAIL;
+        return EXT2_FAIL;
     } else {
         int bg_id = (id - 1) / fs_info.inode_per_bg;
         int inode_index = (id - 1) % fs_info.inode_per_bg;
@@ -83,7 +83,7 @@ int find_inode(__u32 id, struct ext2_inode *inode) {
         struct ext2_group_desc group_desc;
         if (0 == disk_read(fs_info.group_desc_address + (bg_id * 32 / 512), buffer, 1)) {
             debug_cat(DEBUG_ERROR, "find_inode: failed due to disk error.\n");
-            return FAIL;
+            return EXT2_FAIL;
         }
         group_desc_fill(&group_desc, buffer + (bg_id * 32 % 512));
 
@@ -92,24 +92,24 @@ int find_inode(__u32 id, struct ext2_inode *inode) {
                 fs_info.par_start_address + group_desc.bg_inode_bitmap * (fs_info.block_size / 512) + inode_index / 512,
                 buffer, 1)) {
             debug_cat(DEBUG_ERROR, "find_inode: failed due to disk error.\n");
-            return FAIL;
+            return EXT2_FAIL;
         }
 
         if (0 == (buffer[inode_index / 8] & (1 << (7 - inode_index % 8)))) {
             // that inode is not used
-            return FAIL;
+            return EXT2_FAIL;
         }
 
         // read that inode entry
         if (0 == disk_read(fs_info.par_start_address + group_desc.bg_inode_table * (fs_info.block_size / 512) +
                            inode_index * fs_info.inode_size / 512, buffer, 1)) {
             debug_cat(DEBUG_ERROR, "find_inode: failed due to disk error.\n");
-            return FAIL;
+            return EXT2_FAIL;
         }
 
         // load that inode
         inode_fill(inode, buffer + inode_index * fs_info.inode_size % 512);
-        return SUCCESS;
+        return EXT2_SUCCESS;
     }
 }
 
@@ -130,19 +130,19 @@ int traverse_direct_block(__u8 *target, const __u32 *i_blocks, int length, INODE
     for (int i = 0; i < length; i++) {
         if (i_blocks[i] == 0) {
             // this block is empty
-            return FAIL;
+            return EXT2_FAIL;
         }
 
         if (0 == disk_read(fs_info.par_start_address + i_blocks[i] * (fs_info.block_size / 512), buffer,
                            fs_info.block_size / 512)) {
             debug_cat(DEBUG_ERROR, "traverse_direct_block: failed due to disk error.\n");
-            return FAIL;
+            return EXT2_FAIL;
         }
 
         offset = 0;
         while (offset < 4096) {
-            if (FAIL == dir_entry_fill(&dir, buffer + offset)) {
-                return FAIL;
+            if (EXT2_FAIL == dir_entry_fill(&dir, buffer + offset)) {
+                return EXT2_FAIL;
             }
 
             offset += dir.rec_len;
@@ -152,15 +152,15 @@ int traverse_direct_block(__u8 *target, const __u32 *i_blocks, int length, INODE
 
             // we can continue
             inode->id = dir.inode;
-            if (FAIL == find_inode(inode->id, &(inode->info))) {
-                return FAIL;
+            if (EXT2_FAIL == find_inode(inode->id, &(inode->info))) {
+                return EXT2_FAIL;
             } else {
-                return SUCCESS;
+                return EXT2_SUCCESS;
             }
         }
     }
 
-    return FAIL | NOT_FOUND;
+    return EXT2_FAIL | NOT_FOUND;
 }
 
 /**
@@ -175,26 +175,26 @@ int traverse_indirect_block(__u8 *target, const __u32 *i_blocks, int length, INO
     __u8 buffer[4096];
     for (int i = 0; i < length; i++) {
         if (i_blocks[i] == 0) {
-            return FAIL;
+            return EXT2_FAIL;
         }
 
         if (0 == disk_read(fs_info.par_start_address + i_blocks[i] * (fs_info.block_size / 512), buffer,
                            fs_info.block_size / 512)) {
             debug_cat(DEBUG_ERROR, "traverse_indirect_block: failed due to disk error.\n");
-            return FAIL;
+            return EXT2_FAIL;
         }
         __u32 *entries = (__u32 *) buffer;
         int result = traverse_direct_block(target, entries, 1024, inode);
-        if (SUCCESS == result) {
-            return SUCCESS;
+        if (EXT2_SUCCESS == result) {
+            return EXT2_SUCCESS;
         } else if (NOT_FOUND == result & NOT_FOUND) {
             continue;
         } else {
-            return FAIL;
+            return EXT2_FAIL;
         }
     }
 
-    return FAIL | NOT_FOUND;
+    return EXT2_FAIL | NOT_FOUND;
 }
 
 /**
@@ -209,27 +209,27 @@ int traverse_double_indirect_block(__u8 *target, const __u32 *i_blocks, int leng
     __u8 buffer[4096];
     for (int i = 0; i < length; i++) {
         if (i_blocks[i] == 0) {
-            return FAIL;
+            return EXT2_FAIL;
         }
 
         if (0 == disk_read(fs_info.par_start_address + i_blocks[i] * (fs_info.block_size / 512), buffer,
                            fs_info.block_size / 512)) {
             debug_cat(DEBUG_ERROR, "traverse_double_indirect_block: failed due to disk error.\n");
-            return FAIL;
+            return EXT2_FAIL;
         }
 
         __u32 *entries = (__u32 *) buffer;
         int result = traverse_indirect_block(target, entries, 1024, inode);
-        if (SUCCESS == result) {
-            return SUCCESS;
+        if (EXT2_SUCCESS == result) {
+            return EXT2_SUCCESS;
         } else if (NOT_FOUND == result & NOT_FOUND) {
             continue;
         } else {
-            return FAIL;
+            return EXT2_FAIL;
         }
     }
 
-    return FAIL | NOT_FOUND;
+    return EXT2_FAIL | NOT_FOUND;
 }
 
 /**
@@ -244,27 +244,27 @@ int traverse_triple_indirect_block(__u8 *target, const __u32 *i_blocks, int leng
     __u8 buffer[4096];
     for (int i = 0; i < length; i++) {
         if (i_blocks[i] == 0) {
-            return FAIL;
+            return EXT2_FAIL;
         }
 
         if (0 == disk_read(fs_info.par_start_address + i_blocks[i] * (fs_info.block_size / 512), buffer,
                            fs_info.block_size / 512)) {
             debug_cat(DEBUG_ERROR, "traverse_triple_indirect_block: failed due to disk error.\n");
-            return FAIL;
+            return EXT2_FAIL;
         }
 
         __u32 *entries = (__u32 *) buffer;
         int result = traverse_indirect_block(target, entries, 1024, inode);
-        if (SUCCESS == result) {
-            return SUCCESS;
+        if (EXT2_SUCCESS == result) {
+            return EXT2_SUCCESS;
         } else if (NOT_FOUND == result & NOT_FOUND) {
             continue;
         } else {
-            return FAIL;
+            return EXT2_FAIL;
         }
     }
 
-    return FAIL | NOT_FOUND;
+    return EXT2_FAIL | NOT_FOUND;
 }
 
 /**
@@ -282,25 +282,25 @@ int traverse_block(__u8 *target, __u32 *i_blocks, INODE *inode) {
             result = traverse_double_indirect_block(target, i_blocks + 13, 1, inode);
             if (NOT_FOUND == result & NOT_FOUND) {
                 result = traverse_triple_indirect_block(target, i_blocks + 14, 1, inode);
-                if (SUCCESS == result) {
-                    return SUCCESS;
+                if (EXT2_SUCCESS == result) {
+                    return EXT2_SUCCESS;
                 } else {
-                    return FAIL;
+                    return EXT2_FAIL;
                 }
-            } else if (SUCCESS == result) {
-                return SUCCESS;
+            } else if (EXT2_SUCCESS == result) {
+                return EXT2_SUCCESS;
             } else {
-                return FAIL;
+                return EXT2_FAIL;
             }
-        } else if (SUCCESS == result) {
-            return SUCCESS;
+        } else if (EXT2_SUCCESS == result) {
+            return EXT2_SUCCESS;
         } else {
-            return FAIL;
+            return EXT2_FAIL;
         }
-    } else if (SUCCESS == result) {
-        return SUCCESS;
+    } else if (EXT2_SUCCESS == result) {
+        return EXT2_SUCCESS;
     } else {
-        return FAIL;
+        return EXT2_FAIL;
     }
 }
 
@@ -314,16 +314,16 @@ int get_root_inode(struct ext2_inode *inode) {
     struct ext2_group_desc group_desc;
     if (disk_read(fs_info.group_desc_address, buffer, 1) == 0) {
         debug_cat(DEBUG_ERROR, "get_root_inode: failed due to disk error.\n");
-        return FAIL;
+        return EXT2_FAIL;
     }
     group_desc_fill(&group_desc, buffer);
 
     // fine root inode
     if (disk_read(fs_info.par_start_address + group_desc.bg_inode_table * fs_info.block_size / 512, buffer, 1) == 0) {
         debug_cat(DEBUG_ERROR, "get_root_inode: failed due to disk error.\n");
-        return FAIL;
+        return EXT2_FAIL;
     }
 
     inode_fill(inode, buffer + fs_info.inode_size);
-    return SUCCESS;
+    return EXT2_SUCCESS;
 }

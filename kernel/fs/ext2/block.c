@@ -14,7 +14,7 @@ __u32 find_in_indirect(__u32 bp_id, __u32 indirect_block_ptr) {
     if (0 == disk_read(fs_info.par_start_address + indirect_block_ptr * (fs_info.block_size / 512), buffer,
                        fs_info.block_size / 512)) {
         debug_cat(DEBUG_ERROR, "find_in_indirect: failed due to disk fail.\n");
-        return FAIL;
+        return EXT2_FAIL;
     }
 
     __u32 *block_ids = (__u32 *) buffer;
@@ -31,18 +31,18 @@ __u32 find_in_double_indirect(__u32 bp_id, __u32 double_indirect_block_ptr) {
     if (0 == disk_read(fs_info.par_start_address + double_indirect_block_ptr * (fs_info.block_size / 512), buffer,
                        fs_info.block_size / 512)) {
         debug_cat(DEBUG_ERROR, "find_in_double_indirect: failed due to disk fail.\n");
-        return FAIL;
+        return EXT2_FAIL;
     }
 
     __u32 *block_ids = (__u32 *) buffer;
     __u32 result;
     for (int i = 0; i < fs_info.block_size / 32; i++) {
-        if ((result = find_in_indirect(bp_id, block_ids[i])) != FAIL) {
+        if ((result = find_in_indirect(bp_id, block_ids[i])) != EXT2_FAIL) {
             return result;
         }
     }
 
-    return FAIL;
+    return EXT2_FAIL;
 }
 
 /**
@@ -55,18 +55,18 @@ __u32 find_in_triple_indirect(__u32 bp_id, __u32 double_indirect_block_ptr) {
     if (0 == disk_read(fs_info.par_start_address + double_indirect_block_ptr * (fs_info.block_size / 512), buffer,
                        fs_info.block_size / 512)) {
         debug_cat(DEBUG_ERROR, "find_in_triple_indirect: failed due to disk fail.\n");
-        return FAIL;
+        return EXT2_FAIL;
     }
 
     __u32 *block_ids = (__u32 *) buffer;
     __u32 result;
     for (int i = 0; i < fs_info.block_size / 32; i++) {
-        if ((result = find_in_double_indirect(bp_id, block_ids[i])) != FAIL) {
+        if ((result = find_in_double_indirect(bp_id, block_ids[i])) != EXT2_FAIL) {
             return result;
         }
     }
 
-    return FAIL;
+    return EXT2_FAIL;
 }
 
 /**
@@ -103,25 +103,25 @@ __u32 find_block(__u32 bp_id, __u32 *block_ptr) {
 int write_block(EXT2_FILE *file) {
     if (file->dirty == EXT2_NOT_DIRTY) {
         // if the data is not dirty, it's not necessary to write.
-        return SUCCESS;
+        return EXT2_SUCCESS;
     }
 
     if (file->pointer >= file->inode.info.i_size) {
-        return FAIL;
+        return EXT2_FAIL;
     }
 
     __u32 b_id = find_block(file->pointer / fs_info.block_size, file->inode.info.i_block);
-    if (b_id == FAIL) {
-        return FAIL;
+    if (b_id == EXT2_FAIL) {
+        return EXT2_FAIL;
     }
 
-    if (FAIL == disk_write(fs_info.par_start_address + b_id * (fs_info.block_size / 512), file->buffer,
+    if (EXT2_FAIL == disk_write(fs_info.par_start_address + b_id * (fs_info.block_size / 512), file->buffer,
                            fs_info.block_size / 512)) {
-        return FAIL;
+        return EXT2_FAIL;
     }
 
     file->dirty = EXT2_NOT_DIRTY;
-    return SUCCESS;
+    return EXT2_SUCCESS;
 }
 
 /**
@@ -131,19 +131,19 @@ int write_block(EXT2_FILE *file) {
  */
 int read_block(EXT2_FILE *file) {
     if (file->pointer >= file->inode.info.i_size) {
-        return FAIL;
+        return EXT2_FAIL;
     }
 
     __u32 b_id = find_block(file->pointer / fs_info.block_size, file->inode.info.i_block);
-    if (b_id == FAIL) {
-        return FAIL;
+    if (b_id == EXT2_FAIL) {
+        return EXT2_FAIL;
     }
 
-    if (FAIL == disk_read(fs_info.par_start_address + b_id * (fs_info.block_size / 512), file->buffer,
+    if (EXT2_FAIL == disk_read(fs_info.par_start_address + b_id * (fs_info.block_size / 512), file->buffer,
                            fs_info.block_size / 512)) {
-        return FAIL;
+        return EXT2_FAIL;
     }
 
     file->dirty = EXT2_NOT_DIRTY;
-    return SUCCESS;
+    return EXT2_SUCCESS;
 }

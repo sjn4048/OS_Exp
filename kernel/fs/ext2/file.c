@@ -112,7 +112,7 @@ int find_file_loop(__u8 *path, struct ext2_path *sub_path, INODE *inode) {
         }
 
         // traverse blocks
-        if (FAIL == traverse_block(sub_path->name, parent_inode->info.i_block, &(sub_path->inode))) {
+        if (EXT2_FAIL == traverse_block(sub_path->name, parent_inode->info.i_block, &(sub_path->inode))) {
             goto fail;
         } else {
             continue;
@@ -122,11 +122,11 @@ int find_file_loop(__u8 *path, struct ext2_path *sub_path, INODE *inode) {
     // success
     (*inode) = sub_path->inode;
     clean_sub_path(sub_path);
-    return SUCCESS;
+    return EXT2_SUCCESS;
 
     fail:
     clean_sub_path(sub_path);
-    return FAIL;
+    return EXT2_FAIL;
 }
 
 /**
@@ -137,10 +137,10 @@ int find_file_loop(__u8 *path, struct ext2_path *sub_path, INODE *inode) {
  */
 int find_file_relative(__u8 *path, INODE *inode) {
     struct ext2_path *sub_path = NULL;
-    if (SUCCESS == find_file_loop(path, sub_path, inode)) {
-        return SUCCESS;
+    if (EXT2_SUCCESS == find_file_loop(path, sub_path, inode)) {
+        return EXT2_SUCCESS;
     } else {
-        return FAIL;
+        return EXT2_FAIL;
     }
 }
 
@@ -158,10 +158,10 @@ int find_file_absolute(__u8 *path, INODE *inode) {
     sub_path->child = NULL;
     get_root_inode(&(sub_path->inode.info));
 
-    if (SUCCESS == find_file_loop(path, sub_path, inode)) {
-        return SUCCESS;
+    if (EXT2_SUCCESS == find_file_loop(path, sub_path, inode)) {
+        return EXT2_SUCCESS;
     } else {
-        return FAIL;
+        return EXT2_FAIL;
     }
 }
 
@@ -174,25 +174,25 @@ int find_file_absolute(__u8 *path, INODE *inode) {
 int ext2_find(__u8 *path, INODE *inode) {
     if (path[0] != '/') {
         debug_cat(DEBUG_ERROR, "find_file: path must start with a '/'\n");
-        return FAIL;
+        return EXT2_FAIL;
     }
 
     // find file by relative path
     debug_cat(DEBUG_LOG, "find_file: try to find by relative path.\n");
-    if (SUCCESS == find_file_relative(path, inode)) {
+    if (EXT2_SUCCESS == find_file_relative(path, inode)) {
         debug_cat(DEBUG_LOG, "find_file: found that.\n");
-        return SUCCESS;
+        return EXT2_SUCCESS;
     }
 
     // find file by absolute path
     debug_cat(DEBUG_LOG, "find_file: try to find by absolute path.\n");
-    if (SUCCESS == find_file_absolute(path, inode)) {
+    if (EXT2_SUCCESS == find_file_absolute(path, inode)) {
         debug_cat(DEBUG_LOG, "find_file: found that.\n");
-        return SUCCESS;
+        return EXT2_SUCCESS;
     }
 
     debug_cat(DEBUG_ERROR, "find_file: cannot find that file or directory.\n");
-    return FAIL;
+    return EXT2_FAIL;
 }
 
 /**
@@ -202,14 +202,14 @@ int ext2_find(__u8 *path, INODE *inode) {
  * @return success or not
  */
 int ext2_open(__u8 *path, EXT2_FILE *file) {
-    if (FAIL == ext2_find(path, &(file->inode))) {
+    if (EXT2_FAIL == ext2_find(path, &(file->inode))) {
         debug_cat(DEBUG_ERROR, "ext2_open: failed because cannot find that file.\n");
-        return FAIL;
+        return EXT2_FAIL;
     }
 
     if (EXT2_S_IFREG != file->inode.info.i_mode & EXT2_S_IFREG) {
         debug_cat(DEBUG_ERROR, "ext2_open: failed because that is not a regular file.\n");
-        return FAIL;
+        return EXT2_FAIL;
     }
 
     file->pointer = 0;
@@ -217,23 +217,23 @@ int ext2_open(__u8 *path, EXT2_FILE *file) {
     file->buffer = (__u8 *) memory.allocate(sizeof(__u8) * fs_info.block_size);
     if (file->buffer == NULL) {
         debug_cat(DEBUG_ERROR, "ext2_open: failed due to memory fail.\n");
-        return FAIL;
+        return EXT2_FAIL;
     }
 
     if (file->inode.info.i_block[0] == 0) {
         debug_cat(DEBUG_ERROR, "ext2_open: failed because the first block ID is 0.\n");
-        return FAIL;
+        return EXT2_FAIL;
     }
 
     if (0 ==
         disk_read(fs_info.par_start_address + file->inode.info.i_block[0] * (fs_info.block_size / 512), file->buffer,
                   fs_info.block_size / 512)) {
         debug_cat(DEBUG_ERROR, "ext2_open: failed due to disk fail.\n");
-        return FAIL;
+        return EXT2_FAIL;
     }
 
     debug_cat(DEBUG_LOG, "ext2_open: opened.\n");
-    return SUCCESS;
+    return EXT2_SUCCESS;
 }
 
 /**
@@ -245,35 +245,35 @@ int ext2_open(__u8 *path, EXT2_FILE *file) {
 int ext2_lseek(EXT2_FILE *file, __u32 new_pointer) {
     if (file == NULL) {
         debug_cat(DEBUG_ERROR, "ext2_lseek: empty file pointer.\n");
-        return FAIL;
+        return EXT2_FAIL;
     }
 
     if (file->pointer / fs_info.block_size == new_pointer / fs_info.block_size) {
         file->pointer = new_pointer;
         debug_cat(DEBUG_LOG, "ext2_lseek: pointer moved.\n");
-        return SUCCESS;
+        return EXT2_SUCCESS;
     }
 
     if (new_pointer >= file->inode.info.i_size) {
         debug_cat(DEBUG_ERROR, "ext2_lseek: new pointer is out of range [0, %d].\n", file->inode.info.i_size - 1);
-        return FAIL;
+        return EXT2_FAIL;
     }
 
     if (file->dirty == EXT2_DIRTY) {
-        if (FAIL == write_block(file)) {
+        if (EXT2_FAIL == write_block(file)) {
             debug_cat(DEBUG_ERROR, "ext2_lseek: failed to write dirty data back to disk.\n");
-            return FAIL;
+            return EXT2_FAIL;
         }
     }
 
     file->pointer = new_pointer;
-    if (FAIL == read_block(file)) {
+    if (EXT2_FAIL == read_block(file)) {
         debug_cat(DEBUG_ERROR, "ext2_lseek: failed to read data from disk.\n");
-        return FAIL;
+        return EXT2_FAIL;
     }
 
     debug_cat(DEBUG_LOG, "ext2_lseek: pointer moved.\n");
-    return SUCCESS;
+    return EXT2_SUCCESS;
 }
 
 /**
@@ -287,7 +287,7 @@ int ext2_lseek(EXT2_FILE *file, __u32 new_pointer) {
 int ext2_read(EXT2_FILE *file, __u8 *buffer, __u64 length, __u64 *bytes_of_read) {
     if (file == NULL) {
         debug_cat(DEBUG_ERROR, "ext2_read: empty file pointer.\n");
-        return FAIL;
+        return EXT2_FAIL;
     }
 
     // if the length is longer than the bytes left
@@ -302,9 +302,9 @@ int ext2_read(EXT2_FILE *file, __u8 *buffer, __u64 length, __u64 *bytes_of_read)
             buffer[count++] = file->buffer[i];
         }
         if (i == fs_info.block_size) {
-            if (FAIL == ext2_lseek(file, (file->pointer / fs_info.block_size + 1) * fs_info.block_size)) {
+            if (EXT2_FAIL == ext2_lseek(file, (file->pointer / fs_info.block_size + 1) * fs_info.block_size)) {
                 debug_cat(DEBUG_ERROR, "ext2_read: failed to move pointer.\n");
-                return FAIL;
+                return EXT2_FAIL;
             }
         }
     }
@@ -313,7 +313,7 @@ int ext2_read(EXT2_FILE *file, __u8 *buffer, __u64 length, __u64 *bytes_of_read)
         (*bytes_of_read) = count;
     }
     debug_cat(DEBUG_LOG, "ext2_read: read %d byte(s) of data.\n", count);
-    return SUCCESS;
+    return EXT2_SUCCESS;
 }
 
 /**
@@ -327,7 +327,7 @@ int ext2_read(EXT2_FILE *file, __u8 *buffer, __u64 length, __u64 *bytes_of_read)
 int ext2_write(EXT2_FILE *file, const __u8 *buffer, __u64 length, __u64 *bytes_of_write) {
     if (file == NULL) {
         debug_cat(DEBUG_ERROR, "ext2_write: empty file pointer.\n");
-        return FAIL;
+        return EXT2_FAIL;
     }
 
     // if the length is longer than the bytes left
@@ -343,9 +343,9 @@ int ext2_write(EXT2_FILE *file, const __u8 *buffer, __u64 length, __u64 *bytes_o
             file->dirty = EXT2_DIRTY;
         }
         if (i == fs_info.block_size) {
-            if (FAIL == ext2_lseek(file, (file->pointer / fs_info.block_size + 1) * fs_info.block_size)) {
+            if (EXT2_FAIL == ext2_lseek(file, (file->pointer / fs_info.block_size + 1) * fs_info.block_size)) {
                 debug_cat(DEBUG_ERROR, "ext2_write: failed to move pointer.\n");
-                return FAIL;
+                return EXT2_FAIL;
             }
         }
     }
@@ -354,5 +354,5 @@ int ext2_write(EXT2_FILE *file, const __u8 *buffer, __u64 length, __u64 *bytes_o
         (*bytes_of_write) = count;
     }
     debug_cat(DEBUG_LOG, "ext2_read: read %d byte(s) of data.\n", count);
-    return SUCCESS;
+    return EXT2_SUCCESS;
 }

@@ -8,8 +8,8 @@
 /* all macro definition of ext2 file system */
 #define WINDOWS // platform
 #define DEBUG_EXT2 // debug mode
-#define SUCCESS 0x1
-#define FAIL 0x0
+#define EXT2_SUCCESS 0x1
+#define EXT2_FAIL 0x0
 #define NOT_FOUND 0x2
 #define DEBUG_LOG 100
 #define DEBUG_WARNING 101
@@ -442,7 +442,7 @@ struct ext2_path current_dir;
 #include "stdarg.h"
 #include "windows.h"
 
-#define VIRTUAL_DISK "\\\\.\\PhysicalDrive3" // this is the virtual disk used while my developing
+#define VIRTUAL_DISK "\\\\.\\PhysicalDrive2" // this is the virtual disk used while my developing
 #define SECTOR_SIZE 512 // this is the sector size of virtual disk
 int windows_disk_read(__u32 id, void *buffer);
 int windows_disk_write(__u32 id, void *buffer);

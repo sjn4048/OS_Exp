@@ -16,7 +16,7 @@ int find_part(struct partition_entry *par, void *data) {
         pointer += 16;
     }
 
-    return SUCCESS;
+    return EXT2_SUCCESS;
 }
 
 /**
