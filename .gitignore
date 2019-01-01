@@ -365,3 +365,4 @@ fabric.properties
 !*.bin
 !usrprog/*
 *.o
+!*.txt
