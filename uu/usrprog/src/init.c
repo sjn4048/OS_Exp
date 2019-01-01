@@ -1,8 +1,6 @@
-#include <head.h>
+#include <init.h>
 
 int main(unsigned int argc, void *args) {
-    asm volatile(
-        "syscall 4\n\t"
-    );
+    syscall(4);
     return (int)argc;
 }
