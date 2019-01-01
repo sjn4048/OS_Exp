@@ -246,7 +246,8 @@ void wakeup_parent(unsigned long pid){
 /* pc_create : 
  * create a process 
  */
-void pc_create(char *task_name, void(*entry)(unsigned int argc, void *args), unsigned int argc, void *args, int nice, int is_root, int need_wait) {
+void pc_create(char *task_name, void(*entry)(unsigned int argc, void *args), 
+    unsigned int argc, void *args, int nice, int is_root, int need_wait) {
 
     task_union *new = (task_union*) kmalloc(sizeof(task_union));
     task_struct * task = &(new->task);
