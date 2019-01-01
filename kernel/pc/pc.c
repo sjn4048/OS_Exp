@@ -11,7 +11,6 @@
 #include <driver/vga.h>
 #include <intr.h>
 #include <arch.h>
-#include <zjunix/slab.h>
 #include <zjunix/syscall.h>
 #include <zjunix/log.h>
 
@@ -620,21 +619,8 @@ int exec_from_file(char* filename) {
     char argv[1][10];
     kernel_memset(argv,0,sizeof(argv));
     kernel_memcpy(argv[0],"test",5);
-    unsigned int cp0EntryLo0 = ((ENTRY >> 6) & 0x01ffffc0) | 0x1e;
-    asm volatile(
-        "li $t0, 1\n\t"
-        "mtc0 $t0, $10\n\t"
-        "mtc0 $zero, $5\n\t"
-        "move $t0, %0\n\t"
-        "mtc0 $t0, $2\n\t"
-        "mtc0 $zero, $3\n\t"
-        "mtc0 $zero, $0\n\t"
-        "nop\n\t"
-        "nop\n\t"
-        "tlbwi"
-        : "=r"(cp0EntryLo0));
     int ret = f(1,(void *)argv,ENTRY);
-    kfree((void*)ENTRY);
+    
     // pc_create("seg",(void *)ENTRY,0,0,0,1);
     // kfree((void*)ENTRY);
     return ret;
