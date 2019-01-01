@@ -11,6 +11,7 @@
 #include <driver/vga.h>
 #include <intr.h>
 #include <arch.h>
+#include <zjunix/slab.h>
 #include <zjunix/syscall.h>
 #include <zjunix/log.h>
 
