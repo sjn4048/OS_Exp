@@ -16,7 +16,7 @@ void __syscall(unsigned int status, unsigned int cause, context* pt_context) {
     code = pt_context->t0;
     pt_context->epc += 4;
     if (syscalls[code]) {
-        syscalls[code](status, cause, pt_context);
+        pt_context->v0 = syscalls[code](status, cause, pt_context);
     }
 }
 

@@ -123,7 +123,8 @@ void init_pc();
 void pc_schedule(unsigned int status, unsigned int cause, context* pt_context);
 void pc_create(char *task_name, void(*entry)(unsigned int argc, void *args), 
     unsigned int argc, void *args, int nice, int is_root, int need_wait);
-void pc_kill_syscall(unsigned int status, unsigned int cause, context* pt_context);
+unsigned int pc_create_syscall(unsigned int status, unsigned int cause, context* pt_context);
+unsigned int pc_kill_syscall(unsigned int status, unsigned int cause, context* pt_context);
 int pc_kill(unsigned int PID);
 int pc_exit(context* pt_context);
 int print_proc();
@@ -132,6 +133,7 @@ int print_rbtree_test();
 void change_sysctl_sched_latency(unsigned int latency);
 extern void *kmalloc(unsigned int size);
 extern void restore_context();
+extern unsigned int GetPC();
 int exec_from_file(char* filename);
 int pc_kill_current();
 void kill_all_children(struct list_head * head);

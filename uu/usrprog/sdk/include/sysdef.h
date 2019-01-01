@@ -1,8 +1,6 @@
 #ifndef _SYSDEF_H_
 #define _SYSDEF_H_
 
-#define test4(arg1) SYSCALL_DEFINE1(_test4, arg1)
-
 #define SYSCALL_DEFINE0(name) sys##name
 
 #define SYSCALL_DEFINE1(name, _arg1) do {                          \
@@ -23,7 +21,19 @@
              sys##name;                                            \
 } while(0)
 
-#define sys_test4  __syscall(4) 
+#define get_ret_value ({                        \
+    int tmp = 0;                                \
+    asm volatile("la %0, $v0\n\t" : "=r"(tmp)); \
+    tmp;  })
+
+#define sys_test4 __syscall(4)
+
+#define sys_fork ({                             \
+    __syscall(8);                              \
+    get_ret_value;   })
+
+#define test4(arg1) SYSCALL_DEFINE1(_test4, arg1)
+#define fork() SYSCALL_DEFINE0(_fork)
 
 #define __syscall(code)    \
         asm volatile(       \

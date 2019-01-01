@@ -138,6 +138,7 @@ void init_pc() {
     // ---------------------------------------------------
 
     register_syscall(10, pc_kill_syscall);
+    register_syscall(8,pc_create_syscall);
     register_interrupt_handler(7, pc_schedule);
     current_task = &(new->task);
     /* dynamicly defines the interrupt period by 
@@ -275,6 +276,7 @@ void pc_create(char *task_name, void(*entry)(unsigned int argc, void *args),
      *     2. if vruntime starts with 0, it will block all other processes from 
      *        running because it takes some time for the new process to catch up
      *        its vruntime with the others
+     * ---------------------- NOTE ---------------------- 
      */
     entity->vruntime = current_task->sched_entity.vruntime;
 
@@ -329,6 +331,21 @@ void pc_create(char *task_name, void(*entry)(unsigned int argc, void *args),
 
 }
 
+/* pc_create_syscall : 
+ * process create system call, can be used to fork a process
+ */
+unsigned int pc_create_syscall(unsigned int status, unsigned int cause, context* pt_context) {
+    disable_interrupts();
+    // start from PC right now (GetPC function)
+    // has the same name with parent but different PID
+    // no need to wait for parent
+    // is not root
+    pc_create(current_task->name,(void *)(GetPC()),current_task->context.a0,
+    current_task->context.a1, current_task->nice,0,0);
+    enable_interrupts();
+    return cur_PID - 1;
+}
+
 /* check_if_ps_exit :
  * if powershell is exiting, create a new powershell process
  * to prevent OS from dead, this is quite useful when a unhandled
@@ -350,13 +367,14 @@ void check_if_ps_exit(){
  * a process when a unhandled exception occurs
  * see more info in 'exc.c'
  */
-void pc_kill_syscall(unsigned int status, unsigned int cause, context* pt_context) {
+unsigned int pc_kill_syscall(unsigned int status, unsigned int cause, context* pt_context) {
     
     disable_interrupts();
     check_if_ps_exit();
     pc_exit(pt_context);
     // pc_schedule(status, cause, pt_context);
     enable_interrupts();
+    return 0;
 }
 
 int pc_kill_current(){
@@ -365,10 +383,6 @@ int pc_kill_current(){
      * current process. 
      */
     syscall(10);
-    // asm volatile(
-    //     "li $v0, 10\n\t"
-    //     "syscall\n\t"
-    //     "nop\n\t");
     
     /* Another implementation : 
      * ( NOTE : still some unknown bugs, maybe unstatble!!! )

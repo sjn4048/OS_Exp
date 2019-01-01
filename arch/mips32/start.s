@@ -1,4 +1,5 @@
 .extern init_kernel
+.globl GetPC
 .globl start
 .globl exception
 .globl restore_context
@@ -178,6 +179,11 @@ exception_save_context:
 
 	j restore_context
 	nop
+
+.org 0x0880
+GetPC:
+	move $v0, $ra
+	jr $ra
 
 .org 0x0900
 transform:
