@@ -199,7 +199,7 @@ transform:
 	# lw $t0, 0($sp)
 	# lw $ra, 4($sp)
 	# addiu $sp, $sp, 8
-	add $ra, $ra, $a1
+	# add $ra, $ra, $a1
 	jr $ra
 	nop
 
