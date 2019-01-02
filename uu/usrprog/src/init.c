@@ -7,7 +7,7 @@
 
 unsigned int main(unsigned int argc, void *args) {
 
-    char x[5] = "%x\n";
+    char x[10] = "%x\n";
     unsigned int ptr = malloc(16);
     printf(STRING(x),ptr);
     return 0;
