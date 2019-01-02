@@ -12,7 +12,7 @@ void sdk_init(unsigned int argc, void *args, unsigned int entry_point){
     ENTRY_ADDR = entry_point;
     unsigned int ra;
     asm volatile("move %0,$ra\n\t" : "=r"(ra)); 
-    kernel_printf("%x",ra);
+    // kernel_printf("%x",ra);
     TRANSFORM((unsigned int)main,0,0);
 
 }
