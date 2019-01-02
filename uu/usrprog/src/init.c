@@ -8,7 +8,7 @@ int test_jump(int arg){
     return arg;
 }
 
-
+char printf_tmp[30];
 unsigned int main(unsigned int argc, void *args) {
     // test4(23);
     printf_tmp[0] = 'w';

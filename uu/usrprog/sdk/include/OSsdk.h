@@ -9,7 +9,7 @@ extern unsigned int TRANSFORM_ADDR;
 
 void sdk_init(unsigned int argc, void *args, unsigned int entry_point);
 
-extern char printf_tmp[30];
+// extern char printf_tmp[30];
 
 #define STRING(x) ({                                   \
     int size = sizeof(x) / sizeof(char);               \
