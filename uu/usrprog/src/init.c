@@ -1,16 +1,19 @@
 #include <init.h>
 
+
+#pragma GCC push_options
+#pragma GCC optimize("O0")
+
 int test_jump(int arg){
     return arg;
 }
 
 char tmp[5];
 unsigned int main(unsigned int argc, void *args) {
-    test4(23);
-    tmp[0] = '1';
-    tmp[1] = 'w';
-    tmp[2] = 'a';
-    tmp[3] = 0;
-    return tmp;
+    // test4(23);
+    
+    return "we are";
+
 }
 
+#pragma GCC pop_options

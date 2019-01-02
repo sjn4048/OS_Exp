@@ -640,7 +640,7 @@ int exec_from_file(char* filename) {
     kernel_printf("%x\n",init_gp);
     kernel_printf("%x\n",ret);
     // kernel_printf("%d\n",ret);
-    kernel_printf("%s\n",ret);
+    // kernel_printf("%s\n",ret);
     // pc_create("seg",(void *)ENTRY,0,0,0,1);
     // kfree((void*)ENTRY);
     return ret;
