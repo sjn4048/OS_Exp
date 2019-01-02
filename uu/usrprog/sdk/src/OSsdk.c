@@ -10,7 +10,7 @@ int (*kernel_printf)(const char* format, ...) = (int (*)(const char* format, ...
 
 void sdk_init(unsigned int argc, void *args, unsigned int entry_point){
     ENTRY_ADDR = entry_point;
-    unsigned int ra;
+    // unsigned int ra;
     // asm volatile("move %0,$ra\n\t" : "=r"(ra)); 
     // char tmp[] = "%x\n";
     // kernel_printf(tmp+entry_point,ra);
