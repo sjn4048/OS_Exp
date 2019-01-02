@@ -12,66 +12,69 @@ Disassembly of section .text:
   10:	00000000 	nop
 
 00000014 <sdk_init>:
-  14:	27bdffe8 	addiu	sp,sp,-24
-  18:	afbf0014 	sw	ra,20(sp)
-  1c:	afbe0010 	sw	s8,16(sp)
+  14:	27bdffe0 	addiu	sp,sp,-32
+  18:	afbf001c 	sw	ra,28(sp)
+  1c:	afbe0018 	sw	s8,24(sp)
   20:	03a0f025 	move	s8,sp
-  24:	afc40018 	sw	a0,24(s8)
-  28:	afc5001c 	sw	a1,28(s8)
-  2c:	afc60020 	sw	a2,32(s8)
-  30:	8fc20020 	lw	v0,32(s8)
-  34:	af828010 	sw	v0,-32752(gp)
+  24:	afc40020 	sw	a0,32(s8)
+  28:	afc50024 	sw	a1,36(s8)
+  2c:	afc60028 	sw	a2,40(s8)
+  30:	8fc20028 	lw	v0,40(s8)
+  34:	af828018 	sw	v0,-32744(gp)
   38:	3c028000 	lui	v0,0x8000
-  3c:	34420900 	ori	v0,v0,0x900
-  40:	af828014 	sw	v0,-32748(gp)
-  44:	8f828014 	lw	v0,-32748(gp)
-  48:	00401825 	move	v1,v0
-  4c:	3c020000 	lui	v0,0x0
-  50:	244200b4 	addiu	v0,v0,180
-  54:	8f848010 	lw	a0,-32752(gp)
-  58:	00003825 	move	a3,zero
-  5c:	00003025 	move	a2,zero
-  60:	00802825 	move	a1,a0
-  64:	00402025 	move	a0,v0
-  68:	0060f809 	jalr	v1
-  6c:	00000000 	nop
-  70:	00000000 	nop
-  74:	03c0e825 	move	sp,s8
-  78:	8fbf0014 	lw	ra,20(sp)
-  7c:	8fbe0010 	lw	s8,16(sp)
-  80:	27bd0018 	addiu	sp,sp,24
-  84:	03e00008 	jr	ra
-  88:	00000000 	nop
+  3c:	34422838 	ori	v0,v0,0x2838
+  40:	afc20010 	sw	v0,16(s8)
+  44:	3c028000 	lui	v0,0x8000
+  48:	34420900 	ori	v0,v0,0x900
+  4c:	af82801c 	sw	v0,-32740(gp)
+  50:	8f82801c 	lw	v0,-32740(gp)
+  54:	00401825 	move	v1,v0
+  58:	3c020000 	lui	v0,0x0
+  5c:	244200c0 	addiu	v0,v0,192
+  60:	8f848018 	lw	a0,-32744(gp)
+  64:	00003825 	move	a3,zero
+  68:	00003025 	move	a2,zero
+  6c:	00802825 	move	a1,a0
+  70:	00402025 	move	a0,v0
+  74:	0060f809 	jalr	v1
+  78:	00000000 	nop
+  7c:	00000000 	nop
+  80:	03c0e825 	move	sp,s8
+  84:	8fbf001c 	lw	ra,28(sp)
+  88:	8fbe0018 	lw	s8,24(sp)
+  8c:	27bd0020 	addiu	sp,sp,32
+  90:	03e00008 	jr	ra
+  94:	00000000 	nop
 
-0000008c <test_jump>:
-  8c:	27bdfff8 	addiu	sp,sp,-8
-  90:	afbe0004 	sw	s8,4(sp)
-  94:	03a0f025 	move	s8,sp
-  98:	afc40008 	sw	a0,8(s8)
-  9c:	8fc20008 	lw	v0,8(s8)
-  a0:	03c0e825 	move	sp,s8
-  a4:	8fbe0004 	lw	s8,4(sp)
-  a8:	27bd0008 	addiu	sp,sp,8
-  ac:	03e00008 	jr	ra
-  b0:	00000000 	nop
+00000098 <test_jump>:
+  98:	27bdfff8 	addiu	sp,sp,-8
+  9c:	afbe0004 	sw	s8,4(sp)
+  a0:	03a0f025 	move	s8,sp
+  a4:	afc40008 	sw	a0,8(s8)
+  a8:	8fc20008 	lw	v0,8(s8)
+  ac:	03c0e825 	move	sp,s8
+  b0:	8fbe0004 	lw	s8,4(sp)
+  b4:	27bd0008 	addiu	sp,sp,8
+  b8:	03e00008 	jr	ra
+  bc:	00000000 	nop
 
-000000b4 <main>:
-  b4:	27bdffe8 	addiu	sp,sp,-24
-  b8:	afbf0014 	sw	ra,20(sp)
-  bc:	afbe0010 	sw	s8,16(sp)
-  c0:	03a0f025 	move	s8,sp
-  c4:	afc40018 	sw	a0,24(s8)
-  c8:	afc5001c 	sw	a1,28(s8)
-  cc:	8f828008 	lw	v0,-32760(gp)
-  d0:	3c030000 	lui	v1,0x0
-  d4:	24640100 	addiu	a0,v1,256
-  d8:	0040f809 	jalr	v0
-  dc:	00000000 	nop
-  e0:	3c020000 	lui	v0,0x0
-  e4:	24420104 	addiu	v0,v0,260
-  e8:	03c0e825 	move	sp,s8
-  ec:	8fbf0014 	lw	ra,20(sp)
-  f0:	8fbe0010 	lw	s8,16(sp)
-  f4:	27bd0018 	addiu	sp,sp,24
-  f8:	03e00008 	jr	ra
-  fc:	00000000 	nop
+000000c0 <main>:
+  c0:	27bdffe8 	addiu	sp,sp,-24
+  c4:	afbf0014 	sw	ra,20(sp)
+  c8:	afbe0010 	sw	s8,16(sp)
+  cc:	03a0f025 	move	s8,sp
+  d0:	afc40018 	sw	a0,24(s8)
+  d4:	afc5001c 	sw	a1,28(s8)
+  d8:	8f828010 	lw	v0,-32752(gp)
+  dc:	3c030000 	lui	v1,0x0
+  e0:	2464010c 	addiu	a0,v1,268
+  e4:	0040f809 	jalr	v0
+  e8:	00000000 	nop
+  ec:	3c020000 	lui	v0,0x0
+  f0:	24420110 	addiu	v0,v0,272
+  f4:	03c0e825 	move	sp,s8
+  f8:	8fbf0014 	lw	ra,20(sp)
+  fc:	8fbe0010 	lw	s8,16(sp)
+ 100:	27bd0018 	addiu	sp,sp,24
+ 104:	03e00008 	jr	ra
+ 108:	00000000 	nop
