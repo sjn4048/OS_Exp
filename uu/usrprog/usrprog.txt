@@ -65,7 +65,7 @@ Disassembly of section .text:
   cc:	00404025 	move	t0,v0
   d0:	0000000c 	syscall
   d4:	00000000 	nop
-  d8:	8fc20008 	lw	v0,8(s8)
+  d8:	24020003 	li	v0,3
   dc:	03c0e825 	move	sp,s8
   e0:	8fbe0004 	lw	s8,4(sp)
   e4:	27bd0008 	addiu	sp,sp,8
