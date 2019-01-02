@@ -12,7 +12,6 @@ void do_exceptions(unsigned int status, unsigned int cause, context* pt_context)
     int index = cause >> 2;
     index &= 0x1f;
     if (exceptions[index]) {
-        kernel_printf("gethere %d \n",pt_context->t0);
         exceptions[index](status, cause, pt_context);
     } else {
         task_struct* pcb;
