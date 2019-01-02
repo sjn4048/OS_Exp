@@ -8,8 +8,8 @@ char tmp[] = "13";
 int tes = 2;
 unsigned int main(unsigned int argc, void *args) {
     test4(23);
-    unsigned int ra;
-    asm volatile("move %0,$ra\n\t" : "=r"(ra)); 
-    return tes;
+    unsigned int init_gp;
+    asm volatile("la %0, _gp\n\t" : "=r"(init_gp)); 
+    return init_gp;
 }
 
