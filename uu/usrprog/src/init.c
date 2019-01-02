@@ -7,8 +7,8 @@
 
 unsigned int main(unsigned int argc, void *args) {
     // test4(23);
-
-    printf(STRING("weare\n"));
+    STRING("weare\n");
+    printf(printf_tmp);
     return 0;
 }
 
