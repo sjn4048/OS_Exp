@@ -12,8 +12,7 @@ char tmp[5];
 unsigned int main(unsigned int argc, void *args) {
     // test4(23);
     
-    return "we are";
-
+    return (unsigned int)"we are";
 }
 
 #pragma GCC pop_options
