@@ -8,8 +8,8 @@
 unsigned int main(unsigned int argc, void *args) {
     // test4(23);
     char x[5] = "23";
-    STRING(x);
-    printf(printf_tmp);
+    
+    printf(STRING(x));
     return 0;
 }
 
