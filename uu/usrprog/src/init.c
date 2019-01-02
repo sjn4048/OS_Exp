@@ -11,12 +11,12 @@ int test_jump(int arg){
 char tmp[5];
 unsigned int main(unsigned int argc, void *args) {
     // test4(23);
-    // tmp[0] = 'w';
-    // tmp[1] = 'a';
-    // tmp[2] = '2';
-    // tmp[3] = 0;
-    kernel_printf("wea");
-    return (unsigned int)"we are";
+    tmp[0] = 'w';
+    tmp[1] = 'a';
+    tmp[2] = '2';
+    tmp[3] = 0;
+    kernel_printf(tmp);
+    return 0;
 }
 
 #pragma GCC pop_options
