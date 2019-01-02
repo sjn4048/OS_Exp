@@ -5,7 +5,7 @@
 #include <init.h>
 
 extern unsigned int ENTRY_ADDR;
-extern const unsigned int TRANSFORM_ADDR;
+extern unsigned int TRANSFORM_ADDR;
 
 void sdk_init(unsigned int argc, void *args, unsigned int entry_point);
 
