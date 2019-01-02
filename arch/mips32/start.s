@@ -190,15 +190,15 @@ GetPC:
 transform:
 	add $t0, $a0, $a1
 	move $t3, $ra
-	addi $sp, $sp, -4
-	sw $ra, 0($sp)
+	addi $sp, $sp, -32
+	sw $ra, 28($sp)
 	move $a0, $a2
 	move $a1, $a3
 	jal $t0
 	nop
-	lw $ra, 0($sp)
-	addiu $sp, $sp, 4
-	jr $t3
+	lw $ra, 28($sp)
+	addiu $sp, $sp, 32
+	jr $ra
 	nop
 
 .org 0x1000

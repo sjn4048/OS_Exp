@@ -5,7 +5,7 @@ int test_jump(int arg){
 }
 
 int main(unsigned int argc, void *args) {
-    // test4(23);
+    test4(23);
     return 3;
 }
 
