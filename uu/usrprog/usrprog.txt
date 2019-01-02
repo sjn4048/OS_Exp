@@ -54,21 +54,22 @@ Disassembly of section .text:
   a8:	00000000 	nop
 
 000000ac <main>:
-  ac:	27bdfff0 	addiu	sp,sp,-16
-  b0:	afbe000c 	sw	s8,12(sp)
-  b4:	03a0f025 	move	s8,sp
-  b8:	afc40010 	sw	a0,16(s8)
-  bc:	afc50014 	sw	a1,20(s8)
-  c0:	24020031 	li	v0,49
-  c4:	a3c20000 	sb	v0,0(s8)
-  c8:	24020077 	li	v0,119
-  cc:	a3c20001 	sb	v0,1(s8)
-  d0:	24020061 	li	v0,97
-  d4:	a3c20002 	sb	v0,2(s8)
-  d8:	a3c00003 	sb	zero,3(s8)
-  dc:	00001025 	move	v0,zero
+  ac:	27bdffe8 	addiu	sp,sp,-24
+  b0:	afbf0014 	sw	ra,20(sp)
+  b4:	afbe0010 	sw	s8,16(sp)
+  b8:	03a0f025 	move	s8,sp
+  bc:	afc40018 	sw	a0,24(s8)
+  c0:	afc5001c 	sw	a1,28(s8)
+  c4:	8f828010 	lw	v0,-32752(gp)
+  c8:	3c030000 	lui	v1,0x0
+  cc:	246400f8 	addiu	a0,v1,248
+  d0:	0040f809 	jalr	v0
+  d4:	00000000 	nop
+  d8:	3c020000 	lui	v0,0x0
+  dc:	244200fc 	addiu	v0,v0,252
   e0:	03c0e825 	move	sp,s8
-  e4:	8fbe000c 	lw	s8,12(sp)
-  e8:	27bd0010 	addiu	sp,sp,16
-  ec:	03e00008 	jr	ra
-  f0:	00000000 	nop
+  e4:	8fbf0014 	lw	ra,20(sp)
+  e8:	8fbe0010 	lw	s8,16(sp)
+  ec:	27bd0018 	addiu	sp,sp,24
+  f0:	03e00008 	jr	ra
+  f4:	00000000 	nop
