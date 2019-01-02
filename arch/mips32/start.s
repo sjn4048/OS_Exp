@@ -188,14 +188,16 @@ GetPC:
 .org 0x0900
 transform:
 	add $t0, $a0, $a1
-	addiu $sp, $sp, -4
+	addi $sp, $sp, -8
 	sw $a1, 0($sp)
+	sw $ra, 4($sp)
 	move $a0, $a2
 	move $a1, $a3
 	jal $t0
 	nop
 	lw $t0, 0($sp)
-	addiu $sp, $sp, 4
+	lw $ra, 4($sp)
+	addiu $sp, $sp, 8
 	add $ra, $ra, $t0
 	jr $ra
 
