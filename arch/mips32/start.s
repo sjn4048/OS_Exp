@@ -184,6 +184,7 @@ exception_save_context:
 GetPC:
 	move $v0, $ra
 	jr $ra
+	nop
 
 .org 0x0900
 transform:
@@ -193,13 +194,14 @@ transform:
 	sw $ra, 4($sp)
 	move $a0, $a2
 	move $a1, $a3
-	jal $t0
-	nop
+	# jal $t0
+	# nop
 	lw $t0, 0($sp)
 	lw $ra, 4($sp)
 	addiu $sp, $sp, 8
 	add $ra, $ra, $t0
 	jr $ra
+	nop
 
 .org 0x1000
 start:
