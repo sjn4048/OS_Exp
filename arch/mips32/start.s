@@ -189,6 +189,7 @@ GetPC:
 .org 0x0900
 transform:
 	add $t0, $a0, $a1
+	move $t3, $ra
 	addi $sp, $sp, -4
 	sw $ra, 0($sp)
 	move $a0, $a2
@@ -197,7 +198,7 @@ transform:
 	nop
 	lw $ra, 0($sp)
 	addiu $sp, $sp, 4
-	jr $ra
+	jr $t3
 	nop
 
 .org 0x1000

@@ -20,45 +20,48 @@ Disassembly of section .text:
   28:	afc5001c 	sw	a1,28(s8)
   2c:	afc60020 	sw	a2,32(s8)
   30:	8fc20020 	lw	v0,32(s8)
-  34:	af828010 	sw	v0,-32752(gp)
+  34:	af828018 	sw	v0,-32744(gp)
   38:	3c028000 	lui	v0,0x8000
   3c:	34420900 	ori	v0,v0,0x900
   40:	00401825 	move	v1,v0
   44:	3c020000 	lui	v0,0x0
-  48:	244200a0 	addiu	v0,v0,160
-  4c:	8fc50020 	lw	a1,32(s8)
-  50:	00402025 	move	a0,v0
-  54:	0060f809 	jalr	v1
-  58:	00000000 	nop
-  5c:	00000000 	nop
-  60:	03c0e825 	move	sp,s8
-  64:	8fbf0014 	lw	ra,20(sp)
-  68:	8fbe0010 	lw	s8,16(sp)
-  6c:	27bd0018 	addiu	sp,sp,24
-  70:	03e00008 	jr	ra
-  74:	00000000 	nop
+  48:	244200ac 	addiu	v0,v0,172
+  4c:	8f848018 	lw	a0,-32744(gp)
+  50:	00003825 	move	a3,zero
+  54:	00003025 	move	a2,zero
+  58:	00802825 	move	a1,a0
+  5c:	00402025 	move	a0,v0
+  60:	0060f809 	jalr	v1
+  64:	00000000 	nop
+  68:	00000000 	nop
+  6c:	03c0e825 	move	sp,s8
+  70:	8fbf0014 	lw	ra,20(sp)
+  74:	8fbe0010 	lw	s8,16(sp)
+  78:	27bd0018 	addiu	sp,sp,24
+  7c:	03e00008 	jr	ra
+  80:	00000000 	nop
 
-00000078 <test_jump>:
-  78:	27bdfff8 	addiu	sp,sp,-8
-  7c:	afbe0004 	sw	s8,4(sp)
-  80:	03a0f025 	move	s8,sp
-  84:	afc40008 	sw	a0,8(s8)
-  88:	8fc20008 	lw	v0,8(s8)
-  8c:	03c0e825 	move	sp,s8
-  90:	8fbe0004 	lw	s8,4(sp)
-  94:	27bd0008 	addiu	sp,sp,8
-  98:	03e00008 	jr	ra
-  9c:	00000000 	nop
+00000084 <test_jump>:
+  84:	27bdfff8 	addiu	sp,sp,-8
+  88:	afbe0004 	sw	s8,4(sp)
+  8c:	03a0f025 	move	s8,sp
+  90:	afc40008 	sw	a0,8(s8)
+  94:	8fc20008 	lw	v0,8(s8)
+  98:	03c0e825 	move	sp,s8
+  9c:	8fbe0004 	lw	s8,4(sp)
+  a0:	27bd0008 	addiu	sp,sp,8
+  a4:	03e00008 	jr	ra
+  a8:	00000000 	nop
 
-000000a0 <main>:
-  a0:	27bdfff8 	addiu	sp,sp,-8
-  a4:	afbe0004 	sw	s8,4(sp)
-  a8:	03a0f025 	move	s8,sp
-  ac:	afc40008 	sw	a0,8(s8)
-  b0:	afc5000c 	sw	a1,12(s8)
-  b4:	24020003 	li	v0,3
-  b8:	03c0e825 	move	sp,s8
-  bc:	8fbe0004 	lw	s8,4(sp)
-  c0:	27bd0008 	addiu	sp,sp,8
-  c4:	03e00008 	jr	ra
-  c8:	00000000 	nop
+000000ac <main>:
+  ac:	27bdfff8 	addiu	sp,sp,-8
+  b0:	afbe0004 	sw	s8,4(sp)
+  b4:	03a0f025 	move	s8,sp
+  b8:	afc40008 	sw	a0,8(s8)
+  bc:	afc5000c 	sw	a1,12(s8)
+  c0:	24020003 	li	v0,3
+  c4:	03c0e825 	move	sp,s8
+  c8:	8fbe0004 	lw	s8,4(sp)
+  cc:	27bd0008 	addiu	sp,sp,8
+  d0:	03e00008 	jr	ra
+  d4:	00000000 	nop
