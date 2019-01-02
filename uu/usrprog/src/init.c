@@ -4,12 +4,13 @@ int test_jump(int arg){
     return arg;
 }
 
-char tmp[] = "13";
-unsigned int tes = 2;
-unsigned int init_gp;
+char tmp[5];
 unsigned int main(unsigned int argc, void *args) {
     test4(23);
-    asm volatile("move %0, $gp\n\t" : "=r"(init_gp)); 
-    return init_gp;
+    tmp[0] = '1';
+    tmp[1] = 'w';
+    tmp[2] = 'a';
+    tmp[3] = 0;
+    return tmp;
 }
 
