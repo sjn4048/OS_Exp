@@ -8,6 +8,10 @@ const unsigned int TRANSFORM_ADDR = 0x80000900;
 
 void sdk_init(unsigned int argc, void *args, unsigned int entry_point){
     ENTRY_ADDR = entry_point;
+    unsigned int ra;
+    asm volatile("la %0, ra\n\t" : "=r"(ra)); 
+    TRANSFORM(kernel_printf,"%x",ra);
+    TRANSFORM(kernel_printf,"%x",ra);
     TRANSFORM((unsigned int)main,0,0);
     // asm volatile(
     //     "la $t0, main\n\t"
