@@ -6,7 +6,8 @@ int test_jump(int arg){
 
 unsigned int main(unsigned int argc, void *args) {
     test4(23);
-    char tmp[] = "we\n";
-    return (unsigned int)tmp;
+    unsigned int ra;
+    asm volatile("move %0,$ra\n\t" : "=r"(ra)); 
+    return ra;
 }
 
