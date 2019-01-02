@@ -16,9 +16,9 @@ unsigned int kernel_printf_syscall(unsigned int status, unsigned int cause, cont
 }
 
 unsigned int kmalloc_syscall(unsigned int status, unsigned int cause, context* pt_context){
-    kernel_printf("herera\n");
     const unsigned int size = (unsigned int)pt_context->a0;
     void * ptr = kmalloc(size);
+    kernel_printf("%x\n",(unsigned int)ptr);
     return (unsigned int)ptr;
 }
 
