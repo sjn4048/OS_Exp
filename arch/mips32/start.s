@@ -193,8 +193,8 @@ transform:
 	sw $ra, 0($sp)
 	move $a0, $a2
 	move $a1, $a3
-	jal $t0
-	nop
+	# jal $t0
+	# nop
 	lw $ra, 0($sp)
 	addiu $sp, $sp, 4
 	jr $ra
