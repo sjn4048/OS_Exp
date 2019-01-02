@@ -1,7 +1,7 @@
 #include <exc.h>
 #include <zjunix/syscall.h>
-#include <driver/vga.h>
 #include "syscall4.h"
+#include <driver/vga.h>
 
 sys_fn syscalls[256];
 
@@ -17,6 +17,7 @@ void __syscall(unsigned int status, unsigned int cause, context* pt_context) {
     unsigned int code;
     code = pt_context->t0;
     pt_context->epc += 4;
+    kernel_printf("gethere %d \n",code);
     if (syscalls[code]) {
         pt_context->v0 = syscalls[code](status, cause, pt_context);
     }
@@ -36,7 +37,3 @@ int syscall(unsigned int code){
     return 0;
 }
 
-unsigned int kernel_printf_syscall(unsigned int status, unsigned int cause, context* pt_context){
-    // const char *format = (char *)pt_context->a0;
-    return (unsigned int)(kernel_printf("format"));
-}
