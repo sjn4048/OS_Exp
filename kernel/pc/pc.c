@@ -634,8 +634,9 @@ int exec_from_file(char* filename) {
     // char argv[1][10];
     // kernel_memset(argv,0,sizeof(argv));
     // kernel_memcpy(argv[0],"test",5);
-    int ret = f(0,0,ENTRY);
-    kernel_printf("%s",(char *)(ret+ENTRY));
+    unsigned int ret = f(0,0,ENTRY);
+    kernel_printf("%x\n",ret);
+    kernel_printf("%s\n",(char *)(ret+ENTRY));
     // pc_create("seg",(void *)ENTRY,0,0,0,1);
     // kfree((void*)ENTRY);
     return ret;
