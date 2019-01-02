@@ -6,10 +6,10 @@
 
 
 unsigned int main(unsigned int argc, void *args) {
-    // test4(23);
-    char x[5] = "23";
-    
-    printf(STRING(x));
+
+    char x[5] = "%x\n";
+    unsigned int ptr = malloc(16);
+    printf(STRING(x),ptr);
     return 0;
 }
 

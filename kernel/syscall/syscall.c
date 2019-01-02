@@ -11,6 +11,7 @@ void init_syscall() {
     // register all syscalls here
     register_syscall(4, syscall4);
     register_syscall(9,kernel_printf_syscall);
+    register_syscall(7,kmalloc_syscall);
 }
 
 void __syscall(unsigned int status, unsigned int cause, context* pt_context) {
