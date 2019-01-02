@@ -21,21 +21,24 @@
              sys##name;                                            \
 } while(0)
 
-#define get_ret_value ({                        \
-    int tmp = 0;                                \
-    asm volatile("move %0, $v0\n\t" : "=r"(tmp)); \
+#define get_ret_value ({                           \
+    int tmp = 0;                                   \
+    asm volatile("move %0, $v0\n\t" : "=r"(tmp));  \
     tmp;  })
 
 #define sys_test4 __syscall(4)
 
-#define sys_fork(__hold) ({                             \
+#define sys_fork(__hold) ({                    \
     __syscall(8);                              \
     get_ret_value;   })
 
+#define sys_printf __syscall(9)
+
 #define test4(arg1) SYSCALL_DEFINE1(_test4, arg1)
 #define fork() SYSCALL_DEFINE0(_fork)
+#define printf(arg1) SYSCALL_DEFINE1(_printf, arg1)
 
-#define __syscall(code)    \
+#define __syscall(code)     \
         asm volatile(       \
         "move $t0, %0\n\t"  \
         "syscall\n\t"       \

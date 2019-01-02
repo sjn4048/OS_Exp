@@ -1,5 +1,6 @@
 #include <exc.h>
 #include <zjunix/syscall.h>
+#include <driver/vga.h>
 #include "syscall4.h"
 
 sys_fn syscalls[256];
@@ -9,6 +10,7 @@ void init_syscall() {
 
     // register all syscalls here
     register_syscall(4, syscall4);
+    register_syscall(9,kernel_printf_syscall);
 }
 
 void __syscall(unsigned int status, unsigned int cause, context* pt_context) {
@@ -32,4 +34,9 @@ int syscall(unsigned int code){
         "nop\n\t"
         : : "r"(code));
     return 0;
+}
+
+unsigned int kernel_printf_syscall(unsigned int status, unsigned int cause, context* pt_context){
+    const char *format = (char *)pt_context->a0;
+    return (unsigned int)(kernel_printf(format));
 }

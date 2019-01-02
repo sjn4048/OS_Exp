@@ -9,7 +9,6 @@ extern unsigned int TRANSFORM_ADDR;
 
 void sdk_init(unsigned int argc, void *args, unsigned int entry_point);
 
-int (*kernel_printf)(const char* format, ...);
 
 #define TRANSFORM(name, _arg1, _arg2) (((unsigned int (*)(unsigned int func, \
  unsigned int entry, void * arg1, void * arg2))                                          \

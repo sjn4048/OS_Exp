@@ -5,7 +5,6 @@ unsigned int ENTRY_ADDR;
 unsigned int TRANSFORM_ADDR;
 
 
-int (*kernel_printf)(const char* format, ...) = (int (*)(const char* format, ...))(0x80002838);
 
 
 void sdk_init(unsigned int argc, void *args, unsigned int entry_point){
