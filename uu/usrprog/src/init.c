@@ -10,6 +10,6 @@ unsigned int main(unsigned int argc, void *args) {
     test4(23);
     unsigned int init_gp;
     asm volatile("la %0, _gp\n\t" : "=r"(init_gp)); 
-    return tes;
+    return init_gp;
 }
 
