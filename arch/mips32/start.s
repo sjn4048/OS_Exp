@@ -196,7 +196,7 @@ transform:
 	nop
 	lw $t0, 0($sp)
 	addiu $sp, $sp, 4
-	add $t0, $t0, $ra
+	add $ra, $ra, $t0
 	jr $ra
 
 .org 0x1000
