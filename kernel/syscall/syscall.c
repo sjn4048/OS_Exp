@@ -37,6 +37,6 @@ int syscall(unsigned int code){
 }
 
 unsigned int kernel_printf_syscall(unsigned int status, unsigned int cause, context* pt_context){
-    const char *format = (char *)pt_context->a0;
-    return (unsigned int)(kernel_printf(format));
+    // const char *format = (char *)pt_context->a0;
+    return (unsigned int)(kernel_printf("format"));
 }
