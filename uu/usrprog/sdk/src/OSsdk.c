@@ -5,7 +5,7 @@ unsigned int ENTRY_ADDR;
 unsigned int TRANSFORM_ADDR;
 
 
-
+char printf_tmp[30];
 
 void sdk_init(unsigned int argc, void *args, unsigned int entry_point){
     ENTRY_ADDR = entry_point;
