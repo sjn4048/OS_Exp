@@ -14,7 +14,8 @@ unsigned int main(unsigned int argc, void *args) {
     tmp[0] = 'w';
     tmp[1] = 'a';
     tmp[2] = '2';
-    tmp[3] = 0;
+    tmp[3] = '\n';
+    tmp[4] = 0;
     printf(tmp);
     return 0;
 }
