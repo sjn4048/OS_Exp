@@ -67,7 +67,7 @@ Disassembly of section .text:
   d4:	00000000 	nop
   d8:	03e01025 	move	v0,ra
   dc:	afc20000 	sw	v0,0(s8)
-  e0:	27828018 	addiu	v0,gp,-32744
+  e0:	8f82801c 	lw	v0,-32740(gp)
   e4:	03c0e825 	move	sp,s8
   e8:	8fbe000c 	lw	s8,12(sp)
   ec:	27bd0010 	addiu	sp,sp,16
