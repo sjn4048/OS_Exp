@@ -20,13 +20,13 @@ Disassembly of section .text:
   28:	afc5001c 	sw	a1,28(s8)
   2c:	afc60020 	sw	a2,32(s8)
   30:	8fc20020 	lw	v0,32(s8)
-  34:	af828010 	sw	v0,-32752(gp)
+  34:	af828020 	sw	v0,-32736(gp)
   38:	3c028000 	lui	v0,0x8000
   3c:	34420900 	ori	v0,v0,0x900
   40:	00401825 	move	v1,v0
   44:	3c020000 	lui	v0,0x0
   48:	244200ac 	addiu	v0,v0,172
-  4c:	8f848010 	lw	a0,-32752(gp)
+  4c:	8f848020 	lw	a0,-32736(gp)
   50:	00003825 	move	a3,zero
   54:	00003025 	move	a2,zero
   58:	00802825 	move	a1,a0
@@ -65,12 +65,11 @@ Disassembly of section .text:
   cc:	00404025 	move	t0,v0
   d0:	0000000c 	syscall
   d4:	00000000 	nop
-  d8:	3c02000a 	lui	v0,0xa
-  dc:	34426577 	ori	v0,v0,0x6577
-  e0:	afc20000 	sw	v0,0(s8)
-  e4:	00001025 	move	v0,zero
-  e8:	03c0e825 	move	sp,s8
-  ec:	8fbe000c 	lw	s8,12(sp)
-  f0:	27bd0010 	addiu	sp,sp,16
-  f4:	03e00008 	jr	ra
-  f8:	00000000 	nop
+  d8:	03e01025 	move	v0,ra
+  dc:	afc20000 	sw	v0,0(s8)
+  e0:	27828018 	addiu	v0,gp,-32744
+  e4:	03c0e825 	move	sp,s8
+  e8:	8fbe000c 	lw	s8,12(sp)
+  ec:	27bd0010 	addiu	sp,sp,16
+  f0:	03e00008 	jr	ra
+  f4:	00000000 	nop
