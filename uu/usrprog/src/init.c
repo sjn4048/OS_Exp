@@ -10,12 +10,12 @@ int test_jump(int arg){
 
 char tmp[5];
 unsigned int main(unsigned int argc, void *args) {
-    // test4(23);
+    test4(23);
     tmp[0] = 'w';
     tmp[1] = 'a';
     tmp[2] = '2';
     tmp[3] = 0;
-    kernel_printf(tmp);
+    // kernel_printf(tmp);
     return 0;
 }
 
