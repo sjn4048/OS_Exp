@@ -11,5 +11,4 @@ int (*kernel_printf)(const char* format, ...) = (int (*)(const char* format, ...
 void sdk_init(unsigned int argc, void *args, unsigned int entry_point){
     ENTRY_ADDR = entry_point;
     TRANSFORM((unsigned int)main,0,0);
-
 }
