@@ -8,6 +8,9 @@
 #define _PAGE_ALLOCED (1 << 30)
 #define _PAGE_SLAB (1 << 29)
 
+struct page *pages;
+struct buddy_sys buddy;
+
 /*
  * struct buddy page is one info-set for the buddy group of pages
  */
@@ -57,9 +60,6 @@ struct buddy_sys {
 #define set_ref(page, val) ((*(page)).reference = (val))
 #define inc_ref(page, val) ((*(page)).reference += (val))
 #define dec_ref(page, val) ((*(page)).reference -= (val))
-
-extern struct page *pages;
-extern struct buddy_sys buddy;
 
 extern void __free_pages(struct page *page, unsigned int order);
 extern struct page *__alloc_pages(unsigned int order);

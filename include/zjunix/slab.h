@@ -13,10 +13,10 @@
  * @end_ptr : points to the head of the rest of the page
  * @nr_objs : keeps the numbers of memory segments that has been allocated
  */
-struct slab_head {
+typedef struct slab_head {
     void *end_ptr;
     unsigned int nr_objs;
-};
+} slab;
 
 /*
  * slab pages is chained in this struct
@@ -32,18 +32,20 @@ struct kmem_cache_node {
  * current being allocated page unit
  */
 struct kmem_cache_cpu {
-    void **freeobj;  // points to the free-space head addr inside current page
+    void* *freeobj;  // points to the free-space head addr inside current page
     struct page *page;
 };
 
-struct kmem_cache {
+// TODO: 补全函数声明
+
+typedef struct {
     unsigned int size;
     unsigned int objsize;
     unsigned int offset;
     struct kmem_cache_node node;
     struct kmem_cache_cpu cpu;
-    unsigned char name[16];
-};
+    // unsigned char name[16];
+} kmem_cache;
 
 // extern struct kmem_cache kmalloc_caches[PAGE_SHIFT];
 extern void init_slab();
