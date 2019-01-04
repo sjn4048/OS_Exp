@@ -7,6 +7,7 @@
 #include <zjunix/bootmm.h>
 #include <zjunix/buddy.h>
 #include <zjunix/fs/fat.h>
+#include <zjunix/fs/ext2.h>
 #include <zjunix/log.h>
 #include <zjunix/pc.h>
 #include <zjunix/slab.h>
@@ -31,10 +32,10 @@ void machine_info() {
 #pragma GCC optimize("O0")
 void create_startup_process() {
     // nice value of 1, just for test
-    pc_create("powershell",(void*)ps,0,0,1);
+    pc_create("powershell",(void*)ps,0,0,1,1,0);
     log(LOG_OK, "Shell init");
     // nice value of 2, just for test
-    pc_create("time",(void*)system_time_proc,0,0,2);
+    pc_create("time",(void*)system_time_proc,0,0,2,1,0);
     log(LOG_OK, "Timer init");
 }
 #pragma GCC pop_options
@@ -60,6 +61,7 @@ void init_kernel() {
     // File system
     log(LOG_START, "File System.");
     init_fs();
+    ext2_init();
     log(LOG_END, "File System.");
     // System call
     log(LOG_START, "System Calls.");

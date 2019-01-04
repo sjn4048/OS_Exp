@@ -8,31 +8,42 @@
 
 exc_fn exceptions[32];
 
-void do_exceptions(unsigned int status, unsigned int cause, context* pt_context) {
+void do_exceptions(unsigned int status, unsigned int cause, context *pt_context)
+{
     kernel_printf("exception!!!!!!!!!!!!!");
+
     int index = cause >> 2;
     index &= 0x1f;
-    if (exceptions[index]) {
+    if (exceptions[index])
+    {
         exceptions[index](status, cause, pt_context);
-    } else {
-        task_struct* pcb;
+    }
+    else
+    {
+        task_struct *pcb;
         unsigned int badVaddr;
-        asm volatile("mfc0 %0, $8\n\t" : "=r"(badVaddr));
+        asm volatile("mfc0 %0, $8\n\t"
+                     : "=r"(badVaddr));
         pcb = current_task;
-        kernel_printf("\nProcess %s exited due to exception cause=%x;\n", pcb->name, cause);
-        kernel_printf("status=%x, EPC=%x, BadVaddr=%x\n", status, pcb->context.epc, badVaddr);
-        pc_kill_syscall(status, cause, pt_context);
+        if (current_task)
+        {
+            kernel_printf("\nProcess %s exited due to exception cause=%x;\n", pcb->name, cause);
+            kernel_printf("status=%x, EPC=%x, BadVaddr=%x\n", status, pcb->context.epc, badVaddr);
+            pc_kill_syscall(status, cause, pt_context);
+        }
         while (1)
             ;
     }
 }
 
-void register_exception_handler(int index, exc_fn fn) {
+void register_exception_handler(int index, exc_fn fn)
+{
     index &= 31;
     exceptions[index] = fn;
 }
 
-void init_exception() {
+void init_exception()
+{
     // status 0000 0000 0000 0000 0000 0000 0000 0000
     // cause 0000 0000 1000 0000 0000 0000 0000 0000
     asm volatile(
