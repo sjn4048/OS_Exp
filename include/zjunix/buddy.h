@@ -14,6 +14,7 @@ struct buddy_sys buddy;
 /*
  * struct buddy page is one info-set for the buddy group of pages
  */
+
 struct page {
     unsigned int flag;       // the declaration of the usage of this page
     unsigned int reference;  //
@@ -28,9 +29,13 @@ struct page {
     unsigned int slabp;      /* if the page is used by slab system,
                               * then slabp represents the base-addr of free space
                               */
+    unsigned int slobp;      /* if the page is used by slob system,
+                              * then slobp represents the base-addr of free space
+                              */
 };
 
 #define PAGE_SHIFT 12
+#define PAGE_SIZE 1 << (PAGE_SHIFT)
 /*
  * order means the size of the set of pages, e.g. order = 1 -> 2^1
  * pages(consequent) are free In current system, we allow the max order to be

@@ -175,7 +175,7 @@ void free_slab(kmem_cache *cache, void *object)
             ;
     }
 
-    unsigned int *ptr = (unsigned char *)object + cache->offset;
+    unsigned int *ptr = (unsigned int *)((unsigned char *)object + cache->offset);
     *ptr = *(unsigned int *)(s_head->end_ptr);
     *(unsigned int *)s_head->end_ptr = (unsigned int)object;
     s_head->nr_objs--;
@@ -206,5 +206,39 @@ unsigned int find_slab(unsigned int size)
     }
 }
 
-void *kmalloc(unsigned int size);
-void kfree(void *obj);
+void *kmalloc(unsigned int size) {
+    struct kmem_cache *cache;
+    unsigned int bf_index;
+
+    if (size == 0)
+    {
+        return 0;
+    }
+
+    // if the size larger than the max size of slab system, then call buddy to
+    // solve this
+    if (size > kmalloc_caches[PAGE_SHIFT - 1].objsize) {
+        size += (1 << PAGE_SHIFT) - 1;
+        size &= ~((1 << PAGE_SHIFT) - 1);
+        return (void *)(KERNEL_ENTRY | (unsigned int)alloc_pages(size >> PAGE_SHIFT));
+    }
+
+    bf_index = find_slab(size);
+    if (bf_index >= PAGE_SHIFT) {
+        kernel_printf("ERROR: No available slab\n");
+        while (1)
+            ;
+    }
+    return (void *)(KERNEL_ENTRY | (unsigned int)slab_alloc(&kmalloc_caches[bf_index]));
+}
+
+void kfree(void *obj) {
+    struct page *page;
+
+    obj = (void *)((unsigned int)obj & (~KERNEL_ENTRY));
+    page = pages + ((unsigned int)obj >> PAGE_SHIFT);
+    if (page->flag != _PAGE_SLAB)
+        return free_pages((void *)((unsigned int)obj & ~((1 << PAGE_SHIFT) - 1)), page->bplevel);
+
+    return free_slab(page->virtual, obj);
+}

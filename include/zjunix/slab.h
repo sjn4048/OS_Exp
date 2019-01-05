@@ -8,6 +8,8 @@
 #define SLAB_AVAILABLE 0x0
 #define SLAB_USED 0xff
 
+#define KMEM_ADDR(PAGE, BASE) ((((PAGE) - (BASE)) << PAGE_SHIFT) | 0x80000000)
+
 /*
  * slab_head makes the allocation accessible from end_ptr to the end of the page
  * @end_ptr : points to the head of the rest of the page
