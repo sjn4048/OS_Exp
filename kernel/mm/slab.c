@@ -2,6 +2,7 @@
 #include <driver/vga.h>
 #include <zjunix/slab.h>
 #include <zjunix/utils.h>
+#include <zjunix/log.h>
 
 /*
  * one list of PAGE_SHIFT(12) possbile memory size
@@ -85,7 +86,8 @@ void format_slabpage(kmem_cache *cache, struct page *page) {
     unsigned int remaining = 1 << PAGE_SHIFT;
 
     set_flag(page, _PAGE_SLAB);
-    do {
+    do
+    {
         ptr = (unsigned int *)(moffset + cache->offset);
         moffset += cache->size;
         *ptr = (unsigned int)moffset;
@@ -156,7 +158,8 @@ slalloc_normal:
     ++(s_head->nr_objs);
 slalloc_end:
     // slab may be full after this allocation
-    if (is_bound(cache->cpu.page->slabp, 1 << PAGE_SHIFT)) {
+    if (is_bound(cache->cpu.page->slabp, 1 << PAGE_SHIFT))
+    {
         list_add_tail(&(cache->cpu.page->list), &(cache->node.full));
         init_kmem_cpu(&(cache->cpu));
     }
@@ -206,7 +209,8 @@ unsigned int find_slab(unsigned int size)
     }
 }
 
-void *kmalloc(unsigned int size) {
+void *kmalloc(unsigned int size)
+{
     struct kmem_cache *cache;
     unsigned int bf_index;
 
@@ -217,7 +221,8 @@ void *kmalloc(unsigned int size) {
 
     // if the size larger than the max size of slab system, then call buddy to
     // solve this
-    if (size > kmalloc_caches[PAGE_SHIFT - 1].objsize) {
+    if (size > kmalloc_caches[PAGE_SHIFT - 1].objsize)
+    {
         size += (1 << PAGE_SHIFT) - 1;
         size &= ~((1 << PAGE_SHIFT) - 1);
         return (void *)(KERNEL_ENTRY | (unsigned int)alloc_pages(size >> PAGE_SHIFT));
@@ -232,7 +237,8 @@ void *kmalloc(unsigned int size) {
     return (void *)(KERNEL_ENTRY | (unsigned int)slab_alloc(&kmalloc_caches[bf_index]));
 }
 
-void kfree(void *obj) {
+void kfree(void *obj)
+{
     struct page *page;
 
     obj = (void *)((unsigned int)obj & (~KERNEL_ENTRY));
