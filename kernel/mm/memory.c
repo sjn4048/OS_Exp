@@ -4,7 +4,7 @@
 void *kmalloc(unsigned int size)
 {
     // TODO
-    allocator = SLAB;
+    allocator = SLOB;
     void *res;
 #ifdef MEMORY_DEBUG
     kernel_printf("Kmalloc: Size:%d, Allocator: %s\t", size, all_to_str[allocator]);
@@ -63,29 +63,29 @@ void kfree(void *obj)
 #pragma GCC push_options
 #pragma GCC optimize("O0")
 
-#define RETRY_CNT 10
-#define RETRY_CNT2 10
-#define RETRY_SIZE 10
+#define RETRY_CNT 1000
+#define RETRY_CNT2 5000
+#define RETRY_SIZE 2000
 void test_malloc()
 {
     void *a;
     //TODO:known bug
-    a = kmalloc(10);
-    kfree(a);
-    a = kmalloc(100);
-    kfree(a);
-    a = kmalloc(256);
-    kfree(a);
-    a = kmalloc(512);
-    kfree(a);
-    a = kmalloc(1024);
-    kfree(a);
-    a = kmalloc(2048);
-    kfree(a);
-    a = kmalloc(4096);
-    kfree(a);
-    a = kmalloc(10000);
-    kfree(a);
+    // a = kmalloc(10);
+    // kfree(a);
+    // a = kmalloc(100);
+    // kfree(a);
+    // a = kmalloc(256);
+    // kfree(a);
+    // a = kmalloc(512);
+    // kfree(a);
+    // a = kmalloc(1024);
+    // kfree(a);
+    // a = kmalloc(2048);
+    // kfree(a);
+    // a = kmalloc(4096);
+    // kfree(a);
+    // a = kmalloc(10000);
+    // kfree(a);
 
     void *b[RETRY_CNT];
     char time_str_buf[9];

@@ -10,7 +10,7 @@
 
 #define KMEM_ADDR(PAGE, BASE) ((((PAGE) - (BASE)) << PAGE_SHIFT) | 0x80000000)
 
-#define SLAB_DEBUG
+//#define SLAB_DEBUG
 #ifdef SLAB_DEBUG
 #include <driver/ps2.h>
 #endif
