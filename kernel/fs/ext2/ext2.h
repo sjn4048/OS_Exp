@@ -11,7 +11,7 @@
 #include <driver/vga.h>
 #include <zjunix/utils.h>
 #include <driver/sd.h>
-#include <zjunix/slab.h>
+#include <zjunix/memory.h>
 #include <zjunix/log.h>
 
 /* disk_tool.c */

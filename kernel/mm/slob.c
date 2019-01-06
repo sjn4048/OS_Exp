@@ -228,7 +228,7 @@ void slob_kfree(const void *block)
     return;
 }
 
-unsigned int ksize(const void *block)
+unsigned int slob_ksize(const void *block)
 {
 	bigblock_t *bb;
 

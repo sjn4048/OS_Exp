@@ -4,7 +4,7 @@
 #include <driver/vga.h>
 #include <zjunix/fs/fat.h>
 #include <zjunix/pc.h>
-#include <zjunix/slab.h>
+#include <zjunix/memory.h>
 #include <zjunix/utils.h>
 
 #pragma GCC push_options

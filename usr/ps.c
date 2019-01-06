@@ -6,7 +6,7 @@
 #include <zjunix/buddy.h>
 #include <zjunix/fs/fat.h>
 #include <zjunix/fs/ext2.h>
-#include <zjunix/slab.h>
+#include <zjunix/memory.h>
 #include <zjunix/time.h>
 #include <zjunix/log.h>
 #include <zjunix/syscall.h>

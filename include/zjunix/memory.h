@@ -1,13 +1,14 @@
 #ifndef _MEMORY_H
 #define _MEMORY_H
 
+#include <zjunix/slab.h>
+#include <zjunix/slob.h>
+
 #ifndef NULL
 #define NULL 0
 #endif // !NULL
 
-
-#include <zjunix/slab.h>
-#include <zjunix/slub.h>
+//#include <zjunix/slub.h>
 
 enum __Allocator
 {

@@ -51,7 +51,7 @@ typedef struct {
 
 // extern struct kmem_cache kmalloc_caches[PAGE_SHIFT];
 extern void init_slab();
-extern void *kmalloc(unsigned int size);
-extern void kfree(void *obj);
+extern void *slab_kmalloc(unsigned int size);
+extern void slab_kfree(void *obj);
 
 #endif

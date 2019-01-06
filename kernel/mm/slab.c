@@ -209,7 +209,7 @@ unsigned int find_slab(unsigned int size)
     }
 }
 
-void *kmalloc(unsigned int size)
+void *slab_kmalloc(unsigned int size)
 {
     struct kmem_cache *cache;
     unsigned int bf_index;
@@ -237,7 +237,7 @@ void *kmalloc(unsigned int size)
     return (void *)(KERNEL_ENTRY | (unsigned int)slab_alloc(&kmalloc_caches[bf_index]));
 }
 
-void kfree(void *obj)
+void slab_kfree(void *obj)
 {
     struct page *page;
 

@@ -35,7 +35,9 @@ struct page {
 };
 
 #define PAGE_SHIFT 12
+#ifndef PAGE_SIZE
 #define PAGE_SIZE 1 << (PAGE_SHIFT)
+#endif // !PAGE_SIZE
 /*
  * order means the size of the set of pages, e.g. order = 1 -> 2^1
  * pages(consequent) are free In current system, we allow the max order to be
