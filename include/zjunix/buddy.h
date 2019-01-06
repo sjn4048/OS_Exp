@@ -8,8 +8,10 @@
 #define _PAGE_ALLOCED (1 << 30)
 #define _PAGE_SLAB (1 << 29)
 
-struct page *pages;
-struct buddy_sys buddy;
+//#define BUDDY_DEBUG
+#ifdef BUDDY_DEBUG
+#include <driver/ps2.h>
+#endif //BUDDY_DEBUG
 
 /*
  * struct buddy page is one info-set for the buddy group of pages
@@ -29,15 +31,14 @@ struct page {
     unsigned int slabp;      /* if the page is used by slab system,
                               * then slabp represents the base-addr of free space
                               */
-    unsigned int slobp;      /* if the page is used by slob system,
-                              * then slobp represents the base-addr of free space
-                              */
 };
 
 #define PAGE_SHIFT 12
 #ifndef PAGE_SIZE
-#define PAGE_SIZE 1 << (PAGE_SHIFT)
+#define PAGE_SIZE (1 << (PAGE_SHIFT))
 #endif // !PAGE_SIZE
+#define PAGE_MASK (~(PAGE_SIZE - 1))
+
 /*
  * order means the size of the set of pages, e.g. order = 1 -> 2^1
  * pages(consequent) are free In current system, we allow the max order to be
@@ -58,6 +59,9 @@ struct buddy_sys {
     struct freelist freelist[MAX_BUDDY_ORDER + 1];
 };
 
+struct page *pages;
+struct buddy_sys buddy;
+
 #define _is_same_bpgroup(page, bage) (((*(page)).bplevel == (*(bage)).bplevel))
 #define _is_same_bplevel(page, lval) ((*(page)).bplevel == (lval))
 #define set_bplevel(page, lval) ((*(page)).bplevel = (lval))
@@ -74,6 +78,10 @@ extern struct page *__alloc_pages(unsigned int order);
 extern void free_pages(void *addr, unsigned int order);
 
 extern void *alloc_pages(unsigned int order);
+
+extern void *buddy_kmalloc(unsigned int size);
+
+extern void buddy_kfree(void* obj);
 
 extern void init_buddy();
 

@@ -15,6 +15,11 @@ enum mm_usage
     _MM_COUNT
 };
 
+#define BOOTMM_DEBUG
+#ifdef BOOTMM_DEBUG
+#include <driver/ps2.h>
+#endif
+
 // record every part of mm's information
 struct bootmm_info
 {

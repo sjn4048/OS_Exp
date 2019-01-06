@@ -11,7 +11,7 @@
  */
 kmem_cache kmalloc_caches[PAGE_SHIFT];
 
-static unsigned int size_kmem_cache[PAGE_SHIFT] = {8, 16, 32, 64, 128, 256, 512, 1024, 2048, 96, 192, 1536};
+static unsigned int size_kmem_cache[PAGE_SHIFT] = {96, 192, 1536, 8, 16, 32, 64, 128, 256, 512, 1024, 2048};
 
 // initialize struct kmem_cache_cpu
 void init_kmem_cpu(struct kmem_cache_cpu *kcpu)
@@ -66,7 +66,7 @@ void init_slab()
 #ifdef SLAB_DEBUG
     kernel_printf("Setup Slub success:\n");
     kernel_printf("\tCurrent slab cache size list:\n\t");
-    for (i = 0; i < PAGE_SHIFT; i++)
+    for (int i = 0; i < PAGE_SHIFT; i++)
     {
         kernel_printf("%x %x ", kmalloc_caches[i].objsize, kmalloc_caches + i);
     }
@@ -79,11 +79,12 @@ void init_slab()
 // 		e.g. if size = 96 then 4096 / 96 = .. .. 64 then slabp starts at
 // 64
 // TODO: review
-void format_slabpage(kmem_cache *cache, struct page *page) {
-    unsigned char *moffset = (unsigned char *)KMEM_ADDR(page, pages);  // physical addr
+void format_slabpage(kmem_cache *cache, struct page *page)
+{
+    unsigned char *moffset = (unsigned char *)KMEM_ADDR(page, pages); // physical addr
     struct slab_head *s_head = (struct slab_head *)moffset;
     unsigned int *ptr;
-    unsigned int remaining = 1 << PAGE_SHIFT;
+    unsigned int remaining = PAGE_SIZE;
 
     set_flag(page, _PAGE_SLAB);
     do
@@ -94,7 +95,7 @@ void format_slabpage(kmem_cache *cache, struct page *page) {
         remaining -= cache->size;
     } while (remaining >= cache->size);
 
-    *ptr = (unsigned int)moffset & ~((1 << PAGE_SHIFT) - 1);
+    *ptr = (unsigned int)moffset & ~(PAGE_SIZE - 1);
     s_head->end_ptr = ptr;
     s_head->nr_objs = 0;
 
@@ -103,7 +104,6 @@ void format_slabpage(kmem_cache *cache, struct page *page) {
     page->virtual = (void *)cache;
     page->slabp = (unsigned int)(*cache->cpu.freeobj);
 }
-
 
 // TODO: review
 void *slab_alloc(kmem_cache *cache)
@@ -114,11 +114,14 @@ void *slab_alloc(kmem_cache *cache)
     // check if there is free
     if (cache->cpu.freeobj != 0)
     {
-        object = *cache->cpu.freeobj;
+        object = *(cache->cpu.freeobj);
     }
 slalloc_check:
     // check if the freeobj is in the boundary situation
-    if (is_bound((unsigned int)object, 1 << PAGE_SHIFT))
+#ifdef SLAB_DEBUG
+    kernel_printf("\tobject: %d\n", (unsigned int)object);
+#endif // ! SLAB_DEBUG
+    if (is_bound((unsigned int)object, PAGE_SIZE))
     {
         // if the page is full
         if (cache->cpu.page != 0)
@@ -138,11 +141,11 @@ slalloc_check:
                     ;
             }
 #ifdef SLAB_DEBUG
-            kernel_printf("\tNew page, index: %x \n", newpage - pages);
+            kernel_printf("\tnewpage: %x, pages: %x, index: %x \n", newpage, pages, newpage - pages);
 #endif // ! SLAB_DEBUG
             format_slabpage(cache, newpage);
             object = *cache->cpu.freeobj;
-            // CHANGE: removed a <goto>
+            goto slalloc_check;
         }
         // get the header of the cpu.page(struct page)
         cache->cpu.page = container_of(cache->node.partial.next, struct page, list);
@@ -158,11 +161,14 @@ slalloc_normal:
     ++(s_head->nr_objs);
 slalloc_end:
     // slab may be full after this allocation
-    if (is_bound(cache->cpu.page->slabp, 1 << PAGE_SHIFT))
+    if (is_bound(cache->cpu.page->slabp, PAGE_SIZE))
     {
-        list_add_tail(&(cache->cpu.page->list), &(cache->node.full));
-        init_kmem_cpu(&(cache->cpu));
+        list_add_tail(&cache->cpu.page->list, &cache->node.full);
+        init_kmem_cpu(&cache->cpu);
     }
+#ifdef SLAB_DEBUG
+    kernel_printf("\tslab_alloc ret: %x\n", object);
+#endif // ! SLAB_DEBUG
     return object;
 }
 
@@ -184,7 +190,9 @@ void free_slab(kmem_cache *cache, void *object)
     s_head->nr_objs--;
 
     if (list_empty(&opage->list))
+    {
         return;
+    }
 
     if (s_head->nr_objs == 0)
     {
@@ -218,31 +226,41 @@ void *slab_kmalloc(unsigned int size)
     {
         return 0;
     }
-
+#ifdef SLAB_DEBUG
+    kernel_printf("\tslab_kmalloc: size: %d", size);
+    kernel_getchar();
+#endif // ! SLAB_DEBUG
     // if the size larger than the max size of slab system, then call buddy to
     // solve this
     if (size > kmalloc_caches[PAGE_SHIFT - 1].objsize)
     {
-        size += (1 << PAGE_SHIFT) - 1;
-        size &= ~((1 << PAGE_SHIFT) - 1);
+        size = UPPER_ALLIGN(size, PAGE_SIZE);
         return (void *)(KERNEL_ENTRY | (unsigned int)alloc_pages(size >> PAGE_SHIFT));
     }
 
     bf_index = find_slab(size);
-    if (bf_index >= PAGE_SHIFT) {
+    if (bf_index >= PAGE_SHIFT)
+    {
         kernel_printf("ERROR: No available slab\n");
         while (1)
             ;
     }
+#ifdef SLAB_DEBUG
+    kernel_printf("\tslab: returns: %x", (void *)(KERNEL_ENTRY | (unsigned int)slab_alloc(&kmalloc_caches[bf_index])));
+    kernel_getchar();
+#endif // ! SLAB_DEBUG
     return (void *)(KERNEL_ENTRY | (unsigned int)slab_alloc(&kmalloc_caches[bf_index]));
 }
 
 void slab_kfree(void *obj)
 {
     struct page *page;
-
     obj = (void *)((unsigned int)obj & (~KERNEL_ENTRY));
     page = pages + ((unsigned int)obj >> PAGE_SHIFT);
+#ifdef SLAB_DEBUG
+    kernel_printf("\tobj: %x, page->bplevel: %d", obj, page->bplevel);
+    kernel_getchar();
+#endif // ! SLAB_DEBUG
     if (page->flag != _PAGE_SLAB)
         return free_pages((void *)((unsigned int)obj & ~((1 << PAGE_SHIFT) - 1)), page->bplevel);
 

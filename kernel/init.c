@@ -6,6 +6,9 @@
 #include <page.h>
 #include <zjunix/bootmm.h>
 #include <zjunix/buddy.h>
+#include <zjunix/slob.h>
+#include <zjunix/memory.h>
+
 #include <zjunix/fs/fat.h>
 #include <zjunix/fs/ext2.h>
 #include <zjunix/log.h>
@@ -49,6 +52,10 @@ void init_kernel() {
     // Drivers
     init_vga();
     init_ps2();
+    // Interrupts
+    log(LOG_START, "Enable Interrupts.");
+    init_interrupts();
+    log(LOG_END, "Enable Interrupts.");
     // Memory management
     log(LOG_START, "Memory Modules.");
     init_bootmm();
@@ -57,7 +64,10 @@ void init_kernel() {
     log(LOG_OK, "Buddy.");
     init_slab();
     log(LOG_OK, "Slab.");
+    init_slob();
+    log(LOG_OK, "Slob.");
     log(LOG_END, "Memory Modules.");
+    test_malloc();
     // File system
     log(LOG_START, "File System.");
     init_fs();
@@ -72,10 +82,6 @@ void init_kernel() {
     init_pc();
     create_startup_process();
     log(LOG_END, "Process Control Module.");
-    // Interrupts
-    log(LOG_START, "Enable Interrupts.");
-    init_interrupts();
-    log(LOG_END, "Enable Interrupts.");
     // Init finished
     machine_info();
     *GPIO_SEG = 0x11223344;

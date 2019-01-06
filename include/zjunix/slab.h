@@ -10,6 +10,11 @@
 
 #define KMEM_ADDR(PAGE, BASE) ((((PAGE) - (BASE)) << PAGE_SHIFT) | 0x80000000)
 
+#define SLAB_DEBUG
+#ifdef SLAB_DEBUG
+#include <driver/ps2.h>
+#endif
+
 /*
  * slab_head makes the allocation accessible from end_ptr to the end of the page
  * @end_ptr : points to the head of the rest of the page
@@ -40,13 +45,13 @@ struct kmem_cache_cpu {
 
 // TODO: 补全函数声明
 
-typedef struct {
+typedef struct kmem_cache_struct{
     unsigned int size;
     unsigned int objsize;
     unsigned int offset;
     struct kmem_cache_node node;
     struct kmem_cache_cpu cpu;
-    // unsigned char name[16];
+    char* name;
 } kmem_cache;
 
 // extern struct kmem_cache kmalloc_caches[PAGE_SHIFT];

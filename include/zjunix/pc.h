@@ -103,6 +103,9 @@ typedef struct {
     struct list_head children_head;
     struct list_head children;
 
+    // added by mem-part
+    struct mm_struct *mm;           //进程地址空间结构指针
+
 } task_struct;
 
 // current running task pointer

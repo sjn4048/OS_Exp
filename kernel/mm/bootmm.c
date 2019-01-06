@@ -169,13 +169,13 @@ unsigned char *find_pages(unsigned int page_cnt, unsigned int start_page, unsign
 unsigned int bootmm_alloc(unsigned int size, unsigned int type, unsigned int align)
 {
     // get the page where size is in.
-    unsigned int page = ((size + (1 << PAGE_SHIFT) - 1) & PAGE_ALIGN) >> PAGE_SHIFT;
+    unsigned int page_cnt = UPPER_ALLIGN(size, PAGE_TABLE_SIZE) >> PAGE_SHIFT;
 #ifdef BOOTMM_DEBUG
-    kernel_printf("size: %d, align: %d, need page: %d\n", size, align, page);
+    kernel_printf("size: %d, align: %d, need page: %d\n", size, align, page_cnt);
 #endif // BOOTMM_DEBUG
 
     unsigned int res;
-    if (res = find_pages(page, bmm.last_alloc_end + 1, bmm.max_pfn, align >> PAGE_SHIFT))
+    if (res = (unsigned int)find_pages(page_cnt, bmm.last_alloc_end + 1, bmm.max_pfn, align >> PAGE_SHIFT))
     {
         insert_mminfo(&bmm, (unsigned int)res, (unsigned int)res + size - 1, type);
 #ifdef BOOTMM_DEBUG
@@ -185,7 +185,7 @@ unsigned int bootmm_alloc(unsigned int size, unsigned int type, unsigned int ali
     }
 
     // if not found by searching forward, then search back.
-    if (res = find_pages(page, 0, bmm.last_alloc_end, align >> PAGE_SHIFT))
+    if (res = (unsigned int)find_pages(page_cnt, 0, bmm.last_alloc_end, align >> PAGE_SHIFT))
     {
         insert_mminfo(&bmm, (unsigned int)res, (unsigned int)res + size - 1, type);
 #ifdef BOOTMM_DEBUG

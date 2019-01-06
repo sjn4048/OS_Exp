@@ -3,6 +3,7 @@
 #include <zjunix/slob.h>
 #include <zjunix/utils.h>
 #include <zjunix/buddy.h>
+#include <zjunix/slab.h>
 
 struct slob_block
 {
@@ -11,8 +12,22 @@ struct slob_block
 };
 typedef struct slob_block slob_t;
 
+#ifdef SLOB_SINGLE
+static slob_t arena = {.next = &arena, .units = 1};
+static slob_t *slobfree = &arena;
+#else
 #define SLOB_BREAK1 256
 #define SLOB_BREAK2 1024
+static slob_t free_slob_small = {.next = &free_slob_small, .units = 1};
+static slob_t free_slob_medium = {.next = &free_slob_medium, .units = 1};
+static slob_t free_slob_large = {.next = &free_slob_large, .units = 1};
+
+static slob_t *small_cur = &free_slob_small;
+static slob_t *medium_cur = &free_slob_medium;
+static slob_t *large_cur = &free_slob_large;
+
+static slob_t *slobfree = &free_slob_small;
+#endif
 
 #define SLOB_UNIT sizeof(slob_t)
 #define SLOB_UNITS(size) (((size) + (SLOB_UNIT)-1) / (SLOB_UNIT))
@@ -26,12 +41,10 @@ typedef struct bigblock
 
 static bigblock_t *bigblocks;
 
-static slob_t free_slob_small = {.next = &free_slob_small, .units = 1};
-static slob_t free_slob_medium = {.next = &free_slob_medium, .units = 1};
-static slob_t free_slob_large = {.next = &free_slob_large, .units = 1};
-
-static slob_t *slobfree = &free_slob_small;
-
+extern void init_slob()
+{
+    // TODO
+}
 
 static void slob_free(void *block, int size)
 {
@@ -80,27 +93,56 @@ static void slob_free(void *block, int size)
 
 static void *slob_alloc(unsigned int size)
 {
+#ifdef SLOB_DEBUG
+    kernel_printf("enter slob_alloc. Size: %d\n", size);
+    kernel_getchar();
+#endif // SLOB_DEBUG
     slob_t *prev, *cur, *aligned = 0;
     int delta = 0, units = SLOB_UNITS(size);
-
+#ifdef SLOB_SINGLE
+    prev = slobfree;
+#else
+    // if use multiple slobs
     if (size < SLOB_BREAK1)
     {
+#ifdef SLOB_DEBUG
+        kernel_printf("Use small slob to handle.\n");
+        kernel_getchar();
+#endif // SLOB_DEBUG
         slobfree = &free_slob_small;
     }
     else if (size < SLOB_BREAK2)
     {
+#ifdef SLOB_DEBUG
+        kernel_printf("Use medium slob to handle.\n");
+        kernel_getchar();
+#endif // SLOB_DEBUG
         slobfree = &free_slob_medium;
     }
     else
     {
+#ifdef SLOB_DEBUG
+        kernel_printf("Use large slob to handle.\n");
+        kernel_getchar();
+#endif // SLOB_DEBUG
         slobfree = &free_slob_large;
     }
+#endif
 
     for (cur = prev->next;; prev = cur, cur = cur->next)
     {
+#ifdef SLOB_DEBUG
+        kernel_printf("Cur: %x\tPrev: %x\t\n", cur, prev);
+        kernel_printf("cur->units: %d\tunits: %d\tdelta: %d\n", cur->units, units, delta);
+        kernel_getchar();
+#endif // SLOB_DEBUG
         if (cur->units >= units + delta)
         {
-            // if room is enough
+#ifdef SLOB_DEBUG
+            kernel_printf("room is enough.\n");
+            kernel_getchar();
+#endif // SLOB_DEBUG \
+    // if room is enough
             if (delta)
             {
                 // need to fragment head to align?
@@ -114,7 +156,11 @@ static void *slob_alloc(unsigned int size)
 
             if (cur->units == units)
             {
-                // if exact fit, unlink
+#ifdef SLOB_DEBUG
+                kernel_printf("exact fit.\n");
+                kernel_getchar();
+#endif // SLOB_DEBUG \
+    // if exact fit, unlink
                 prev->next = cur->next;
             }
             else
@@ -124,9 +170,18 @@ static void *slob_alloc(unsigned int size)
                 prev->next->units = cur->units - units;
                 prev->next->next = cur->next;
                 cur->units = units;
+#ifdef SLOB_DEBUG
+                kernel_printf("After fragment.\n");
+                kernel_printf("prev->next: %x, prev->next->units: %d, prev->next->next: %x, cur->units: %d", prev->next, prev->next->units, prev->next->next, cur->units);
+                kernel_getchar();
+#endif // SLOB_DEBUG
             }
 
             slobfree = prev;
+#ifdef SLOB_DEBUG
+            kernel_printf("slob_alloc returns %x.\n", cur);
+            kernel_getchar();
+#endif // SLOB_DEBUG
             return cur;
         }
         if (cur == slobfree)
@@ -134,14 +189,25 @@ static void *slob_alloc(unsigned int size)
             // trying to shrink arena
             if (size == PAGE_SIZE)
             {
+#ifdef SLOB_DEBUG
+                kernel_printf("tring to shrink arena. returns 0 as size == PAGE_SIZE.\n");
+                kernel_getchar();
+#endif // SLOB_DEBUG
                 return 0;
             }
-            cur = (slob_t *)alloc_pages(0);
+            cur = (slob_t *)alloc_pages(1);
+#ifdef SLOB_DEBUG
+            kernel_printf("alloc new page %x for cur. Page no: %d\n", cur, ((unsigned int)cur - KERNEL_ENTRY) >> PAGE_SHIFT);
+            kernel_getchar();
+#endif // SLOB_DEBUG
             if (!cur)
             {
                 return 0;
             }
-
+#ifdef SLOB_DEBUG
+            kernel_printf("call slob_free for cur.\n");
+            kernel_getchar();
+#endif // SLOB_DEBUG
             slob_free(cur, PAGE_SIZE);
             cur = slobfree;
         }
@@ -150,36 +216,47 @@ static void *slob_alloc(unsigned int size)
 
 static int find_order(int size)
 {
-	int order = 0;
-	for ( ; size > 4096 ; size >>=1)
-		order++;
-	return order;
+    int order = 0;
+    for (; size > 4096; size >>= 1)
+        order++;
+    return order;
 }
 
 void *slob_kmalloc(unsigned int size)
 {
     slob_t *m;
     bigblock_t *bb;
+#ifdef SLOB_DEBUG
+    kernel_printf("kmalloc %d memory in slob.\n", size, PAGE_SIZE, SLOB_UNIT, PAGE_SIZE - SLOB_UNIT);
+    kernel_getchar();
+#endif // SLOB_DEBUG
 
     // if the size is not bigger than the page size
     if (size < PAGE_SIZE - SLOB_UNIT)
     {
+#ifdef SLOB_DEBUG
+        kernel_printf("Handle malloc in slob.\n");
+        kernel_getchar();
+#endif // SLOB_DEBUG
         m = slob_alloc(size + SLOB_UNIT);
         return m ? (void *)(m + 1) : 0;
     }
 
     // else call buddy to solve this
+#ifdef SLOB_DEBUG
+    kernel_printf("Handle malloc in buddy instead.\n");
+    kernel_getchar();
+#endif // SLOB_DEBUG
     bb = slob_alloc(sizeof(bigblock_t));
-	if (!bb) 
+    if (!bb)
     {
-		return 0;
+        return 0;
     }
 
     // calculate the order, which is temporarily not used.
-    size += (1 << PAGE_SHIFT) - 1;
-    size &= ~((1 << PAGE_SHIFT) - 1);
+    size = UPPER_ALLIGN(size, PAGE_SIZE);
     bb->order = find_order(size);
-	bb->pages = alloc_pages(size >> PAGE_SHIFT);
+    bb->pages = alloc_pages(size >> PAGE_SHIFT);
 
     if (bb->pages)
     {
@@ -202,7 +279,7 @@ void *slob_kzalloc(unsigned int size)
 
 void slob_kfree(const void *block)
 {
-	bigblock_t *bb, **last = &bigblocks;
+    bigblock_t *bb, **last = &bigblocks;
 
     if (!block)
     {
@@ -217,7 +294,7 @@ void slob_kfree(const void *block)
             if (bb->pages == block)
             {
                 *last = bb->next;
-                free_pages((void*)block, bb->order);
+                free_pages((void *)block, bb->order);
                 slob_free(bb, sizeof(bigblock_t));
                 return;
             }
@@ -230,217 +307,94 @@ void slob_kfree(const void *block)
 
 unsigned int slob_ksize(const void *block)
 {
-	bigblock_t *bb;
+    bigblock_t *bb;
 
-	if (!block)
-		return 0;
+    if (!block)
+        return 0;
 
-	if (!((unsigned int)block & (PAGE_SIZE-1))) {
-		for (bb = bigblocks; bb; bb = bb->next)
+    if (!((unsigned int)block & (PAGE_SIZE - 1)))
+    {
+        for (bb = bigblocks; bb; bb = bb->next)
         {
-			if (bb->pages == block) {
-				return PAGE_SIZE << bb->order;
-			}
+            if (bb->pages == block)
+            {
+                return PAGE_SIZE << bb->order;
+            }
         }
-	}
+    }
 
-	return ((slob_t *)block - 1)->units * SLOB_UNIT;
+    return ((slob_t *)block - 1)->units * SLOB_UNIT;
 }
 
-// struct kmem_cache {
-// 	unsigned int size, align;
-// 	const char *name;
-// 	void (*ctor)(void *, kmem_cache_t *, unsigned long);
-// 	void (*dtor)(void *, kmem_cache_t *, unsigned long);
-// };
+struct kmem_cache_s {
+	unsigned int size, align;
+	const char *name;
+	void (*ctor)();
+	void (*dtor)();
+};
 
+kmem_cache *kmem_cache_create(char *name, unsigned int size, unsigned int align,
+	void (*ctor)(),
+	void (*dtor)())
+{
+	kmem_cache *c;
 
-// #include <arch.h>
-// #include <driver/vga.h>
-// #include <zjunix/slob.h>
-// #include <zjunix/utils.h>
-// #include <zjunix/slab.h>
+	c = slob_alloc(sizeof(kmem_cache));
 
-// /* as there is literally no concept as int16, here we use both int as the
-//  * slobidx_t.
-//  */
-// #if PAGE_SIZE <= (32767 * 2)
-// typedef int slobidx_t;
-// #else
-// typedef int slobidx_t;
-// #endif
+	if (c) {
+		c->name = name;
+		c->size = size;
+		// c->ctor = ctor;
+		// c->dtor = dtor;
+		/* ignore alignment */
+		// c->align = 0;
+		// if (c->align < align)
+		// c->align = align;
+	}
 
-// /*
-//  * slob_block has a field 'units', which indicates size of block if +ve,
-//  * or offset of next block if -ve (in SLOB_UNITs).
-//  *
-//  * Free blocks of size 1 unit simply contain the offset of the next block.
-//  * Those with larger size contain their size in the first SLOB_UNIT of
-//  * memory, and the offset of the next free block in the second SLOB_UNIT.
-//  */
-// typedef struct slob_block
-// {
-//     int units;
-// } slob_t;
+	return c;
+}
 
-// #define SLOB_BREAK1 256
-// #define SLOB_BREAK2 1024
+int kmem_cache_destroy(kmem_cache *c)
+{
+	slob_free(c, sizeof(kmem_cache));
+	return 0;
+}
 
-// /*
-//  * All partially free slob pages go on these lists.
-//  */
-// static LIST_HEAD(free_slob_small);
-// static LIST_HEAD(free_slob_medium);
-// static LIST_HEAD(free_slob_large);
+void *kmem_cache_alloc(kmem_cache *c)
+{
+	void *b;
 
-// /*
-//  * slob_page_free: true for pages on free_slob_pages list.
-//  */
-// static inline int slob_page_free(struct page *sp)
-// {
-//     // slobp == 0 means it's free
-//     return sp->slobp == PAGE_FREE;
-// }
+	if (c->size < PAGE_SIZE)
+		b = slob_alloc(c->size);
+	else
+		b = (void *)__alloc_pages(find_order(c->size));
 
-// /*
-//  * set_slob_page_free: add page into free_list and set the slobp flag to true.
-//  */
-// static void set_slob_page_free(struct page *sp, struct list_head *list)
-// {
-//     // TODO
-// 	list_add(&sp->??, list);
-// 	sp->slobp = PAGE_FREE;
-// }
+	return b;
+}
 
-// static inline void clear_slob_page_free(struct page *sp)
-// {
-//     // TODO
-// }
+void kmem_cache_free(kmem_cache *c, void *b)
+{
+	if (c->size < PAGE_SIZE)
+		slob_free(b, c->size);
+	else
+		free_pages(b, find_order(c->size));
+}
 
-// #define SLOB_UNIT sizeof(slob_t)
-// #define SLOB_UNITS(size) (((size) + (SLOB_UNIT) - 1) / (SLOB_UNIT))
+unsigned int kmem_cache_size(kmem_cache *c)
+{
+	return c->size;
+}
 
-// /*
-//  * Encode the given size and next info into a free slob block s.
-//  */
-// static void set_slob(slob_t *s, slobidx_t size, slob_t *next)
-// {
-//     slob_t *base = (slob_t*)((unsigned int)s >> PAGE_SHIFT);
-//     slobidx_t offset = next - base;
+const char *kmem_cache_name(kmem_cache *c)
+{
+	return c->name;
+}
 
-//     if (size > 1)
-//     {
-//         s[0].units = size;
-//         s[1].units = offset;
-//     }
-//     else
-//     {
-//         s[0].units = -offset;
-//     }
-// }
+void kmem_cache_init(void)
+{
+	void *p = slob_alloc(PAGE_SIZE);
 
-// /*
-//  * Return the size of a slob block.
-//  */
-// static slobidx_t slob_units(slob_t *s)
-// {
-// 	if (s->units > 0)
-// 		return s->units;
-// 	return 1;
-// }
-
-// /*
-//  * Return the next free slob block pointer after this one.
-//  */
-// static slob_t *slob_next(slob_t *s)
-// {
-// 	slob_t *base = (slob_t *)((unsigned int)s >> PAGE_SHIFT);
-// 	slobidx_t next;
-
-// 	if (s[0].units < 0)
-//     {
-// 		next = -s[0].units;
-//     }
-//     else
-// 	{
-//     	next = s[1].units;
-//     }
-//     return base + next;
-// }
-
-// /*
-//  * Returns true if s is the last free block in its page.
-//  */
-// static int slob_last(slob_t *s)
-// {
-// 	return !((unsigned int)slob_next(s) >> PAGE_SHIFT);
-// }
-
-// // returns the address of new page
-// static void *slob_new_pages()
-// {
-// 	void *page = __alloc_pages(0);
-
-// 	if (!page)
-// 		return NULL;
-
-// 	return (page << PAGE_SHIFT) | KERNEL_ENTRY;
-// }
-
-// static void slob_free_pages(void *b, int order)
-// {
-// 	// TODO
-// }
-
-// /*
-//  * Allocate a slob block within a given slob_page sp.
-//  */
-// static void *slob_page_alloc(struct page *sp, size_t size, int align)
-// {
-
-// }
-
-// /*
-//  * slob_alloc: entry point into the slob allocator.
-//  */
-// static void *slob_alloc(unsigned int size)
-// {
-//     struct slob_t *sp;
-// 	struct list_head *prev;
-// 	struct list_head *slobfree;
-// 	slob_t *b = NULL;
-// 	unsigned long flags;
-
-//     // choose which slob to allocate
-//     if (size < SLOB_BREAK1)
-//     {
-//         slobfree = &free_slob_small;
-//     }
-//     else if (size < SLOB_BREAK2)
-//     {
-//         slobfree = &free_slob_medium;
-//     }
-//     else
-//     {
-//         slobfree = free_slob_large;
-//     }
-
-//     list_for_each_safe(sp, slobfree, list)
-//     {
-//         // not enough room on this page
-//         if (sp->units < SLOB_UNITS(size))
-//         {
-//             continue;
-//         }
-
-//         prev = sp->list
-//     }
-// }
-
-// /*
-//  * slob_free: entry point into the slob allocator.
-//  */
-// static void slob_free(void *block, int size)
-// {
-
-// }
+	if (p)
+		free_pages(p, 0);
+}

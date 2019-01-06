@@ -1,6 +1,7 @@
 #include "exc.h"
 
 #include <driver/vga.h>
+#include <driver/ps2.h>
 #include <zjunix/pc.h>
 
 #pragma GCC push_options
