@@ -58,7 +58,6 @@ void ps() {
     kernel_puts("PS>", 0xfff, 0);
     while (1) {
         c = kernel_getchar();
-        kernel_printf("aaa %d\n",c);
         if (c == '\n') {
             ps_buffer[ps_buffer_index] = 0;
             if (kernel_strcmp(ps_buffer, "exit") == 0) {
@@ -86,6 +85,7 @@ void ps() {
 }
 
 void parse_cmd() {
+    kernel_printf("something\n");
     unsigned int result = 0;
     char dir[32];
     char c;
