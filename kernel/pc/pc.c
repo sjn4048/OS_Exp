@@ -647,14 +647,7 @@ int exec_from_file(char* filename) {
     }
     int (*f)(unsigned int argc, void *args, unsigned int addr) = (int (*)(unsigned int argc, void *args, unsigned int addr))(ENTRY);
     kernel_printf("%x\n",(unsigned int)ENTRY);
-    // char argv[1][10];
-    // kernel_memset(argv,0,sizeof(argv));
-    // kernel_memcpy(argv[0],"test",5);
     unsigned int ret = f(0,0,ENTRY);
-    // kernel_printf("%d\n",ret);
-    // kernel_printf("%s\n",ret);
-    // pc_create("seg",(void *)ENTRY,0,0,0,1);
-    // kfree((void*)ENTRY);
     return ret;
 
 }

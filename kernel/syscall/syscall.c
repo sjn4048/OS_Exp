@@ -8,10 +8,26 @@ sys_fn syscalls[256];
 void init_syscall() {
     register_exception_handler(8, __syscall);
 
-    // register all syscalls here
+    // register all syscalls here // 8  \ 10
     register_syscall(4, syscall4);
     register_syscall(9,kernel_printf_syscall);
     register_syscall(7,kmalloc_syscall);
+
+
+    register_syscall(5,fs_open_syscall);
+    register_syscall(6,fs_read_syscall);
+    register_syscall(3,fs_close_syscall);
+    register_syscall(11,fs_create_syscall);
+    register_syscall(12,fs_lseek_syscall);
+    register_syscall(13,fs_write_syscall);
+
+
+    register_syscall(14,kernel_putchar_at_syscall);
+    register_syscall(15,kernel_getchar_syscall);
+    register_syscall(16,kernel_set_cursor_syscall);
+    register_syscall(17,kernel_clear_screen_syscall);
+
+    
 }
 
 void __syscall(unsigned int status, unsigned int cause, context* pt_context) {
