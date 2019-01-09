@@ -721,10 +721,13 @@ unsigned int pow10(unsigned int p){
 }
 
 unsigned int atoi(char * param){
+    kernel_printf("param %s\n",param);
     int len = sizeof(param);
+    kernel_printf("len %d\n",len);
     int i = 0;
     unsigned int ret = 0;
     for (i = 0;i < len;i++){
+        kernel_printf("i %d\n",i);
         ret += (param[i] - '0') * pow10(len-i-1);
     }
     return ret;
