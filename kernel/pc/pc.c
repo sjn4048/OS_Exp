@@ -722,9 +722,14 @@ unsigned int pow10(unsigned int p){
 
 unsigned int atoi(char * param){
     kernel_printf("param %s\n",param);
-    int len = sizeof(param);
-    kernel_printf("len %d\n",len);
     int i = 0;
+    int len = 0;
+    while(1){
+        if (param[len] == 0)
+            break;
+        len++;
+    }
+    kernel_printf("len %d\n",len);
     unsigned int ret = 0;
     for (i = 0;i < len;i++){
         kernel_printf("i %d\n",i);
