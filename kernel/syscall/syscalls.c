@@ -22,4 +22,3 @@ unsigned int kmalloc_syscall(unsigned int status, unsigned int cause, context* p
     return (unsigned int)ptr;
 }
 
-

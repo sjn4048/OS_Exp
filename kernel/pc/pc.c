@@ -642,3 +642,44 @@ int exec_from_file(char* filename) {
     return ret;
 
 }
+
+
+
+unsigned int get_time_string(unsigned int ticks_high, unsigned int ticks_low) {
+    ticks_low = (ticks_low >> 8) | (ticks_high << 24);
+    ticks_high >>= 8;
+    unsigned int second;
+    // second = (ticks_high % 390625);
+    // second = second * 10995 + (second * 45421) % 390625;
+    // second += ticks_low / 390625;
+    second = ticks_low;
+    return second;
+}
+
+void delay_s(unsigned int second) {
+    unsigned int ticks_high, ticks_low;
+    int cur_time = 0;
+    int tmp_time = 0;
+    asm volatile(
+            "mfc0 %0, $9, 6\n\t"
+            "mfc0 %1, $9, 7\n\t"
+            : "=r"(ticks_low), "=r"(ticks_high));
+    cur_time = get_time_string(ticks_high, ticks_low);
+    while (1) {
+        asm volatile(
+            "mfc0 %0, $9, 6\n\t"
+            "mfc0 %1, $9, 7\n\t"
+            : "=r"(ticks_low), "=r"(ticks_high));
+        tmp_time = get_time_string(ticks_high, ticks_low);
+        if (tmp_time - cur_time > 390625 * second) break;
+    }
+}
+
+unsigned int test_program(unsigned int delay){
+    int i = 0;
+    while(1){
+        delay_s(1);
+        kernel_printf("%d\n",i);
+        i++;
+    }
+}
