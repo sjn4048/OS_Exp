@@ -681,7 +681,8 @@ void test_program(unsigned int argc, char *args){
     if (argc != 0)
         name = (char *)args;
     while(1){
-        delay_s(2);
+        delay_s(3);
+        print_proc();
         kernel_printf("Program name is: [%s], current tick :%d\n", name, i);
         i++;
     }
