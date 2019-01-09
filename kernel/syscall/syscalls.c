@@ -21,4 +21,3 @@ unsigned int kmalloc_syscall(unsigned int status, unsigned int cause, context* p
     kernel_printf("%x\n",(unsigned int)ptr);
     return (unsigned int)ptr;
 }
-

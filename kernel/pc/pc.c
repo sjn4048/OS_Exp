@@ -711,3 +711,22 @@ void test_program(unsigned int argc, char *args){
         }
     }
 }
+
+unsigned int pow(unsigned int p){
+    int i = 0;
+    int e = 1;
+    for(i = 0;i < p;i++)
+        e *= 10;
+    return e;
+}
+
+unsigned int atoi(char * param){
+    int len = sizeof(param);
+    int i = 0;
+    
+    unsigned int ret = 0;
+    for (i = 0;i < len;i++){
+        ret += (param[i] - '0') * pow(len-i-2);
+    }
+    return ret;
+}

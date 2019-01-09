@@ -163,6 +163,12 @@ void parse_cmd() {
     } else if (kernel_strcmp(ps_buffer, "kill_cur") == 0) {
         result = pc_kill_current(param);
         kernel_printf("pc_kill_current return with %d\n", result);
+    } else if (kernel_strcmp(ps_buffer, "change_latency") == 0) {
+        // change_sysctl_sched_latency(param);
+        char kss[] = "1234";
+        kernel_printf("%d\n",atoi(kss));
+        kernel_printf("%d\n",atoi(param));
+        kernel_printf("change_sysctl_sched_latency return with 0\n");
     } else if (kernel_strcmp(ps_buffer, "tprog1") == 0) {
         for(j = 0;j < 10;j++) name[j] = param[j];
         name[9] = 0;

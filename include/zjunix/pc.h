@@ -138,5 +138,5 @@ int exec_from_file(char* filename);
 int pc_kill_current();
 void kill_all_children(struct list_head * head);
 void test_program(unsigned int argc, char *args);
-
+unsigned int atoi(char * param);
 #endif  // !_ZJUNIX_PC_H
