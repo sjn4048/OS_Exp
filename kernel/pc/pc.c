@@ -248,7 +248,7 @@ void wakeup_parent(unsigned long pid){
  * create a process 
  */
 void pc_create(char *task_name, void(*entry)(unsigned int argc, void *args), 
-    unsigned int argc, void *args, int nice, int is_root, int need_wait) {
+    unsigned int argc, char *args, int nice, int is_root, int need_wait) {
 
     task_union *new = (task_union*) kmalloc(sizeof(task_union));
     task_struct * task = &(new->task);
@@ -675,14 +675,13 @@ void delay_s(unsigned int second) {
     }
 }
 
-void test_program(unsigned int argc, void *args){
-    kernel_printf("in\n");
+void test_program(unsigned int argc, char *args){
     int i = 0;
     char * name = "default program";
     // if (argc != 0)
     //     name = (char *)args;
     while(1){
-        delay_s(1);
+        delay_s(5);
         kernel_printf("Program name is: [%s], current tick :%d\n", name, i);
         i++;
     }

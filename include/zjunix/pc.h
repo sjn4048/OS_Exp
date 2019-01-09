@@ -122,7 +122,7 @@ typedef union {
 void init_pc();
 void pc_schedule(unsigned int status, unsigned int cause, context* pt_context);
 void pc_create(char *task_name, void(*entry)(unsigned int argc, void *args), 
-    unsigned int argc, void *args, int nice, int is_root, int need_wait);
+    unsigned int argc, char *args, int nice, int is_root, int need_wait);
 unsigned int pc_create_syscall(unsigned int status, unsigned int cause, context* pt_context);
 unsigned int pc_kill_syscall(unsigned int status, unsigned int cause, context* pt_context);
 int pc_kill(unsigned int PID);
@@ -137,6 +137,6 @@ extern unsigned int GetPC();
 int exec_from_file(char* filename);
 int pc_kill_current();
 void kill_all_children(struct list_head * head);
-void test_program(unsigned int argc, void *args);
+void test_program(unsigned int argc, char *args);
 
 #endif  // !_ZJUNIX_PC_H
