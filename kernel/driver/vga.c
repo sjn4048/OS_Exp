@@ -130,7 +130,7 @@ int kernel_putintx(unsigned int x, int fc, int bg) {
     return x;
 }
 
-int kernel_vprintf(const char *format, va_list ap) {
+int kernel_vprintf(int fc, const char *format, va_list ap) {
     int cnt = 0;
     while (*format) {
         if (*format != '%') {
@@ -181,7 +181,16 @@ int kernel_printf(const char *format, ...) {
     int cnt = 0;
     va_list ap;
     va_start(ap, format);
-    cnt = kernel_vprintf(format, ap);
+    cnt = kernel_vprintf(0xfff, format, ap);
+    va_end(ap);
+    return cnt;
+}
+
+int kernel_printf_color(int fc, const char *format, ...) {
+    int cnt = 0;
+    va_list ap;
+    va_start(ap, format);
+    cnt = kernel_vprintf(fc, format, ap);
     va_end(ap);
     return cnt;
 }
