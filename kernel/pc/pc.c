@@ -691,5 +691,9 @@ void test_program(unsigned int argc, char *args){
         else
             kernel_printf("Program name is: [%s], current tick :%d\n", name, i);
         i++;
+        if(i == 5){
+            kernel_printf("exiting!!!\n");
+            pc_kill_current();
+        }
     }
 }
