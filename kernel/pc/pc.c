@@ -489,6 +489,7 @@ int pc_kill(unsigned int PID) {
 
     if (find == 0){
         kernel_printf_color(VGA_RED, "Process not found!\n");
+        enable_interrupts();
         return 1;
     }
 
