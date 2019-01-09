@@ -16,7 +16,7 @@
 
 char ps_buffer[64];
 int ps_buffer_index;
-
+char name[10];
 void test_syscall4() {
     syscall(4);
     // asm volatile(
@@ -91,6 +91,7 @@ void parse_cmd() {
     kernel_putchar('\n', 0, 0);
     char sd_buffer[8192];
     int i = 0;
+    int j;
     char *param;
     for (i = 0; i < 63; i++) {
         if (ps_buffer[i] == ' ') {
@@ -164,11 +165,11 @@ void parse_cmd() {
         kernel_printf("pc_kill_current return with %d\n", result);
     }
     else if (kernel_strcmp(ps_buffer, "tprog") == 0) {
-        // result = test_program(1);
-        // pc_create("default program",test_program,0,0,0,1,0);
-        if (param[0] != 't'){
+        for(j = 0;j < 10;j++) name[j] = param[j];
+        name[9] = 0;
+        if (name[0] != 't'){
             kernel_printf("1\n");
-            pc_create("test program",test_program,1,param,0,1,0);
+            pc_create(name,test_program,1,name,0,1,0);
         }
         else{
             kernel_printf("2\n");
