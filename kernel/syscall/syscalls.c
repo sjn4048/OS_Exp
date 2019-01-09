@@ -60,7 +60,7 @@ unsigned int fs_lseek_syscall(unsigned int status, unsigned int cause, context* 
 
 unsigned int fs_write_syscall(unsigned int status, unsigned int cause, context* pt_context){
     FILE *file = (FILE *)pt_context->a0;
-    const u8 * buf = (u8 *)pt_context->a1;
+    const unsigned char * buf = (u8 *)pt_context->a1;
     u32 count = (u32)pt_context->a2;
     unsigned int ret = fs_write(file, buf, count);
     return ret;
@@ -87,7 +87,7 @@ unsigned int kernel_set_cursor_syscall(unsigned int status, unsigned int cause, 
 }
 
 unsigned int kernel_clear_screen_syscall(unsigned int status, unsigned int cause, context* pt_context){
-    const int scope = (int)pt_context->a0;
+    int scope = (int)pt_context->a0;
     kernel_clear_screen(scope);
     return 0;
 }
