@@ -683,7 +683,7 @@ void test_program(unsigned int argc, char *args){
         if (argc != 0)
             kernel_printf("Program name is: [%s], current tick :%d\n", name, i);
         else
-            kernel_printf("Program name is: [%s], current tick :%d\n", args, i);
+            kernel_printf("1Program name is: [%s], current tick :%d\n", args, i);
         i++;
     }
 }
