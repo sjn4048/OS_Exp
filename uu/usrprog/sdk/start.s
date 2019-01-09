@@ -15,11 +15,11 @@
 
 .globl entry
 entry:
-# mtc0 $a2, $7
+mtc0 $a2, $7
 nop
 nop
 # jal main
-# mtc0 $zero, $7
+mtc0 $zero, $7
 nop
 nop
 jr $ra
