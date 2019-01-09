@@ -640,13 +640,9 @@ int exec_from_file(char* filename) {
     unsigned int j = 0;
     // unsigned int ENTRY = (unsigned int)kmalloc(4096);
     unsigned int ENTRY = 0x87000000;
-    kernel_printf("%d\n",(unsigned int)n);
     for (j = 0; j < n; j++) {
-        kernel_printf("1 %d\n",(unsigned int)j);
         fs_read(&file, buffer, CACHE_BLOCK_SIZE);
-        kernel_printf("2 %d\n",(unsigned int)j);
         kernel_memcpy((void*)(ENTRY + j * CACHE_BLOCK_SIZE), buffer, CACHE_BLOCK_SIZE);
-        kernel_printf("3 %d\n",(unsigned int)j);
         kernel_cache(ENTRY + j * CACHE_BLOCK_SIZE);
 
     }
