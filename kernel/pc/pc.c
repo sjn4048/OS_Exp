@@ -678,10 +678,10 @@ void delay_s(unsigned int second) {
 void test_program(unsigned int argc, char *args){
     int i = 0;
     char * name = "default program";
-    // if (argc != 0)
-    //     name = (char *)args;
+    if (argc != 0)
+        name = (char *)args;
     while(1){
-        delay_s(5);
+        delay_s(2);
         kernel_printf("Program name is: [%s], current tick :%d\n", name, i);
         i++;
     }

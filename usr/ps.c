@@ -165,7 +165,10 @@ void parse_cmd() {
     }
     else if (kernel_strcmp(ps_buffer, "tprog") == 0) {
         // result = test_program(1);
-        pc_create("test_program",test_program,0,0,0,1,0);
+        if (param[0] != ' ')
+            pc_create(param,test_program,1,param,0,1,0);
+        else
+            pc_create("default program",test_program,0,0,0,1,0);
         kernel_printf("test_program return with %d\n", result);
     }
     
