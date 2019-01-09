@@ -3,13 +3,13 @@
 
 #include <sysdef.h>
 #include <init.h>
-#include <file.h>
+// #include <file.h>
 
 
 unsigned int sdk_init(unsigned int argc, void *args, unsigned int entry_point);
 
-unsigned long get_entry_filesize(u8 *entry);
-unsigned long get_u32(u8 *ch);
+// unsigned long get_entry_filesize(u8 *entry);
+// unsigned long get_u32(u8 *ch);
 
 
 #define STRING(x) ({                                   \
