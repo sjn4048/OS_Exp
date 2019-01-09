@@ -6,10 +6,7 @@
 .org 0x0
 entry:
 	la $t0, sdk_init
-	jal $t0
-	nop
-	nop
-	jr $ra
+	j $t0
 	nop
 	nop
 
