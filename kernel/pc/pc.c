@@ -680,7 +680,6 @@ void test_program(unsigned int argc, char *args){
     char * name = "default program";
     while(1){
         delay_s(3);
-        print_proc();
         if (argc != 0)
             kernel_printf("Program name is: [%s], current tick :%d\n", name, i);
         else
