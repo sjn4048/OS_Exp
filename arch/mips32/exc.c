@@ -18,7 +18,7 @@ void do_exceptions(unsigned int status, unsigned int cause, context* pt_context)
         unsigned int badVaddr;
         asm volatile("mfc0 %0, $8\n\t" : "=r"(badVaddr));
         pcb = current_task;
-        kernel_printf("\nProcess %s exited due to exception cause=%x;\n", pcb->name, cause);
+        kernel_printf("\nProcess %d exited due to exception cause=%x;\n", pcb->PID, cause);
         kernel_printf("status=%x, EPC=%x, BadVaddr=%x\n", status, pcb->context.epc, badVaddr);
         while(1)
             ;
