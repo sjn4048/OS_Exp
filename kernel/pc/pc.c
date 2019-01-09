@@ -635,11 +635,12 @@ int exec_from_file(char* filename) {
         return 1;
     }
     unsigned int size = get_entry_filesize(file.entry.data);
+    kernel_printf("size %d\n",(unsigned int)size);
     unsigned int n = size / CACHE_BLOCK_SIZE + 1;
     unsigned int i = 0;
     unsigned int j = 0;
     // unsigned int ENTRY = (unsigned int)kmalloc(4096);
-    unsigned int ENTRY = 0x86000000;
+    unsigned int ENTRY = 0x85000000;
     for (j = 0; j < n; j++) {
         fs_read(&file, buffer, CACHE_BLOCK_SIZE);
         kernel_memcpy((void*)(ENTRY + j * CACHE_BLOCK_SIZE), buffer, CACHE_BLOCK_SIZE);
