@@ -678,8 +678,8 @@ void delay_s(unsigned int second) {
 void test_program(unsigned int argc, char *args){
     int i = 0;
     char * name = "default program";
-    // if (argc != 0)
-    //     name = args;
+    if (argc != 0)
+        name = args;
     while(1){
         delay_s(3);
         print_proc();
