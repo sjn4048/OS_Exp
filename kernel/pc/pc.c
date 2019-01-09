@@ -651,8 +651,9 @@ int exec_from_file(char* filename) {
     }
     int (*f)(unsigned int argc, void *args, unsigned int addr) = (int (*)(unsigned int argc, void *args, unsigned int addr))(ENTRY);
     kernel_printf("%x\n",(unsigned int)ENTRY);
-
+asm volatile("addi $sp, $sp, -32\n\t"); 
     unsigned int ret = f(0,0,ENTRY);
+asm volatile("addi $sp, $sp, 32\n\t"); 
     // disable_interrupts();
     return ret;
 
