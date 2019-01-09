@@ -664,6 +664,7 @@ flag = 1;
     unsigned int ret = f(0,0,ENTRY);
 asm volatile("move %0, $sp\n\t" : "=r"(ass));
 kernel_printf("after  %x\n",ass);
+print_proc();
     // disable_interrupts();
     return ret;
 
