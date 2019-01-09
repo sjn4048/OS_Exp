@@ -715,7 +715,6 @@ void test_program(unsigned int argc, char *args){
 unsigned int pow10(unsigned int p){
     int i = 0;
     int e = 1;
-    kernel_printf("p%d\n",p);
     for(i = 0;i < p;i++)
         e *= 10;
     return e;
@@ -724,10 +723,8 @@ unsigned int pow10(unsigned int p){
 unsigned int atoi(char * param){
     int len = sizeof(param);
     int i = 0;
-    kernel_printf("len%d\n",len);
     unsigned int ret = 0;
     for (i = 0;i < len;i++){
-        kernel_printf("i%d\n",i);
         ret += (param[i] - '0') * pow10(len-i-1);
     }
     return ret;
