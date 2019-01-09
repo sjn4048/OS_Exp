@@ -163,6 +163,10 @@ void parse_cmd() {
         result = pc_kill_current(param);
         kernel_printf("pc_kill_current return with %d\n", result);
     }
+    else if (kernel_strcmp(ps_buffer, "tprog") == 0) {
+        result = test_program(1);
+        kernel_printf("test_program return with %d\n", result);
+    }
     
     // ----------- process schedule commands -----------
     // -------------------------------------------------
