@@ -5,8 +5,6 @@
 #include <init.h>
 #include <file.h>
 
-extern unsigned int ENTRY_ADDR;
-extern unsigned int TRANSFORM_ADDR;
 
 unsigned int sdk_init(unsigned int argc, void *args, unsigned int entry_point);
 
@@ -25,8 +23,8 @@ unsigned long get_u32(u8 *ch);
 int (*printf)(const char* format, ...); // = (int (*)(const char* format, ...))(0x8000283c);
 
 
-#define TRANSFORM(name, _arg1, _arg2) (((unsigned int (*)(unsigned int func, \
- unsigned int entry, void * arg1, void * arg2))                                          \
-(TRANSFORM_ADDR))((unsigned int)name, ENTRY_ADDR, (void *)_arg1, (void *)_arg2))
+// #define TRANSFORM(name, _arg1, _arg2) (((unsigned int (*)(unsigned int func, \
+//  unsigned int entry, void * arg1, void * arg2))                                          \
+// (TRANSFORM_ADDR))((unsigned int)name, ENTRY_ADDR, (void *)_arg1, (void *)_arg2))
 
 #endif

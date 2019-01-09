@@ -1,14 +1,10 @@
 #include <OSsdk.h>
 
 
-unsigned int ENTRY_ADDR;
-unsigned int TRANSFORM_ADDR;
 
 
 
 unsigned int sdk_init(unsigned int argc, void *args, unsigned int entry_point){
-    ENTRY_ADDR = entry_point;
-    TRANSFORM_ADDR = 0x80000900;
     printf = (int (*)(const char* format, ...))(0x8000282c);
     unsigned int ret = main(0,0);
     return ret;
