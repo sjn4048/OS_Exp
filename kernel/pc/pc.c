@@ -645,7 +645,7 @@ int exec_from_file(char* filename) {
 
 
 
-unsigned int get_time_string(unsigned int ticks_high, unsigned int ticks_low) {
+unsigned int get_ticks(unsigned int ticks_high, unsigned int ticks_low) {
     ticks_low = (ticks_low >> 8) | (ticks_high << 24);
     ticks_high >>= 8;
     unsigned int second;
@@ -664,13 +664,13 @@ void delay_s(unsigned int second) {
             "mfc0 %0, $9, 6\n\t"
             "mfc0 %1, $9, 7\n\t"
             : "=r"(ticks_low), "=r"(ticks_high));
-    cur_time = get_time_string(ticks_high, ticks_low);
+    cur_time = get_ticks(ticks_high, ticks_low);
     while (1) {
         asm volatile(
             "mfc0 %0, $9, 6\n\t"
             "mfc0 %1, $9, 7\n\t"
             : "=r"(ticks_low), "=r"(ticks_high));
-        tmp_time = get_time_string(ticks_high, ticks_low);
+        tmp_time = get_ticks(ticks_high, ticks_low);
         if (tmp_time - cur_time > 390625 * second) break;
     }
 }
