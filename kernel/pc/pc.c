@@ -537,18 +537,25 @@ void kill_all_children(struct list_head * head){
             break;
         }
         next = container_of(pos, task_struct, children);
+
+        /* NOTE : 
+         * the pos will be modified wen kill function runs
+         * this will cause some bugs so we create a backup list for "pos"
+         */
+        struct list_head tmp;
+        tmp.next = pos->next;
+        tmp.prev = pos->prev;
+        pos = &tmp;
         /* NOTE : 
          * we need to check the process we are killing is running right
          * now or not, this is crucial because if we kill the current 
          * running process by "pc_kill", the OS will be dead
          */
         if (next == current_task){
-            kernel_printf("111111111111111\n");
-            // pc_kill_current();
+            pc_kill_current();
         }else{
-            kernel_printf("22222222222222222\n");
             kernel_printf("%d\n",next->PID);
-            // pc_kill(next->PID);
+            pc_kill(next->PID);
         }
     }
 }
