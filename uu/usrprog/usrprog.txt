@@ -1,0 +1,126 @@
+
+usrprog.elf:     file format elf32-tradlittlemips
+
+
+Disassembly of section .text:
+
+00000000 <_ftext>:
+   0:	40863800 	mtc0	a2,$7
+	...
+   c:	40803800 	mtc0	zero,$7
+  10:	00000000 	nop
+  14:	03e00008 	jr	ra
+  18:	00000000 	nop
+	...
+
+00000100 <main>:
+ 100:	03e00008 	jr	ra
+ 104:	24020005 	li	v0,5
+	...
+
+00000110 <sdk_init>:
+ 110:	27bdffe0 	addiu	sp,sp,-32
+ 114:	afbf001c 	sw	ra,28(sp)
+ 118:	afbe0018 	sw	s8,24(sp)
+ 11c:	03a0f025 	move	s8,sp
+ 120:	afc40020 	sw	a0,32(s8)
+ 124:	afc50024 	sw	a1,36(s8)
+ 128:	afc60028 	sw	a2,40(s8)
+ 12c:	8fc20028 	lw	v0,40(s8)
+ 130:	af828010 	sw	v0,-32752(gp)
+ 134:	2402001e 	li	v0,30
+ 138:	00402025 	move	a0,v0
+ 13c:	24020007 	li	v0,7
+ 140:	00404025 	move	t0,v0
+ 144:	0000000c 	syscall
+ 148:	00000000 	nop
+ 14c:	afc00010 	sw	zero,16(s8)
+ 150:	00401025 	move	v0,v0
+ 154:	afc20010 	sw	v0,16(s8)
+ 158:	8fc20010 	lw	v0,16(s8)
+ 15c:	af828014 	sw	v0,-32748(gp)
+ 160:	8f828014 	lw	v0,-32748(gp)
+ 164:	2442001d 	addiu	v0,v0,29
+ 168:	a0400000 	sb	zero,0(v0)
+ 16c:	3c028000 	lui	v0,0x8000
+ 170:	34420900 	ori	v0,v0,0x900
+ 174:	af828018 	sw	v0,-32744(gp)
+ 178:	8f828018 	lw	v0,-32744(gp)
+ 17c:	00401825 	move	v1,v0
+ 180:	3c020000 	lui	v0,0x0
+ 184:	244201c0 	addiu	v0,v0,448
+ 188:	8f848010 	lw	a0,-32752(gp)
+ 18c:	00003825 	move	a3,zero
+ 190:	00003025 	move	a2,zero
+ 194:	00802825 	move	a1,a0
+ 198:	00402025 	move	a0,v0
+ 19c:	0060f809 	jalr	v1
+ 1a0:	00000000 	nop
+ 1a4:	00000000 	nop
+ 1a8:	03c0e825 	move	sp,s8
+ 1ac:	8fbf001c 	lw	ra,28(sp)
+ 1b0:	8fbe0018 	lw	s8,24(sp)
+ 1b4:	27bd0020 	addiu	sp,sp,32
+ 1b8:	03e00008 	jr	ra
+ 1bc:	00000000 	nop
+
+000001c0 <main>:
+ 1c0:	27bdffd8 	addiu	sp,sp,-40
+ 1c4:	afbe0024 	sw	s8,36(sp)
+ 1c8:	03a0f025 	move	s8,sp
+ 1cc:	afc40028 	sw	a0,40(s8)
+ 1d0:	afc5002c 	sw	a1,44(s8)
+ 1d4:	3c020000 	lui	v0,0x0
+ 1d8:	8c4302ac 	lw	v1,684(v0)
+ 1dc:	afc30010 	sw	v1,16(s8)
+ 1e0:	244202ac 	addiu	v0,v0,684
+ 1e4:	94420004 	lhu	v0,4(v0)
+ 1e8:	a7c20014 	sh	v0,20(s8)
+ 1ec:	a7c00016 	sh	zero,22(s8)
+ 1f0:	a7c00018 	sh	zero,24(s8)
+ 1f4:	24020010 	li	v0,16
+ 1f8:	00402025 	move	a0,v0
+ 1fc:	24020007 	li	v0,7
+ 200:	00404025 	move	t0,v0
+ 204:	0000000c 	syscall
+ 208:	00000000 	nop
+ 20c:	afc00004 	sw	zero,4(s8)
+ 210:	00401025 	move	v0,v0
+ 214:	afc20004 	sw	v0,4(s8)
+ 218:	8fc20004 	lw	v0,4(s8)
+ 21c:	afc20008 	sw	v0,8(s8)
+ 220:	2402000a 	li	v0,10
+ 224:	afc2000c 	sw	v0,12(s8)
+ 228:	afc00000 	sw	zero,0(s8)
+ 22c:	afc00000 	sw	zero,0(s8)
+ 230:	1000000b 	b	260 <main+0xa0>
+ 234:	00000000 	nop
+ 238:	8f838014 	lw	v1,-32748(gp)
+ 23c:	8fc20000 	lw	v0,0(s8)
+ 240:	00621021 	addu	v0,v1,v0
+ 244:	8fc30000 	lw	v1,0(s8)
+ 248:	03c31821 	addu	v1,s8,v1
+ 24c:	90630010 	lbu	v1,16(v1)
+ 250:	a0430000 	sb	v1,0(v0)
+ 254:	8fc20000 	lw	v0,0(s8)
+ 258:	24420001 	addiu	v0,v0,1
+ 25c:	afc20000 	sw	v0,0(s8)
+ 260:	8fc30000 	lw	v1,0(s8)
+ 264:	8fc2000c 	lw	v0,12(s8)
+ 268:	0062102a 	slt	v0,v1,v0
+ 26c:	1440fff2 	bnez	v0,238 <main+0x78>
+ 270:	00000000 	nop
+ 274:	8f828014 	lw	v0,-32748(gp)
+ 278:	00402025 	move	a0,v0
+ 27c:	8fc20008 	lw	v0,8(s8)
+ 280:	00402825 	move	a1,v0
+ 284:	24020009 	li	v0,9
+ 288:	00404025 	move	t0,v0
+ 28c:	0000000c 	syscall
+ 290:	00000000 	nop
+ 294:	00001025 	move	v0,zero
+ 298:	03c0e825 	move	sp,s8
+ 29c:	8fbe0024 	lw	s8,36(sp)
+ 2a0:	27bd0028 	addiu	sp,sp,40
+ 2a4:	03e00008 	jr	ra
+ 2a8:	00000000 	nop

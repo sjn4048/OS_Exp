@@ -18,7 +18,7 @@ entry:
 mtc0 $a2, $7
 nop
 nop
-jal main
+# jal main
 mtc0 $zero, $7
 nop
 nop
