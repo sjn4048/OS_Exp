@@ -639,7 +639,7 @@ int exec_from_file(char* filename) {
     unsigned int i = 0;
     unsigned int j = 0;
     // unsigned int ENTRY = (unsigned int)kmalloc(4096);
-    unsigned int ENTRY = 0x81100000;
+    unsigned int ENTRY = 0x87000000;
     kernel_printf("%d\n",(unsigned int)n);
     for (j = 0; j < n; j++) {
         kernel_printf("1 %d\n",(unsigned int)j);
