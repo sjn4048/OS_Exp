@@ -28,5 +28,5 @@ int kernel_puts(const char* s, int fc, int bg);
 int kernel_putint(int i, int fc, int bg);
 int kernel_vprintf(int fc, const char *format, va_list ap);
 int kernel_printf(const char* format, ...);
-
+int kernel_printf_color(int fc, const char *format, ...);
 #endif // ! _DRIVER_VGA_H
