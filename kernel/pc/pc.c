@@ -677,9 +677,10 @@ void delay_s(unsigned int second) {
 
 void test_program(unsigned int argc, char *args){
     int i = 0;
-    char name[] = "default program";
+    char name[20];
+    kernel_memcpy(name,"default program",16);
     if (argc != 0)
-        kernel_memcpy(name,args,10);
+        kernel_memcpy(name,args,20);
     while(1){
         delay_s(3);
         kernel_printf("Program name is: [%s], current tick :%d\n", name, i);
