@@ -148,7 +148,6 @@ void parse_cmd() {
         result = print_rbtree_test();
         kernel_printf("rbtree return with %d\n", result);
     } else if (kernel_strcmp(ps_buffer, "kill") == 0) {
-        // int pid = param[0] - '0';
         kernel_printf("Killing process %d\n", atoi(param));
         result = pc_kill(atoi(param));
         kernel_printf("kill return with %d\n", result);
@@ -164,6 +163,7 @@ void parse_cmd() {
         result = pc_kill_current(param);
         kernel_printf("pc_kill_current return with %d\n", result);
     } else if (kernel_strcmp(ps_buffer, "change_latency") == 0) {
+        kernel_printf("changing CPU interrupt interval to %d\n", atoi(param));
         change_sysctl_sched_latency(atoi(param));
         kernel_printf("change_sysctl_sched_latency return with 0\n");
     } else if (kernel_strcmp(ps_buffer, "tprog1") == 0) {
