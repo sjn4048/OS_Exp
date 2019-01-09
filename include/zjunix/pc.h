@@ -121,7 +121,7 @@ typedef union {
 
 void init_pc();
 void pc_schedule(unsigned int status, unsigned int cause, context* pt_context);
-void pc_create(char *task_name, void(*entry)(unsigned int argc, void *args), 
+void pc_create(char *task_name, void(*entry)(unsigned int argc, char *args), 
     unsigned int argc, char *args, int nice, int is_root, int need_wait);
 unsigned int pc_create_syscall(unsigned int status, unsigned int cause, context* pt_context);
 unsigned int pc_kill_syscall(unsigned int status, unsigned int cause, context* pt_context);
