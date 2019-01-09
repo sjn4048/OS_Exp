@@ -6,11 +6,12 @@
 
 
 unsigned int main(unsigned int argc, void *args) {
-
-    // unsigned int ptr = malloc(16);
+asm volatile("addi $sp, $sp, -32\n\t"); 
+    unsigned int ptr = malloc(16);
+asm volatile("addi $sp, $sp, 32\n\t"); 
     // printf("%dab\n",23);
     // unsigned int ret =  myvi((char *)args);
-    unsigned int ret =  myvi("test.txt");
+    // unsigned int ret =  myvi("test.txt");
     return 5;
 
 }
