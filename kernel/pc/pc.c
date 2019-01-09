@@ -175,9 +175,12 @@ void change_sysctl_sched_latency(unsigned int latency){
  * task which has the mininum vruntime
  */
 void pc_schedule(unsigned int status, unsigned int cause, context* pt_context) {
+    int epc = 0;
     if (flag == 1){
-        asm volatile("mtc0 $zero, $9\n\t");
+        asm volatile("mfc0 %0, $14\n\t" : "=r"(epc));
+        kernel_printf("%x\n",epc);
     }
+    
     disable_interrupts();
     
     // update vruntime of current task
@@ -651,9 +654,9 @@ int exec_from_file(char* filename) {
     }
     int (*f)(unsigned int argc, void *args, unsigned int addr) = (int (*)(unsigned int argc, void *args, unsigned int addr))(ENTRY);
     kernel_printf("%x\n",(unsigned int)ENTRY);
-asm volatile("addi $sp, $sp, -32\n\t"); 
+flag = 1;
     unsigned int ret = f(0,0,ENTRY);
-asm volatile("addi $sp, $sp, 32\n\t"); 
+
     // disable_interrupts();
     return ret;
 
