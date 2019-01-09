@@ -12,43 +12,100 @@
  */
 int ext2_cat(__u8 *path)
 {
+    __u8 path_buffer[64];
+    int count = 0;
+    for (int i = 0; i < 64; i++)
+    {
+        if (path[i] != ' ' && path[i] != '\0')
+        {
+            path_buffer[count++] = path[i];
+        }
+        else
+        {
+            path_buffer[count] = '\0';
+            break;
+        }
+    }
+
     // open it
     EXT2_FILE file;
-    if (EXT2_FAIL == ext2_open(path, &file))
+    if (EXT2_FAIL == ext2_open(path_buffer, &file))
     {
-        log(LOG_FAIL, "Cannot find file located at %s", path);
+        log(LOG_FAIL, "Cannot find file located at %s", path_buffer);
         return EXT2_FAIL;
     }
 
     if ((file.inode.info.i_mode & EXT2_S_IFREG) == 0)
     {
-        log(LOG_FAIL, "%s is not a regular file and cannot be cat", path);
+        log(LOG_FAIL, "%s is not a regular file and cannot be cat", path_buffer);
         return EXT2_FAIL;
     }
 
-    // read it
-    __u8 *buffer;
-    int size;
-    if (file.inode.info.i_size > 200)
+    int start = 0;
+    int length = 0;
+    if (path[count++] == ' ')
     {
-        kernel_printf("%s is too long, this is the first 200 charactors.\n", path);
-        buffer = (__u8 *)kmalloc(200 + 1);
-        size = 200;
+        while (path[count] >= '0' && path[count] <= '9')
+        {
+            start = start * 10 + path[count++] - '0';
+        }
+
+        while (path[count] < '0' || path[count] > '9')
+        {
+            count++;
+        }
+
+        while (path[count] >= '0' && path[count] <= '9')
+        {
+            length = length * 10 + path[count++] - '0';
+        }
     }
     else
     {
-        buffer = (__u8 *)kmalloc(file.inode.info.i_size + 1);
-        size = file.inode.info.i_size;
+        length = file.inode.info.i_size;
+    }
+
+    if (length > 300)
+    {
+        length = 300;
+    }
+    if (length == 0)
+    {
+        log(LOG_FAIL, "Length = 0");
+        return EXT2_FAIL;
+    }
+
+    log(LOG_STEP, "cat path=%s, start=%d, length=%d", path_buffer, start, length);
+
+    if (file.inode.info.i_size < start)
+    {
+        log(LOG_FAIL, "This is file is %d bytes long, and your want to read starting at %d.",
+            file.inode.info.i_size, start);
+        return EXT2_FAIL;
+    }
+
+    __u8 *buffer;
+    if (start + length > file.inode.info.i_size)
+    {
+        length = file.inode.info.i_size - start;
+    }
+    buffer = (__u8 *)kmalloc(length + 1);
+
+    // move pointer
+    if (EXT2_FAIL == ext2_lseek(&file, start))
+    {
+        log(LOG_FAIL, "Cannot move pointer.");
+        return EXT2_FAIL;
     }
 
     __u64 bytes_of_read;
-    if (EXT2_FAIL == ext2_read(&file, buffer, size, &bytes_of_read) ||
-        size != bytes_of_read)
+    if (EXT2_FAIL == ext2_read(&file, buffer, length, &bytes_of_read) ||
+        length != bytes_of_read)
     {
-        log(LOG_FAIL, "Failed to read data from %s", path);
+        log(LOG_FAIL, "Failed to read data from %s", path_buffer);
     }
 
-    buffer[size] = '\0';
+    buffer[length] = '\0';
     kernel_printf("%s\n", buffer);
     kernel_printf("-------- Totally read %d bytes of data. --------\n", bytes_of_read);
     kfree(buffer);
@@ -341,10 +398,16 @@ int ext2_rm(__u8 *param)
     }
 
     // remove
-    ext2_rm_inode(inode);
+    if (EXT2_FAIL == ext2_rm_inode(inode)) {
+        log(LOG_FAIL, "Failed to remove that.");
+        return EXT2_FAIL;
+    }
 
     // remove dir entry from current inode
-    ext2_rm_dir_entry(param);
+    if (EXT2_FAIL == ext2_rm_dir_entry(param)) {
+        log(LOG_FAIL, "Failed to remove that.");
+        return EXT2_FAIL;
+    }
 
     return EXT2_SUCCESS;
 }

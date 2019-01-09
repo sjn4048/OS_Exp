@@ -13,6 +13,7 @@
 #include <driver/sd.h>
 #include <zjunix/slab.h>
 #include <zjunix/log.h>
+#include <driver/ps2.h>
 
 /* disk_tool.c */
 int ext2_find_part(struct partition_entry *par, void *data);
@@ -57,5 +58,10 @@ int ext2_strlen(__u8 *string);
 int ext2_find_file_relative(__u8 *path, INODE *inode);
 int ext2_rm_inode(INODE inode);
 int ext2_is_removable(__u8 *name);
+
+/* debug.c */
+void ext2_output_buffer(void *data, int length);
+void ext2_show_group_decs(struct ext2_group_desc *gd);
+void ext2_show_current_dir();
 
 #endif //EXT2_EXT2_H

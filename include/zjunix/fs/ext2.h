@@ -5,8 +5,6 @@
 #ifndef _ZJUNIX_FS_EXT2_H
 #define _ZJUNIX_FS_EXT2_H
 
-#define EXT2_DEBUG
-
 /* all macro definition of ext2 file system */
 #define EXT2_SUCCESS 0x1
 #define EXT2_FAIL 0x0
