@@ -163,8 +163,7 @@ void parse_cmd() {
     } else if (kernel_strcmp(ps_buffer, "kill_cur") == 0) {
         result = pc_kill_current(param);
         kernel_printf("pc_kill_current return with %d\n", result);
-    }
-    else if (kernel_strcmp(ps_buffer, "tprog") == 0) {
+    } else if (kernel_strcmp(ps_buffer, "tprog1") == 0) {
         for(j = 0;j < 10;j++) name[j] = param[j];
         name[9] = 0;
         if (name[0] != 't'){
@@ -172,6 +171,16 @@ void parse_cmd() {
         }
         else{
             pc_create("default program",test_program,0,0,0,1,0);
+        }
+        kernel_printf("test_program return with %d\n", result);
+    } else if (kernel_strcmp(ps_buffer, "tprog2") == 0) {
+        for(j = 0;j < 10;j++) name[j] = param[j];
+        name[9] = 0;
+        if (name[0] != 't'){
+            pc_create(name,test_program,1,name,0,0,0);
+        }
+        else{
+            pc_create("default program",test_program,0,0,0,0,0);
         }
         kernel_printf("test_program return with %d\n", result);
     }
