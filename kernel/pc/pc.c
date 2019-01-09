@@ -179,7 +179,7 @@ void pc_schedule(unsigned int status, unsigned int cause, context* pt_context) {
     if (flag == 1){
         asm volatile("mfc0 %0, $14\n\t" : "=r"(epc));
         kernel_printf("bbb %x\n",epc);
-        kernel_printf("ccc %x\n",pt_context->epc);
+        print_proc();
     }
     
     disable_interrupts();
@@ -208,7 +208,7 @@ void pc_schedule(unsigned int status, unsigned int cause, context* pt_context) {
     current_task = next;
 
     if (flag == 1){
-        kernel_printf("aaa %x\n",pt_context->epc);
+        kernel_printf("aaa %x\n",pt_context);
     }
     asm volatile("mtc0 $zero, $9\n\t");
     enable_interrupts();
