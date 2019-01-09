@@ -653,7 +653,7 @@ int exec_from_file(char* filename) {
     kernel_printf("%x\n",(unsigned int)ENTRY);
 
     unsigned int ret = f(0,0,ENTRY);
-    disable_interrupts();
+    // disable_interrupts();
     return ret;
 
 }
