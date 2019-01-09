@@ -168,11 +168,9 @@ void parse_cmd() {
         for(j = 0;j < 10;j++) name[j] = param[j];
         name[9] = 0;
         if (name[0] != 't'){
-            kernel_printf("1111111111111\n");
             pc_create(name,test_program,1,name,0,1,0);
         }
         else{
-            kernel_printf("22222222222222\n");
             pc_create("default program",test_program,0,0,0,1,0);
         }
         kernel_printf("test_program return with %d\n", result);
