@@ -95,7 +95,7 @@ SECTIONS
   .rel.plt       : { *(.rel.plt)		}
   .rela.plt      : { *(.rela.plt)		}
   .plt      : { *(.plt)	}
-  . = 0x85000000;
+  . = 0x81100000;
   .text      :
   {
     _ftext = . ;
