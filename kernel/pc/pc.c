@@ -675,7 +675,7 @@ void delay_s(unsigned int second) {
     }
 }
 
-unsigned int test_program(unsigned int argc, void *args){
+void test_program(unsigned int argc, void *args){
     int i = 0;
     char * name = "default program";
     if (argc != 0)

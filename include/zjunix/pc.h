@@ -137,6 +137,6 @@ extern unsigned int GetPC();
 int exec_from_file(char* filename);
 int pc_kill_current();
 void kill_all_children(struct list_head * head);
-unsigned int test_program(unsigned int argc, void *args);
+void test_program(unsigned int argc, void *args);
 
 #endif  // !_ZJUNIX_PC_H
