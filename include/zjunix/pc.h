@@ -11,7 +11,7 @@
 #define _ZJUNIX_PC_H
 
 // TASK_KERNEL_SIZE indicates the task structure's kernel size
-#define TASK_KERNEL_SIZE 4096 * 2
+#define TASK_KERNEL_SIZE 2048
 
 // PC_DEBUG_MODE indicates whether printing debug info or not
 // #define PC_DEBUG_MODE
