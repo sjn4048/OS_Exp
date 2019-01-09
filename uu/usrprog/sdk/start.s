@@ -11,6 +11,6 @@ entry:
 	nop
 	nop
 	addi $gp, $gp, -10000
-
+	jr $ra
 
 

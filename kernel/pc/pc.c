@@ -22,7 +22,7 @@
 
 // intervl between two schedule interrupts
 unsigned int sysctl_sched_latency = 1000000;
-
+unsigned int flag = 0;
 //current task pointer
 task_struct *current_task = 0;
 
@@ -173,7 +173,9 @@ void change_sysctl_sched_latency(unsigned int latency){
  * task which has the mininum vruntime
  */
 void pc_schedule(unsigned int status, unsigned int cause, context* pt_context) {
-
+    if (flag == 1){
+        asm volatile("mtc0 $zero, $9\n\t");
+    }
     disable_interrupts();
     
     // update vruntime of current task
@@ -647,7 +649,9 @@ int exec_from_file(char* filename) {
     }
     int (*f)(unsigned int argc, void *args, unsigned int addr) = (int (*)(unsigned int argc, void *args, unsigned int addr))(ENTRY);
     kernel_printf("%x\n",(unsigned int)ENTRY);
+    flag = 1;
     unsigned int ret = f(0,0,ENTRY);
+    flag = 0;
     return ret;
 
 }
