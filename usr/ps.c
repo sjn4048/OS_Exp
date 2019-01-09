@@ -58,6 +58,7 @@ void ps() {
     kernel_puts("PS>", 0xfff, 0);
     while (1) {
         c = kernel_getchar();
+        kernel_printf("aaa %d\n",c);
         if (c == '\n') {
             ps_buffer[ps_buffer_index] = 0;
             if (kernel_strcmp(ps_buffer, "exit") == 0) {
@@ -68,7 +69,14 @@ void ps() {
                 parse_cmd();
             ps_buffer_index = 0;
             kernel_puts("PS>", 0xfff, 0);
-        }  else {
+        } else if (c == 0x08) {
+            if (ps_buffer_index) {
+                ps_buffer_index--;
+                kernel_putchar_at(' ', 0xfff, 0, cursor_row, cursor_col - 1);
+                cursor_col--;
+                kernel_set_cursor();
+            }
+        } else {
             if (ps_buffer_index < 63) {
                 ps_buffer[ps_buffer_index++] = c;
                 kernel_putchar(c, 0xfff, 0);
