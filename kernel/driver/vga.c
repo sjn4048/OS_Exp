@@ -134,34 +134,34 @@ int kernel_vprintf(int fc, const char *format, va_list ap) {
     int cnt = 0;
     while (*format) {
         if (*format != '%') {
-            kernel_putchar(*format++, 0xfff, 0);
+            kernel_putchar(*format++, fc, 0);
         } else {
             format++;
             switch (*format) {
                 case 'c': {
                     char valch = va_arg(ap, int);
-                    kernel_putchar(valch, 0xfff, 0);
+                    kernel_putchar(valch, fc, 0);
                     format++;
                     cnt++;
                     break;
                 }
                 case 'd': {
                     int valint = va_arg(ap, int);
-                    kernel_putint(valint, 0xfff, 0);
+                    kernel_putint(valint, fc, 0);
                     format++;
                     cnt++;
                     break;
                 }
                 case 'x': {
                     int valint = va_arg(ap, int);
-                    kernel_putintx(valint, 0xfff, 0);
+                    kernel_putintx(valint, fc, 0);
                     format++;
                     cnt++;
                     break;
                 }
                 case 's': {
                     char *valstr = va_arg(ap, char *);
-                    kernel_puts(valstr, 0xfff, 0);
+                    kernel_puts(valstr, fc, 0);
                     format++;
                     cnt++;
                     break;
