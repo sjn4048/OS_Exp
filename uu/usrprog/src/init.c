@@ -7,9 +7,9 @@
 
 unsigned int main(unsigned int argc, void *args) {
 
-    char x[10] = "%xab\n";
+    char x[7] = "%xab\n";
     unsigned int ptr = malloc(16);
-    printf(STRING(x),ptr);
+    printf(STRING(x),23);
     return 0;
 }
 

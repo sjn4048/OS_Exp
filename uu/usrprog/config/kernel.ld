@@ -166,7 +166,7 @@ SECTIONS
   PROVIDE (etext = .);
   /* Adjust the address for the data segment.  We want to adjust up to
      the same address within the page on the next page up.  */
-  . = 0x80000000;
+  . = ALIGN(8);
   .data    :
   {
     _fdata = . ;
