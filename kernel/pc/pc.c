@@ -712,7 +712,7 @@ void test_program(unsigned int argc, char *args){
     }
 }
 
-unsigned int pow(unsigned int p){
+unsigned int pow10(unsigned int p){
     int i = 0;
     int e = 1;
     for(i = 0;i < p;i++)
@@ -726,7 +726,7 @@ unsigned int atoi(char * param){
     
     unsigned int ret = 0;
     for (i = 0;i < len;i++){
-        ret += (param[i] - '0') * pow(len-i-2);
+        ret += (param[i] - '0') * pow10(len-i-2);
     }
     return ret;
 }
