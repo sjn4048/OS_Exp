@@ -648,7 +648,8 @@ int exec_from_file(char* filename) {
     }
     int (*f)(unsigned int argc, void *args, unsigned int addr) = (int (*)(unsigned int argc, void *args, unsigned int addr))(ENTRY);
     kernel_printf("%x\n",(unsigned int)ENTRY);
-    unsigned int ret = f(0,0,ENTRY);
+    // unsigned int ret = f(0,0,ENTRY);
+    unsigned int ret = 0;
     return ret;
 
 }
