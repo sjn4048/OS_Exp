@@ -334,40 +334,46 @@ void do_last_line_mode(char key) {
 
 int myvi(char *para) {
     myvi_init();
-
+printf("1\n");
     filename = para;
     pre_cursor_freq = _cursor_freq;
     _cursor_freq = 0;
     kernel_set_cursor();
-
+printf("2\n");
     mystrcpy(file.path, filename);
-
+printf("3\n");
     load_file(filename);
-
+printf("4\n");
     screen_flush();
-
+printf("5\n");
     /* global variable initial */
 
     while (err == 0) {
         char key = get_key();
+printf("6\n");
         switch (mode) {
             case 0:  // command mode
+            printf("a\n");
                 do_command_mode(key);
                 break;
             case 1:  // insert mode
+            printf("b\n");
                 do_insert_mode(key);
                 break;
             case 2:  // last line mode
+            printf("c\n");
                 do_last_line_mode(key);
                 break;
             default:
+            printf("d\n");
                 break;
         }
     }
-
+printf("7\n");
     _cursor_freq = pre_cursor_freq;
     kernel_set_cursor();
+printf("8\n");
     kernel_clear_screen(31);
-
+printf("9\n");
     return 0;
 }
