@@ -164,7 +164,8 @@ void parse_cmd() {
         kernel_printf("pc_kill_current return with %d\n", result);
     }
     else if (kernel_strcmp(ps_buffer, "tprog") == 0) {
-        result = test_program(1);
+        // result = test_program(1);
+        pc_create("test_program",test_program,1,param,0,1,0);
         kernel_printf("test_program return with %d\n", result);
     }
     
