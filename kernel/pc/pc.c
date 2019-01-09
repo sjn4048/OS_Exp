@@ -464,13 +464,13 @@ int pc_kill(unsigned int PID) {
 
     // can't kill idle process
     if (PID == 0) {
-        kernel_printf("You are killing idle process!!!\n");
+        kernel_printf_color(VGA_RED, "You are killing idle process!!!\n");
         return 1;
     }
 
     // can't kill itself
     if (PID == current_task->PID) {
-        kernel_printf("You can't kill current task!\n");
+        kernel_printf_color(VGA_RED, "You can't kill current task!\n");
         return 1;
     }
 
@@ -488,7 +488,7 @@ int pc_kill(unsigned int PID) {
     }
 
     if (find == 0){
-        kernel_printf("Process not found!\n");
+        kernel_printf_color(VGA_RED, "Process not found!\n");
         return 1;
     }
 
@@ -554,7 +554,6 @@ void kill_all_children(struct list_head * head){
         if (next == current_task){
             pc_kill_current();
         }else{
-            kernel_printf("%d\n",next->PID);
             pc_kill(next->PID);
         }
     }
@@ -569,13 +568,13 @@ int print_proc() {
     struct list_head *pos;
     task_struct *next;
 
-    kernel_printf("----------ALL PROCESSES--------------\n");
+    kernel_printf_color(VGA_GREEN, "----------ALL PROCESSES--------------\n");
     list_for_each(pos, (&all_task)) {
         next = container_of(pos, task_struct, task_list);
-        kernel_printf("  PID : %d, name : %s, state : %s, vruntime : %d\n", next->PID, next->name, task_state(next->state),
+        kernel_printf_color(VGA_BLUE, "  PID : %d, name : %s, state : %s, vruntime : %d\n", next->PID, next->name, task_state(next->state),
         next->sched_entity.vruntime);
     }
-    kernel_printf("----------ALL PROCESSES--------------\n");
+    kernel_printf_color(VGA_GREEN, "----------ALL PROCESSES--------------\n");
 
     return 0;
 }
@@ -609,11 +608,11 @@ int print_rbtree_test() {
      * it is crucial because we schedule the process in a very short time
      */
     disable_interrupts();
-    kernel_printf("-----------------------------------------------------\n");
-    kernel_printf("----------CFS structure(Red Black Tree)--------------\n");
+    kernel_printf_color(VGA_GREEN, "-----------------------------------------------------\n");
+    kernel_printf_color(VGA_GREEN, "----------CFS structure(Red Black Tree)--------------\n");
     print_process(&(rq.tasks_timeline));
-    kernel_printf("----------CFS structure(Red Black Tree)--------------\n");
-    kernel_printf("-----------------------------------------------------\n");
+    kernel_printf_color(VGA_GREEN, "----------CFS structure(Red Black Tree)--------------\n");
+    kernel_printf_color(VGA_GREEN, "-----------------------------------------------------\n");
     enable_interrupts();
     return 0;
 
