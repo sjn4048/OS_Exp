@@ -36,11 +36,11 @@
     __syscall(7);                                \
     get_ret_value;   })
 
-#define sys_printf __syscall(9)
+// #define sys_printf __syscall(9)
 
 #define test4(arg1) SYSCALL_DEFINE1(_test4, arg1)
 #define fork() SYSCALL_DEFINE0(_fork)
-#define printf(arg1, arg2) SYSCALL_DEFINE2(_printf, arg1, arg2)
+// #define printf(arg1, arg2) SYSCALL_DEFINE2(_printf, arg1, arg2)
 #define malloc(arg1)  SYSCALL_DEFINE1(_malloc, arg1)
 
 #define __syscall(code)     \
