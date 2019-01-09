@@ -639,7 +639,7 @@ int exec_from_file(char* filename) {
     unsigned int i = 0;
     unsigned int j = 0;
     // unsigned int ENTRY = (unsigned int)kmalloc(4096);
-    unsigned int ENTRY = 0x83000000;
+    unsigned int ENTRY = 0x86000000;
     for (j = 0; j < n; j++) {
         fs_read(&file, buffer, CACHE_BLOCK_SIZE);
         kernel_memcpy((void*)(ENTRY + j * CACHE_BLOCK_SIZE), buffer, CACHE_BLOCK_SIZE);
