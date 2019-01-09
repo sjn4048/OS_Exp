@@ -21,6 +21,7 @@
 
 #define EXT2_S_IFDIR 0x4000
 #define EXT2_S_IFREG 0x8000
+#define EXT2_FT_REG_FILE 0x0001
 #define EXT2_FT_DIR 0x0002
 
 /* type and structure definition */
@@ -436,5 +437,6 @@ int ext2_ls();
 int ext2_cd(__u8 *path);
 int ext2_mkdir(__u8 *name);
 int ext2_create(__u8 *param);
+int ext2_rm(__u8 *param);
 
 #endif //_ZJUNIX_FS_EXT2_H

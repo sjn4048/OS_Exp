@@ -24,6 +24,7 @@ int ext2_find_sparse_bg(struct ext2_group_desc *group_desc, int *id);
 int ext2_find_free_inode(struct ext2_group_desc *group_desc);
 int ext2_find_free_block(struct ext2_group_desc *group_desc);
 int ext2_set_block_used(__u32 block_id);
+int ext2_rm_dir_entry(__u8 *name);
 
 /* inode.c */
 int ext2_inode_fill(struct ext2_inode *inode, void *data);
@@ -34,11 +35,15 @@ int ext2_traverse_block(__u8 *target, __u32 *i_blocks, INODE *inode);
 int ext2_get_root_inode(struct ext2_inode *inode);
 int ext2_append_to_end(INODE *inode, struct ext2_dir_entry *dir);
 int ext2_store_inode(INODE *inode);
+int ext2_release_blocks(__u32 *blocks);
+int ext2_set_inode_free(__u32 id);
+int ext2_traverse_block_rm(__u32 *blocks);
 
 /* block.c */
 int ext2_write_block(EXT2_FILE *file);
 int ext2_read_block(EXT2_FILE *file);
 int ext2_new_block(INODE *inode, int count);
+int ext2_set_block_free(__u32 block_id);
 
 /* file.c */
 int ext2_find(__u8 *path, INODE *inode);
@@ -50,5 +55,7 @@ int ext2_write(EXT2_FILE *file, __u8 *buffer, __u64 length, __u64 *bytes_of_writ
 int ext2_is_valid_filename(__u8 *name);
 int ext2_strlen(__u8 *string);
 int ext2_find_file_relative(__u8 *path, INODE *inode);
+int ext2_rm_inode(INODE inode);
+int ext2_is_removable(__u8 *name);
 
 #endif //EXT2_EXT2_H

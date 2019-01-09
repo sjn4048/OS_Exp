@@ -658,3 +658,197 @@ int ext2_store_inode(INODE *inode)
 
     return EXT2_SUCCESS;
 }
+
+/**
+ * set inode free in bitmap
+ * @param inode id
+ * @return success or not
+ */
+int ext2_set_inode_free(__u32 id)
+{
+    struct ext2_group_desc group_desc;
+    unsigned char buffer[512];
+    // refresh group descriptor
+    sd_read_block(
+        buffer,
+        fs_info.group_desc_address + ((id - 1) / fs_info.sb.s_inodes_per_group) * 32 / 512, 1);
+    ext2_group_desc_fill(
+        &group_desc,
+        buffer + ((id - 1) / fs_info.sb.s_inodes_per_group) * 32 % 512);
+    group_desc.bg_free_blocks_count += 1;
+    kernel_memcpy(
+        buffer + ((id - 1) / fs_info.sb.s_inodes_per_group) * 32 % 512,
+        &group_desc, sizeof(struct ext2_group_desc));
+    sd_write_block(
+        buffer,
+        fs_info.group_desc_address + ((id - 1) / fs_info.sb.s_inodes_per_group) * 32 / 512, 1);
+    // refresh block bitmap
+    sd_read_block(
+        buffer,
+        fs_info.par_start_address + group_desc.bg_inode_bitmap * 8 + (id - 1) % fs_info.sb.s_inodes_per_group / 8 / 512, 1);
+    buffer[(id - 1) % fs_info.sb.s_inodes_per_group / 8 % 512] &= ~(1 << ((id - 1) % 8));
+    sd_write_block(
+        buffer,
+        fs_info.par_start_address + group_desc.bg_inode_bitmap * 8 + (id - 1) % fs_info.sb.s_inodes_per_group / 8 / 512, 1);
+
+    return EXT2_SUCCESS;
+}
+
+/**
+ * remove inode in direct blocks
+ * @param blocks
+ * @param length
+ * @return success or not
+ */
+int ext2_traverse_block_rm_d(__u32 *blocks, int length)
+{
+    // block by block
+    __u8 buffer[4096];
+    int offset;
+    struct ext2_dir_entry dir;
+    for (int i = 0; i < length; i++)
+    {
+        if (blocks[i] == 0)
+        {
+            // this block is empty
+            return 0;
+        }
+
+        sd_read_block(buffer,
+                      fs_info.par_start_address + blocks[i] * (fs_info.block_size / 512),
+                      fs_info.block_size / 512);
+
+        offset = 0;
+        while (offset < 4096)
+        {
+            ext2_dir_entry_fill(&dir, buffer + offset);
+            offset += dir.rec_len;
+
+            // remove
+            INODE inode;
+            inode.id = dir.inode;
+            ext2_find_inode(dir.inode, &(inode.info));
+            ext2_rm_inode(inode);
+        }
+
+        ext2_set_block_free(blocks[i]);
+    }
+
+    return -1;
+}
+
+/**
+ * remove inode in indirect blocks
+ * @param blocks
+ * @param length
+ * @return success or not
+ */
+int ext2_traverse_block_rm_id(__u32 *blocks, int length)
+{
+    __u8 buffer[4096];
+    for (int i = 0; i < length; i++)
+    {
+        if (blocks[i] == 0)
+        {
+            return 0;
+        }
+
+        sd_read_block(buffer,
+                      fs_info.par_start_address + blocks[i] * (fs_info.block_size / 512),
+                      fs_info.block_size / 512);
+        __u32 *entries = (__u32 *)buffer;
+        if (0 == ext2_traverse_block_rm_d(entries, 1024))
+        {
+            return 0;
+        }
+
+        ext2_set_block_free(blocks[i]);
+    }
+
+    return -1;
+}
+
+/**
+ * remove inode in double indirect blocks
+ * @param blocks
+ * @param length
+ * @return success or not
+ */
+int ext2_traverse_block_rm_2id(__u32 *blocks, int length)
+{
+    __u8 buffer[4096];
+    for (int i = 0; i < length; i++)
+    {
+        if (blocks[i] == 0)
+        {
+            return 0;
+        }
+
+        sd_read_block(buffer,
+                      fs_info.par_start_address + blocks[i] * (fs_info.block_size / 512),
+                      fs_info.block_size / 512);
+        __u32 *entries = (__u32 *)buffer;
+        if (0 == ext2_traverse_block_rm_id(entries, 1024))
+        {
+            return 0;
+        }
+
+        ext2_set_block_free(blocks[i]);
+    }
+
+    return -1;
+}
+
+/**
+ * remove inode in triple indirect blocks
+ * @param blocks
+ * @param length
+ * @return success or not
+ */
+int ext2_traverse_block_rm_3id(__u32 *blocks, int length)
+{
+    __u8 buffer[4096];
+    for (int i = 0; i < length; i++)
+    {
+        if (blocks[i] == 0)
+        {
+            return 0;
+        }
+
+        sd_read_block(buffer,
+                      fs_info.par_start_address + blocks[i] * (fs_info.block_size / 512),
+                      fs_info.block_size / 512);
+        __u32 *entries = (__u32 *)buffer;
+        if (0 == ext2_traverse_block_rm_2id(entries, 1024))
+        {
+            return 0;
+        }
+
+        ext2_set_block_free(blocks[i]);
+    }
+
+    return -1;
+}
+
+/**
+ * remove all inode in blocks
+ * @param blocks
+ * @return success or not
+ */
+int ext2_traverse_block_rm(__u32 *blocks)
+{
+    if (-1 == ext2_traverse_block_rm_d(blocks, 12))
+    {
+        if (-1 == ext2_traverse_block_rm_id(blocks + 12, 1))
+        {
+            if (-1 == ext2_traverse_block_rm_2id(blocks + 13, 1))
+            {
+                if (-1 == ext2_traverse_block_rm_3id(blocks + 14, 1))
+                {
+                    return EXT2_SUCCESS;
+                }
+            }
+        }
+    }
+    return EXT2_SUCCESS;
+}

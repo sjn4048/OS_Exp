@@ -444,7 +444,7 @@ int ext2_new_block(INODE *inode, int count)
     __u32 *pointers = (__u32 *)kmalloc(sizeof(__u32) * count);
 
     // find free blocks
-    unsigned char buffer[4096];
+    unsigned char buffer[512];
     struct ext2_group_desc group_desc;
     int target = -1;
     int gd_id = (inode->id - 1) / fs_info.sb.s_inodes_per_group - 1; // -1 for +1
@@ -458,7 +458,6 @@ int ext2_new_block(INODE *inode, int count)
                 gd_id += 1;
                 sd_read_block(buffer, fs_info.group_desc_address + gd_id * 32 / 512, 1);
                 ext2_group_desc_fill(&group_desc, buffer + gd_id * 32 % 512);
-                sd_read_block(buffer, fs_info.par_start_address + group_desc.bg_block_bitmap * 8, 8);
             }
             target = ext2_find_free_block(&group_desc);
             if (target != -1)
@@ -480,15 +479,179 @@ int ext2_new_block(INODE *inode, int count)
         // clean these blocks
         for (int i = 0; i < count; i++)
         {
-            sd_read_block(buffer, fs_info.par_start_address + pointers[i] * 8, 8);
-            for (int j = 0; j < 4096; j++)
+            for (int j = 0; j < 8; j++)
             {
-                buffer[j] = 0;
+                sd_read_block(buffer, fs_info.par_start_address + pointers[i] * 8 + j, 1);
+                for (int k = 0; k < 512; k++)
+                {
+                    buffer[k] = 0;
+                }
+                sd_write_block(buffer, fs_info.par_start_address + pointers[i] * 8 + j, 1);
             }
-            sd_write_block(buffer, fs_info.par_start_address + pointers[i] * 8, 8);
         }
-        inode->info.i_size += 4096 * count;
+        inode->info.i_blocks += 8 * count;
         kfree(pointers);
         return EXT2_SUCCESS;
     }
+}
+
+/**
+ * set a block free in bitmap
+ * @param block id
+ * @return success or not
+ */
+int ext2_set_block_free(__u32 block_id)
+{
+    struct ext2_group_desc group_desc;
+    unsigned char buffer[512];
+    // refresh group descriptor
+    sd_read_block(
+        buffer,
+        fs_info.group_desc_address + (block_id / fs_info.sb.s_blocks_per_group) * 32 / 512, 1);
+    ext2_group_desc_fill(
+        &group_desc,
+        buffer + (block_id / fs_info.sb.s_blocks_per_group) * 32 % 512);
+    group_desc.bg_free_blocks_count += 1;
+    kernel_memcpy(
+        buffer + (block_id / fs_info.sb.s_blocks_per_group) * 32 % 512,
+        &group_desc, sizeof(struct ext2_group_desc));
+    sd_write_block(
+        buffer,
+        fs_info.group_desc_address + (block_id / fs_info.sb.s_blocks_per_group) * 32 / 512, 1);
+    // refresh block bitmap
+    sd_read_block(
+        buffer,
+        fs_info.par_start_address + group_desc.bg_block_bitmap * 8 + block_id % fs_info.sb.s_blocks_per_group / 8 / 512, 1);
+    buffer[block_id % fs_info.sb.s_blocks_per_group / 8 % 512] &= ~(1 << (block_id % 8));
+    sd_write_block(
+        buffer,
+        fs_info.par_start_address + group_desc.bg_block_bitmap * 8 + block_id % fs_info.sb.s_blocks_per_group / 8 / 512, 1);
+
+    return EXT2_SUCCESS;
+}
+
+/**
+ * release direct block
+ * @param blocks: direct blocks
+ * @return -1 means that haven't ended yet
+ */
+int ext2_release_direct_blocks(__u32 *blocks, int len)
+{
+    for (int i = 0; i < len; i++)
+    {
+        if (blocks[i] == 0)
+        {
+            return 0;
+        }
+        else
+        {
+            ext2_set_block_free(blocks[i]);
+        }
+    }
+
+    return -1;
+}
+
+/**
+ * release indirect block
+ * @param blocks: direct blocks
+ * @return -1 means that haven't ended yet
+ */
+int ext2_release_indirect_blocks(__u32 *blocks, int len)
+{
+    __u8 buffer[4096];
+    for (int i = 0; i < len; i++)
+    {
+        if (blocks[i] != 0)
+        {
+            sd_read_block(buffer, fs_info.par_start_address + blocks[i] * 8, 8);
+            __u32 *buffer_32 = (__u32 *)buffer;
+            ext2_release_direct_blocks(buffer_32, 1024);
+            // release it self
+            ext2_release_direct_blocks(blocks + i, 1);
+        }
+        else
+        {
+            return 0;
+        }
+    }
+
+    return -1;
+}
+
+/**
+ * release double indirect block
+ * @param blocks: direct blocks
+ * @return -1 means that haven't ended yet
+ */
+int ext2_release_double_indirect_blocks(__u32 *blocks, int len)
+{
+    __u8 buffer[4096];
+    for (int i = 0; i < len; i++)
+    {
+        if (blocks[i] != 0)
+        {
+            sd_read_block(buffer, fs_info.par_start_address + blocks[i] * 8, 8);
+            __u32 *buffer_32 = (__u32 *)buffer;
+            ext2_release_indirect_blocks(buffer_32, 1024);
+            // release it self
+            ext2_release_direct_blocks(blocks + i, 1);
+        }
+        else
+        {
+            return 0;
+        }
+    }
+
+    return -1;
+}
+
+/**
+ * release triple indirect block
+ * @param blocks: direct blocks
+ * @return -1 means that haven't ended yet
+ */
+int ext2_release_triple_indirect_blocks(__u32 *blocks, int len)
+{
+    __u8 buffer[4096];
+    for (int i = 0; i < len; i++)
+    {
+        if (blocks[i] != 0)
+        {
+            sd_read_block(buffer, fs_info.par_start_address + blocks[i] * 8, 8);
+            __u32 *buffer_32 = (__u32 *)buffer;
+            ext2_release_double_indirect_blocks(buffer_32, 1024);
+            // release it self
+            ext2_release_direct_blocks(blocks + i, 1);
+        }
+        else
+        {
+            return 0;
+        }
+    }
+
+    return -1;
+}
+
+/**
+ * release the blocks belong to a inode
+ * @param blocks
+ * @return success or not
+ */
+int ext2_release_blocks(__u32 *blocks)
+{
+    if (-1 == ext2_release_direct_blocks(blocks, 12))
+    {
+        if (-1 == ext2_release_indirect_blocks(blocks + 12, 1))
+        {
+            if (-1 == ext2_release_double_indirect_blocks(blocks + 13, 1))
+            {
+                if (-1 == ext2_release_triple_indirect_blocks(blocks + 14, 1))
+                {
+                    return EXT2_SUCCESS;
+                }
+            }
+        }
+    }
+    return EXT2_SUCCESS;
 }

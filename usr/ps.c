@@ -246,7 +246,11 @@ void parse_cmd()
     {
         result = ext2_create(param);
     }
-
+    else if (kernel_strcmp(ps_buffer, "rm") == 0)
+    {
+        result = ext2_rm(param);
+    }
+    
     // ----------- ext2 file system commands -----------
     // ====================================================+
 

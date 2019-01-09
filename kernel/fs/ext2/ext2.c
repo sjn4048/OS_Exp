@@ -165,7 +165,10 @@ int ext2_mkdir(__u8 *name)
     inode.info.i_links_count = 2;
     inode.info.i_blocks = 0;
     for (int i = 0; i < 15; i++)
+    {
         inode.info.i_block[i] = 0;
+    }
+
     if (EXT2_FAIL == ext2_store_inode(&inode))
     {
         // occupy the inode to prevent from that it be allocate again
@@ -222,19 +225,126 @@ int ext2_create(__u8 *param)
     // get filename
     int i = 0;
     int j = 0;
-    while (i < 64 && param[i] != ' ')
+    int is_empty = EXT2_FALSE;
+    while (i < 64 && param[i] != ' ' && param[i] != '\0')
     {
-        filename[j++] = param[i];
+        filename[j++] = param[i++];
     }
     filename[j] = '\0';
 
-    // get content
-    j = 0;
-    while (i < 64 && param[i] != '\0')
+    if (param[i] != '\0')
     {
-        content[j++] = param[i];
+        // get content
+        i++;
+        j = 0;
+        while (i < 64 && param[i] != '\0')
+        {
+            content[j++] = param[i++];
+        }
+        content[j] = '\0';
     }
-    content[j] = '\0';
+    else
+    {
+        is_empty = EXT2_TRUE;
+    }
 
-    // TODO
+    // new inode
+    __u8 buffer[512];
+    INODE inode;
+    sd_read_block(
+        buffer,
+        fs_info.group_desc_address + ((current_dir.inode.id - 1) / fs_info.sb.s_inodes_per_group) * 32 / 512, 1);
+    struct ext2_group_desc group_desc;
+    ext2_group_desc_fill(&group_desc,
+                         buffer + ((current_dir.inode.id - 1) / fs_info.sb.s_inodes_per_group) * 32 % 512);
+    inode.id = ext2_find_free_inode(&group_desc) +
+               ((current_dir.inode.id - 1) / fs_info.sb.s_inodes_per_group) * fs_info.sb.s_inodes_per_group + 1;
+
+    // copy other message from parent
+    kernel_memcpy(&(inode.info), &(current_dir.inode.info), sizeof(struct ext2_inode));
+    inode.info.i_mode &= 0x0fff;              // clear file format info
+    inode.info.i_mode |= EXT2_S_IFREG;        // set it to a regular file
+    inode.info.i_size = ext2_strlen(content); // clear all blocks
+    inode.info.i_links_count = 1;             // 1 for himself
+    inode.info.i_blocks = 0;                  // no block belong to him
+    for (int i = 0; i < 15; i++)
+    {
+        inode.info.i_block[i] = 0;
+    }
+
+    // allocate new block for the inode
+    if (EXT2_FAIL == ext2_new_block(&inode, 1))
+    {
+        return EXT2_FAIL;
+    }
+
+    // store the inode
+    if (EXT2_FAIL == ext2_store_inode(&inode))
+    {
+        return EXT2_FAIL;
+    }
+
+    // conduct directory entry
+    struct ext2_dir_entry dir;
+    dir.inode = inode.id;
+    dir.name_len = ext2_strlen(filename);
+    if (dir.name_len == -1)
+    {
+        return EXT2_FAIL;
+    }
+    kernel_memcpy(dir.name, filename, dir.name_len);
+    dir.name[dir.name_len] = '\0';
+    dir.rec_len = ((dir.name_len + 8 - 1) / 4 + 1) * 4;
+    dir.file_type = EXT2_FT_REG_FILE;
+
+    // append to parent
+    if (EXT2_SUCCESS != ext2_append_to_end(&current_dir.inode, &dir))
+    {
+        return EXT2_FAIL;
+    }
+
+    // store back to disk
+    if (EXT2_FAIL == ext2_store_inode(&(current_dir.inode)))
+    {
+        return EXT2_FAIL;
+    }
+
+    // if we add some content to the inode
+    if (!is_empty)
+    {
+        sd_read_block(buffer, fs_info.par_start_address + inode.info.i_block[0] * 8, 1);
+        kernel_memcpy(buffer, content, j);
+        sd_write_block(buffer, fs_info.par_start_address + inode.info.i_block[0] * 8, 1);
+    }
+
+    return EXT2_SUCCESS;
+}
+
+/**
+ * remove file or directory RECURSIVELY
+ * @param param: the file you want to remove (relative path only)
+ * @return success or not
+ */
+int ext2_rm(__u8 *param)
+{
+    INODE inode;
+    if (EXT2_FAIL == ext2_find_file_relative(param, &inode))
+    {
+        log(LOG_FAIL, "Cannot find %s", param);
+        return EXT2_FAIL;
+    }
+
+    if (EXT2_FALSE == ext2_is_removable(param))
+    {
+        log(LOG_FAIL, "%s cannot be removed.", param);
+        return EXT2_FAIL;
+    }
+
+    // remove
+    ext2_rm_inode(inode);
+
+    // remove dir entry from current inode
+    ext2_rm_dir_entry(param);
+
+    return EXT2_SUCCESS;
 }
