@@ -530,7 +530,12 @@ int pc_kill(unsigned int PID) {
 void kill_all_children(struct list_head * head){
     struct list_head *pos;
     task_struct *next;
+    int i = 0;
     list_for_each(pos, head){
+        i++;
+        if (i == 4){
+            break;
+        }
         next = container_of(pos, task_struct, children);
         /* NOTE : 
          * we need to check the process we are killing is running right
@@ -538,9 +543,12 @@ void kill_all_children(struct list_head * head){
          * running process by "pc_kill", the OS will be dead
          */
         if (next == current_task){
-            pc_kill_current();
+            kernel_printf("111111111111111\n");
+            // pc_kill_current();
         }else{
-            pc_kill(next->PID);
+            kernel_printf("22222222222222222\n");
+            kernel_printf("%d\n",next->PID);
+            // pc_kill(next->PID);
         }
     }
 }
