@@ -85,7 +85,6 @@ void ps() {
 }
 
 void parse_cmd() {
-    kernel_printf("something\n");
     unsigned int result = 0;
     char dir[32];
     char c;
