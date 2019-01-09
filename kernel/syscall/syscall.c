@@ -1,6 +1,6 @@
 #include <exc.h>
 #include <zjunix/syscall.h>
-#include "syscall4.h"
+#include "syscalls.h"
 #include <driver/vga.h>
 
 sys_fn syscalls[256];
