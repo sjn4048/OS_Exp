@@ -10,8 +10,9 @@ unsigned int syscall4(unsigned int status, unsigned int cause, context* pt_conte
 }
 
 unsigned int kernel_printf_syscall(unsigned int status, unsigned int cause, context* pt_context){
-    const char *format = (char *)pt_context->a0;
-    kernel_printf(format);
+    const char *a0 = (char *)pt_context->a0;
+    const char *a1 = (char *)pt_context->a1;
+    kernel_printf(a0,a1);
     return 0;
 }
 
