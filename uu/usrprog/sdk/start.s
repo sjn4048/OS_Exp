@@ -13,11 +13,23 @@
 # 	j $t0
 # 	nop
 
-.globl seg_start
-seg_start:
-li $t0, 0x12345678
-li $t1, 0xbfc09008
-sw $t0, 0($t1)
+.globl entry
+entry:
+mtc0 $a2, $7
+nop
+nop
+jal main
+mtc0 $zero, $7
+nop
 nop
 jr $ra
 nop
+nop
+
+.org 0x100
+main:
+li $v0, 5
+jr $ra
+nop
+nop
+
