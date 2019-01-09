@@ -548,7 +548,7 @@ void kill_all_children(struct list_head * head){
         }else{
             kernel_printf("22222222222222222\n");
             kernel_printf("%d\n",next->PID);
-            // pc_kill(next->PID);
+            pc_kill(next->PID);
         }
     }
 }
