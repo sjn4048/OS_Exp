@@ -14,18 +14,18 @@ void init_syscall() {
     register_syscall(7,kmalloc_syscall);
 
 
-    // register_syscall(5,fs_open_syscall);
-    // register_syscall(6,fs_read_syscall);
-    // register_syscall(3,fs_close_syscall);
-    // register_syscall(11,fs_create_syscall);
-    // register_syscall(12,fs_lseek_syscall);
-    // register_syscall(13,fs_write_syscall);
+    register_syscall(5,fs_open_syscall);
+    register_syscall(6,fs_read_syscall);
+    register_syscall(3,fs_close_syscall);
+    register_syscall(11,fs_create_syscall);
+    register_syscall(12,fs_lseek_syscall);
+    register_syscall(13,fs_write_syscall);
 
 
-    // register_syscall(14,kernel_putchar_at_syscall);
-    // register_syscall(15,kernel_getchar_syscall);
-    // register_syscall(16,kernel_set_cursor_syscall);
-    // register_syscall(17,kernel_clear_screen_syscall);
+    register_syscall(14,kernel_putchar_at_syscall);
+    register_syscall(15,kernel_getchar_syscall);
+    register_syscall(16,kernel_set_cursor_syscall);
+    register_syscall(17,kernel_clear_screen_syscall);
 
     
 }
@@ -34,6 +34,7 @@ void __syscall(unsigned int status, unsigned int cause, context* pt_context) {
     unsigned int code;
     code = pt_context->t0;
     pt_context->epc += 4;
+    kernel_printf("syscall!!!!!! %d\n",code);
     if (syscalls[code]) {
         pt_context->v0 = syscalls[code](status, cause, pt_context);
     }
