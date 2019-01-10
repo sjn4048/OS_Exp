@@ -661,9 +661,9 @@ print_proc();
         fs_read(&file, buffer, CACHE_BLOCK_SIZE);
         kernel_memcpy((void*)(ENTRY + j * CACHE_BLOCK_SIZE), buffer, CACHE_BLOCK_SIZE);
         kernel_cache(ENTRY + j * CACHE_BLOCK_SIZE);
-        for (kk = 0;kk < 10;kk++) kernel_printf("%x ",syscalls[kk]);
-        kernel_printf("\n");
+
     }
+    for (kk = 0;kk < 10;kk++) kernel_printf("%x ",syscalls[kk]);
     int (*f)(unsigned int argc, void *args, unsigned int addr) = (int (*)(unsigned int argc, void *args, unsigned int addr))(ENTRY);
     unsigned int ass = 0;
 asm volatile("move %0, $sp\n\t" : "=r"(ass));
