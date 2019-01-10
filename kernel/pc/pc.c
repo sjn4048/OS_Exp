@@ -89,10 +89,8 @@ static void copy_context(context* src, context* dest) {
  * initialize the process schedule module
  */
 void init_pc() {
-    // int *i = holder1; i = holder2; i = holder3; i = holder4; i = holder5;
-    // i = holder6; i = holder7; i = holder8; i = holder8; i = holder10;
-    // sysctl_sched_latency = 1000000;
-    // holder = 0; holder1 = 0; holder2 = 0;holder3 = 0; holder4 = 0; holder5 = 0;
+    int *i = holder1; i = holder2; i = holder3; i = holder4; i = holder5;
+    i = holder6; i = holder7; i = holder8; i = holder8; i = holder10;
     init_cfs_rq(&rq);
     INIT_LIST_HEAD(&all_task);
     INIT_LIST_HEAD(&all_dead);

@@ -16,16 +16,16 @@
 #define KERNEL_ENTRY 0x80000000
 #define USER_ENTRY 0x00000000
 
-// extern unsigned int* const holder1;
-// extern unsigned int* const holder2;
-// extern unsigned int* const holder3;
-// extern unsigned int* const holder4;
-// extern unsigned int* const holder5;
-// extern unsigned int* const holder6;
-// extern unsigned int* const holder7;
-// extern unsigned int* const holder8;
-// extern unsigned int* const holder9;
-// extern unsigned int* const holder10;
+extern unsigned int* const holder1;
+extern unsigned int* const holder2;
+extern unsigned int* const holder3;
+extern unsigned int* const holder4;
+extern unsigned int* const holder5;
+extern unsigned int* const holder6;
+extern unsigned int* const holder7;
+extern unsigned int* const holder8;
+extern unsigned int* const holder9;
+extern unsigned int* const holder10;
 
 extern unsigned int* const CHAR_VRAM;
 extern unsigned int* const GRAPHIC_VRAM;
