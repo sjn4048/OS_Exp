@@ -3,7 +3,7 @@ DIRS := sdk src
 OBJS := 
 
 # compile options
-export TARGET := ../../usrprog.bin
+export TARGET := ../../u
 export MAP := usrprog.map
 export ELF := usrprog.elf
 export DISASSEMBLY := usrprog.txt

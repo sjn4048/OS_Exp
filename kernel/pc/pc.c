@@ -652,7 +652,7 @@ int exec_from_file(char* filename) {
     unsigned int j = 0;
 print_proc();
 kernel_getchar();
-    unsigned int ENTRY = (unsigned int)kmalloc(8192);
+    unsigned int ENTRY = (unsigned int)kmalloc(4096 * 3);
     kernel_printf("size  %x\n",size);
     kernel_printf("ENTRY  %x\n",ENTRY);
 // ENTRY = 0x87000000; 
