@@ -11,7 +11,9 @@ unsigned int main(unsigned int argc, void *args) {
     // printf("malloc ptr : %x\n",ptr);
     // unsigned int ret =  myvi((char *)args);
     // unsigned int ret =  myvi("test.txt");
-    unsigned int ret = ls("/");
+    // unsigned int ret = ls("/");
+    printf("malloc ptr\n");
+
     // int i = 23;
     return 10;
 
