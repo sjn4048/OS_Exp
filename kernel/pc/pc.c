@@ -34,7 +34,7 @@ struct list_head all_waiting;
 struct list_head all_ready;
 
 // PID allocating system
-unsigned int cur_PID = 0;
+int cur_PID = 0;
 
 // cfs running queue structure
 struct cfs_rq rq;
@@ -584,7 +584,7 @@ int print_proc() {
     kernel_printf_color(VGA_GREEN, "----------ALL PROCESSES--------------\n");
     list_for_each(pos, (&all_task)) {
         next = container_of(pos, task_struct, task_list);
-        kernel_printf_color(VGA_BLUE, "  PID : %d, name : %s, state : %s, vruntime : %x %d\n", next->PID, next->name, task_state(next->state), next, next->nice);
+        kernel_printf_color(VGA_BLUE, "  PID : %d, name : %s, state : %s, vruntime : %x\n", next->PID, next->name, task_state(next->state), next);
         // next->sched_entity.vruntime);
     }
     kernel_printf_color(VGA_GREEN, "----------ALL PROCESSES--------------\n");

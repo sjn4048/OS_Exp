@@ -81,7 +81,7 @@ typedef struct {
     sched_entity sched_entity; // schedule entity
     context context; // context register
 
-    unsigned int PID;   //pid
+    int PID;   //pid
     unsigned int parent;   //parent's pid
     unsigned int state;   //state
     char name[32];  //name
