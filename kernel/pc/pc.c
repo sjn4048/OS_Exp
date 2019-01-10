@@ -666,7 +666,7 @@ flag = 1;
 
     kernel_printf("out");
 // enable_interrupts();
-flag = 0;
+// flag = 0;
     for (kk = 0;kk < 10;kk++) kernel_printf("%x ",syscalls[kk]);
     int (*f)(unsigned int argc, void *args, unsigned int addr) = (int (*)(unsigned int argc, void *args, unsigned int addr))(ENTRY);
 
