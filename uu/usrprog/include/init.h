@@ -5,7 +5,7 @@
 
 
 
-unsigned int main(unsigned int argc, void *args);
+unsigned int main(unsigned int argc, char params[][10]);
 
 
 #endif // ! _HEAD_H
