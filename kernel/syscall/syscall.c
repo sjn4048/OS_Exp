@@ -36,6 +36,7 @@ void init_syscall() {
     
 }
 
+// system syscall entry ( from exception )
 void __syscall(unsigned int status, unsigned int cause, context* pt_context) {
     unsigned int code;
     code = pt_context->t0;
@@ -52,6 +53,8 @@ void register_syscall(int index, sys_fn fn) {
     syscalls[index] = fn;
 }
 
+
+// user syscall entry ( you can directly call this )
 int syscall(unsigned int code){
     // simple Semaphore implemtation
     while (Semaphore == 0);
@@ -61,6 +64,7 @@ int syscall(unsigned int code){
         "syscall\n\t"
         "nop\n\t"
         : : "r"(code));
+    // restore Semaphore
     Semaphore = 1;
     return 0;
 }
