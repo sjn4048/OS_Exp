@@ -653,7 +653,6 @@ int exec_from_file(char* filename, unsigned int argc, char params[][10]) {
     const unsigned int CACHE_BLOCK_SIZE = 64;
     unsigned char buffer[512];
     int result = fs_open(&file, filename);
-    kernel_printf("filename %s\n",filename);
     if (result != 0) {
         kernel_printf("File %s not exist\n", filename);
         return 1;
@@ -682,7 +681,9 @@ disable_schedule = 1;
                     (int (*)(unsigned int argc, char params[][10]))(ENTRY);
     
     // call the program !!!
+    kernel_printf_color(VGA_BLUE,"Calling user function [%s]\n",filename);
     unsigned int ret = f(argc, params);
+    kernel_printf_color(VGA_BLUE,"End calling user function [%s]\n",filename);
     
 // enable interrupts
 disable_schedule = 0;

@@ -14,11 +14,13 @@ unsigned int main(unsigned int argc, char params[][10]) {
     // unsigned int ret =  myvi("test.txt");
     
     // unsigned int ret = ls((char *)args);
+    unsigned int ret;
+    if (argc > 1)
+        ret = ls(params[1]);
+    else
+        ret = ls("/");
 
-    unsigned int ret = ls(params[1]);
-
-    return 10;
-
+    return 0;
 }
 
 #pragma GCC pop_options
