@@ -667,7 +667,7 @@ kernel_printf("before  %x\n",ass);
 // flag = 1;
 print_proc();
 kernel_getchar();
-// unsigned int ret = f(0,0,ENTRY);
+unsigned int ret = f(0,0,ENTRY);
 asm volatile("move %0, $sp\n\t" : "=r"(ass));
 kernel_printf("after  %x\n",ass);
 
