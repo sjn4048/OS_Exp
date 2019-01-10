@@ -37,7 +37,10 @@ void __syscall(unsigned int status, unsigned int cause, context* pt_context) {
     kernel_printf("syscall!!!!!! %d\n",code);
     kernel_printf("syscall!!!!!! %x\n",syscalls[code]);
     if (syscalls[code]) {
+        kernel_printf("getin!!!!!! %x\n");
         pt_context->v0 = syscalls[code](status, cause, pt_context);
+    }else{
+        pt_context->v0 = 1;
     }
 }
 
