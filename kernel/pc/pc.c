@@ -13,6 +13,7 @@
 #include <arch.h>
 #include <zjunix/syscall.h>
 #include <zjunix/log.h>
+#include <driver/ps2.h>
 
 // defines the task's possible state
 #define TASK_RUNNING 0
@@ -651,6 +652,8 @@ int exec_from_file(char* filename) {
     unsigned int j = 0;
     // unsigned int ENTRY = (unsigned int)kmalloc(4096);
     unsigned int ENTRY = 0x87000000; 
+print_proc();
+kernel_getchar();
     for (j = 0; j < n; j++) {
         fs_read(&file, buffer, CACHE_BLOCK_SIZE);
         kernel_memcpy((void*)(ENTRY + j * CACHE_BLOCK_SIZE), buffer, CACHE_BLOCK_SIZE);
