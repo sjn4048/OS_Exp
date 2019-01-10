@@ -681,10 +681,12 @@ disable_schedule = 1;
                     (int (*)(unsigned int argc, char params[][10]))(ENTRY);
     
     // call the program !!!
-    kernel_printf_color(VGA_BLUE,"Calling user function [%s]\n",filename);
+    kernel_printf_color(VGA_BLUE,"Calling user function ");
+    kernel_printf_color(VGA_RED,"%s\n",filename);
     unsigned int ret = f(argc, params);
-    kernel_printf_color(VGA_BLUE,"End calling user function [%s]\n",filename);
-    
+    kernel_printf_color(VGA_BLUE,"End calling user function ");
+    kernel_printf_color(VGA_RED,"%s\n",filename);
+
 // enable interrupts
 disable_schedule = 0;
 
