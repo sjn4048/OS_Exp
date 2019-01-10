@@ -79,9 +79,10 @@ typedef struct {
     int static_prio, normal_prio;
 
     sched_entity sched_entity; // schedule entity
+    char holder0[16];
     context context; // context register
-
-    unsigned int PID;   //pid
+    char holder1[16];
+    int PID;   //pid
     unsigned int parent;   //parent's pid
     unsigned int state;   //state
     char name[32];  //name
@@ -124,11 +125,14 @@ typedef union {
     unsigned char kernel_stack[TASK_KERNEL_SIZE];
 } task_union;
 
+extern int in_stress_testing;
 
 void init_pc();
 void pc_schedule(unsigned int status, unsigned int cause, context* pt_context);
-void pc_create(char *task_name, void(*entry)(unsigned int argc, void *args), unsigned int argc, void *args, int nice, int is_root, int need_wait);
-void pc_kill_syscall(unsigned int status, unsigned int cause, context* pt_context);
+void pc_create(char *task_name, void(*entry)(unsigned int argc, char args[][10]), 
+    unsigned int argc, char args[][10], int nice, int is_root, int need_wait);
+unsigned int pc_create_syscall(unsigned int status, unsigned int cause, context* pt_context);
+unsigned int pc_kill_syscall(unsigned int status, unsigned int cause, context* pt_context);
 int pc_kill(unsigned int PID);
 int pc_exit(context* pt_context);
 int print_proc();
@@ -137,9 +141,11 @@ int print_rbtree_test();
 void change_sysctl_sched_latency(unsigned int latency);
 extern void *kmalloc(unsigned int size);
 extern void restore_context();
-int exec_from_file(char* filename);
+extern unsigned int GetPC();
+int exec_from_file(char* filename, unsigned int argc, char params[][10]);
 int pc_kill_current();
 void kill_all_children(struct list_head * head);
-
-
+void test_program(unsigned int argc, char args[][10]);
+void stress_test(unsigned int prog_num);
+unsigned int atoi(char * param);
 #endif  // !_ZJUNIX_PC_H

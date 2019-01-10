@@ -313,7 +313,6 @@ void bootmm_free_pages(off_t start, size_t size)
 #ifdef BOOTMM_DEBUG
         while (1)
             ;
-#elif // DEBUG
         return;
 #endif
     }

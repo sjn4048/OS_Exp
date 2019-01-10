@@ -1,6 +1,8 @@
 .extern init_kernel
+.globl GetPC
 .globl start
 .globl exception
+.globl restore_context
 .extern kernel_sp
 .extern exception_handler
 .extern interrupt_handler
@@ -41,7 +43,7 @@ exception_start:
 	move $k1, $sp
 	la  $k0, kernel_sp
 	lw  $sp, 0($k0)
-		
+
 interrupt_save_context:
 	addiu $sp, $sp, -128
 	sw $at, 4($sp)
@@ -228,6 +230,26 @@ tlb_save_context:
 	addi $sp, $sp, 32
 
 	j restore_context
+	
+.org 0x0880
+GetPC:
+	move $v0, $ra
+	jr $ra
+	nop
+
+.org 0x0900
+transform:
+	add $t0, $a0, $a1
+	move $t3, $ra
+	addi $sp, $sp, -32
+	sw $ra, 28($sp)
+	move $a0, $a2
+	move $a1, $a3
+	jal $t0
+	nop
+	lw $ra, 28($sp)
+	addiu $sp, $sp, 32
+	jr $ra
 	nop
 
 .org 0x1000

@@ -49,7 +49,7 @@ void log(int status, const char *format, ...) {
     // print log message
     va_list ap;
     va_start(ap, format);
-    kernel_vprintf(format, ap);
+    kernel_vprintf(0xfff, format, ap);
     va_end(ap);
     kernel_printf("\n");
 }

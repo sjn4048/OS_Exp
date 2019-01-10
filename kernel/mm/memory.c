@@ -52,6 +52,8 @@ char *mem_choose()
 // Top-most and only memory allocation entry
 void *kmalloc(size_t size)
 {
+    allocator = SLOB;
+
     void *res;
 #ifdef MEMORY_DEBUG
     kernel_printf("Kmalloc: Size:%d, Allocator: %s\t", size, all_to_str[allocator]);

@@ -17,9 +17,9 @@
 
 char ps_buffer[64];
 int ps_buffer_index;
-
-void test_syscall4()
-{
+extern int in_stress_testing;
+char name[10];
+void test_syscall4() {
     syscall(4);
     // asm volatile(
     //     "li $a0, 0x00ff\n\t"
@@ -48,9 +48,8 @@ void test_proc()
     }
 }
 
-int proc_demo_create()
-{
-
+int proc_demo_create() {
+    
     return 0;
 }
 
@@ -76,8 +75,7 @@ void ps()
                 ps_buffer_index = 0;
                 ps_buffer[0] = 0;
                 kernel_printf("\n  PowerShell exit.\n");
-            }
-            else
+            } else
                 parse_cmd();
             ps_buffer_index = 0;
             kernel_puts("PS>", 0xfff, 0);
@@ -108,9 +106,13 @@ void parse_cmd()
     unsigned int result = 0;
     char dir[32];
     char c;
+    unsigned int argc;
+    char params[5][10];
     kernel_putchar('\n', 0, 0);
     char sd_buffer[8192];
     int i = 0;
+    int k = 0;
+    int j;
     char *param;
     for (i = 0; i < 63; i++)
     {
@@ -124,8 +126,29 @@ void parse_cmd()
         param = ps_buffer;
     else
         param = ps_buffer + i + 1;
-    if (ps_buffer[0] == 0)
-    {
+
+    // calculate and transform paramater(s)
+    i = 0;
+    j = 0;
+    k = 0;
+    while (1){
+        if (param[j] == 0) {
+            params[i][k] = 0;
+            break;
+        }
+        if (param[j] == ' ') {
+            j++;
+            params[i][k] = 0;
+            i++; 
+            k = 0;
+        }
+        params[i][k++] = param[j];
+        j++;
+    }
+    // total params numbers
+    argc = i + 1;
+
+    if (ps_buffer[0] == 0) {
         return;
     }
     else if (kernel_strcmp(ps_buffer, "clear") == 0)
@@ -177,84 +200,73 @@ void parse_cmd()
     else if (kernel_strcmp(ps_buffer, "mmtest") == 0)
     {
         kernel_printf("kmalloc : %x, size = 1KB\n", kmalloc(1024));
-    }
+    } 
 
     // -------------------------------------------------
     // ----------- process schedule commands -----------
-    else if (kernel_strcmp(ps_buffer, "ps") == 0)
-    {
+    else if (kernel_strcmp(ps_buffer, "ps") == 0) {
         result = print_proc();
         kernel_printf("ps return with %d\n", result);
-    }
-    else if (kernel_strcmp(ps_buffer, "rbtree") == 0)
-    {
+    } else if (kernel_strcmp(ps_buffer, "rbtree") == 0) {
         result = print_rbtree_test();
         kernel_printf("rbtree return with %d\n", result);
-    }
-    else if (kernel_strcmp(ps_buffer, "kill") == 0)
-    {
-        int pid = param[0] - '0';
-        kernel_printf("Killing process %d\n", pid);
-        result = pc_kill(pid);
+    } else if (kernel_strcmp(ps_buffer, "kill") == 0) {
+        kernel_printf("Killing process %d\n", atoi(param));
+        result = pc_kill(atoi(param));
         kernel_printf("kill return with %d\n", result);
-    }
-    else if (kernel_strcmp(ps_buffer, "time") == 0)
-    {
-        pc_create("time", system_time_proc, 0, 0, 0, 1, 0);
-    }
-    else if (kernel_strcmp(ps_buffer, "proc") == 0)
-    {
+    } else if (kernel_strcmp(ps_buffer, "time") == 0) {
+        pc_create("time",system_time_proc,0,0,0,1,0);
+    } else if (kernel_strcmp(ps_buffer, "proc") == 0) {
         result = proc_demo_create();
         kernel_printf("proc return with %d\n", result);
-    }
-    else if (kernel_strcmp(ps_buffer, "exec") == 0)
-    {
-        result = exec_from_file(param);
+    } else if (kernel_strcmp(ps_buffer, "exec") == 0) {
+        result = exec_from_file(params[0], argc, params);
         kernel_printf("exec return with %d\n", result);
-    }
-    else if (kernel_strcmp(ps_buffer, "kill_cur") == 0)
-    {
+    } else if (kernel_strcmp(ps_buffer, "kill_cur") == 0) {
         result = pc_kill_current(param);
         kernel_printf("pc_kill_current return with %d\n", result);
+    } else if (kernel_strcmp(ps_buffer, "change_latency") == 0) {
+        kernel_printf_color(VGA_GREEN, "changing CPU interrupt interval to %d\n", atoi(param));
+        change_sysctl_sched_latency(atoi(param));
+        kernel_printf("change_sysctl_sched_latency return with 0\n");
+    } else if (kernel_strcmp(ps_buffer, "tprog1") == 0) {
+        in_stress_testing ++;
+        for(j = 0;j < 10;j++) name[j] = params[0][j];
+        name[9] = 0;
+        if (name[0] != 't'){
+            pc_create(name,test_program,argc,params,0,1,0);
+        } else{
+            pc_create("default program",test_program,0,0,0,1,0);
+        }
+        kernel_printf("test_program return with %d\n", result);
+    } else if (kernel_strcmp(ps_buffer, "tprog2") == 0) {
+        in_stress_testing++;
+        for(j = 0;j < 10;j++) name[j] = params[0][j];
+        name[9] = 0;
+        if (name[0] != 't'){
+            pc_create(name,test_program,argc,params,0,0,0);
+        } else{
+            pc_create("default program",test_program,0,0,0,0,0);
+        }
+        kernel_printf("test_program return with %d\n", result);
+    } else if (kernel_strcmp(ps_buffer, "tprog3") == 0) {
+        stress_test(atoi(param));
+        kernel_printf("stress testing return with %d\n", 0);
     }
-
+    
     // ----------- process schedule commands -----------
     // -------------------------------------------------
 
-    // ====================================================+
-    // ----------- ext2 file system commands -----------
-
-    else if (kernel_strcmp(ps_buffer, "cat") == 0)
-    {
-        result = ext2_cat(param);
-    }
-    else if (kernel_strcmp(ps_buffer, "ls") == 0)
-    {
-        result = ext2_ls();
-    }
-    else if (kernel_strcmp(ps_buffer, "cd") == 0)
-    {
-        result = ext2_cd(param);
-    }
-    else if (kernel_strcmp(ps_buffer, "mkdir") == 0)
-    {
-        result = ext2_mkdir(param);
-    }
-    else if (kernel_strcmp(ps_buffer, "create") == 0)
-    {
-        result = ext2_create(param);
-    }
-
-    // ----------- ext2 file system commands -----------
-    // ====================================================+
-
-    else if (kernel_strcmp(ps_buffer, "vi") == 0)
-    {
+    else if (kernel_strcmp(ps_buffer, "cat") == 0) {
+        result = fs_cat(param);
+        kernel_printf("cat return with %d\n", result);
+    } else if (kernel_strcmp(ps_buffer, "ls") == 0) {
+        result = ls(param);
+        kernel_printf("ls return with %d\n", result);
+    } else if (kernel_strcmp(ps_buffer, "vi") == 0) {
         result = myvi(param);
         kernel_printf("vi return with %d\n", result);
-    }
-    else
-    {
+    } else {
         kernel_puts(ps_buffer, 0xfff, 0);
         kernel_puts(": command not found\n", 0xfff, 0);
     }

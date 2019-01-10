@@ -1,5 +1,4 @@
-/*
- *  pc/pc.c
+/* pc/pc.c
  *
  *  Kernel scheduler and related syscalls
  *
@@ -13,6 +12,11 @@
 #include <arch.h>
 #include <zjunix/syscall.h>
 #include <zjunix/log.h>
+#include <driver/ps2.h>
+#include <zjunix/syscall.h>
+#include <zjunix/memory.h>
+
+extern int Semaphore;
 
 // defines the task's possible state
 #define TASK_RUNNING 0
@@ -20,12 +24,14 @@
 #define TASK_READY 2
 #define TASK_DEAD 3
 
+int in_stress_testing = 0;
+
 // intervl between two schedule interrupts
 unsigned int sysctl_sched_latency = 1000000;
-
+unsigned int disable_schedule = 0;
 //current task pointer
 task_struct *current_task = 0;
-
+unsigned int ENTRY;
 // lists contain different kinds of tasks
 struct list_head all_task;
 struct list_head all_dead;
@@ -33,7 +39,7 @@ struct list_head all_waiting;
 struct list_head all_ready;
 
 // PID allocating system
-unsigned int cur_PID = 0;
+int cur_PID = 0;
 
 // cfs running queue structure
 struct cfs_rq rq;
@@ -88,9 +94,13 @@ static void copy_context(context* src, context* dest) {
  * initialize the process schedule module
  */
 void init_pc() {
-    // sysctl_sched_latency = 1000000;
+    ENTRY = (unsigned int)kmalloc(4096 * 2);
+kernel_printf("ENTRY  %x\n",ENTRY);
+    int *i = holder1; i = holder2; i = holder3; i = holder4; i = holder5;
+    i = holder6; i = holder7; i = holder8; i = holder8; i = holder10;
+    i = holder11; i = holder12; i = holder13; i = holder14; i = holder15;
+    i = holder16; i = holder17; i = holder18; i = holder18; i = holder110;
     init_cfs_rq(&rq);
-
     INIT_LIST_HEAD(&all_task);
     INIT_LIST_HEAD(&all_dead);
     INIT_LIST_HEAD(&all_waiting);
@@ -138,6 +148,7 @@ void init_pc() {
     // ---------------------------------------------------
 
     register_syscall(10, pc_kill_syscall);
+    register_syscall(8,pc_create_syscall);
     register_interrupt_handler(7, pc_schedule);
     current_task = &(new->task);
     /* dynamicly defines the interrupt period by 
@@ -172,7 +183,11 @@ void change_sysctl_sched_latency(unsigned int latency){
  * task which has the mininum vruntime
  */
 void pc_schedule(unsigned int status, unsigned int cause, context* pt_context) {
-
+    if (disable_schedule == 1){
+        asm volatile("mtc0 $zero, $9\n\t");
+        return;
+    }
+    
     disable_interrupts();
     
     // update vruntime of current task
@@ -246,7 +261,8 @@ void wakeup_parent(unsigned long pid){
 /* pc_create : 
  * create a process 
  */
-void pc_create(char *task_name, void(*entry)(unsigned int argc, void *args), unsigned int argc, void *args, int nice, int is_root, int need_wait) {
+void pc_create(char *task_name, void(*entry)(unsigned int argc, char args[][10]), 
+    unsigned int argc, char args[][10], int nice, int is_root, int need_wait) {
 
     task_union *new = (task_union*) kmalloc(sizeof(task_union));
     task_struct * task = &(new->task);
@@ -274,6 +290,7 @@ void pc_create(char *task_name, void(*entry)(unsigned int argc, void *args), uns
      *     2. if vruntime starts with 0, it will block all other processes from 
      *        running because it takes some time for the new process to catch up
      *        its vruntime with the others
+     * ---------------------- NOTE ---------------------- 
      */
     entity->vruntime = current_task->sched_entity.vruntime;
 
@@ -328,6 +345,21 @@ void pc_create(char *task_name, void(*entry)(unsigned int argc, void *args), uns
 
 }
 
+/* pc_create_syscall : 
+ * process create system call, can be used to fork a process
+ */
+unsigned int pc_create_syscall(unsigned int status, unsigned int cause, context* pt_context) {
+    disable_interrupts();
+    // start from PC right now (GetPC function)
+    // has the same name with parent but different PID
+    // no need to wait for parent
+    // is not root
+    pc_create(current_task->name,(void *)(GetPC()),current_task->context.a0,
+    (void *)current_task->context.a1, current_task->nice,0,0);
+    enable_interrupts();
+    return cur_PID - 1;
+}
+
 /* check_if_ps_exit :
  * if powershell is exiting, create a new powershell process
  * to prevent OS from dead, this is quite useful when a unhandled
@@ -344,18 +376,28 @@ void check_if_ps_exit(){
 
 }
 
+
+
 /* pc_kill_syscall : 
  * process kill system call, it can be used to forcely terminate 
  * a process when a unhandled exception occurs
  * see more info in 'exc.c'
  */
-void pc_kill_syscall(unsigned int status, unsigned int cause, context* pt_context) {
-    
+unsigned int pc_kill_syscall(unsigned int status, unsigned int cause, context* pt_context) {
+
     disable_interrupts();
     check_if_ps_exit();
     pc_exit(pt_context);
-    // pc_schedule(status, cause, pt_context);
+
+    /* attention :
+     * we will restore Semaphore to 1 here
+     * because we will never go back to syscall() function again!
+     */
+    Semaphore = 1;
+
     enable_interrupts();
+
+    return 0;
 }
 
 int pc_kill_current(){
@@ -364,11 +406,7 @@ int pc_kill_current(){
      * current process. 
      */
     syscall(10);
-    // asm volatile(
-    //     "li $v0, 10\n\t"
-    //     "syscall\n\t"
-    //     "nop\n\t");
-    
+
     /* Another implementation : 
      * ( NOTE : still some unknown bugs, maybe unstatble!!! )
      * in order to get 'pt_context' info which can't be accessed directly 
@@ -438,7 +476,6 @@ int pc_exit(context* pt_context){
 
     // switch context registers
     copy_context(&(current_task->context),pt_context);
-
     return 0;
 }
 
@@ -449,13 +486,13 @@ int pc_kill(unsigned int PID) {
 
     // can't kill idle process
     if (PID == 0) {
-        kernel_printf("You are killing idle process!!!\n");
+        kernel_printf_color(VGA_RED, "You are killing idle process!!!\n");
         return 1;
     }
 
     // can't kill itself
     if (PID == current_task->PID) {
-        kernel_printf("You can't kill current task!\n");
+        kernel_printf_color(VGA_RED, "You can't kill current task!\n");
         return 1;
     }
 
@@ -473,7 +510,8 @@ int pc_kill(unsigned int PID) {
     }
 
     if (find == 0){
-        kernel_printf("Process not found!\n");
+        kernel_printf_color(VGA_RED, "Process not found!\n");
+        enable_interrupts();
         return 1;
     }
 
@@ -515,8 +553,22 @@ int pc_kill(unsigned int PID) {
 void kill_all_children(struct list_head * head){
     struct list_head *pos;
     task_struct *next;
+    int i = 0;
     list_for_each(pos, head){
+        i++;
+        if (i == 4){
+            break;
+        }
         next = container_of(pos, task_struct, children);
+
+        /* NOTE : 
+         * the pos will be modified wen kill function runs
+         * this will cause some bugs so we create a backup list for "pos"
+         */
+        struct list_head tmp;
+        tmp.next = pos->next;
+        tmp.prev = pos->prev;
+        pos = &tmp;
         /* NOTE : 
          * we need to check the process we are killing is running right
          * now or not, this is crucial because if we kill the current 
@@ -539,13 +591,13 @@ int print_proc() {
     struct list_head *pos;
     task_struct *next;
 
-    kernel_printf("----------ALL PROCESSES--------------\n");
+    kernel_printf_color(VGA_GREEN, "----------ALL PROCESSES--------------\n");
     list_for_each(pos, (&all_task)) {
         next = container_of(pos, task_struct, task_list);
-        kernel_printf("  PID : %d, name : %s, state : %s, vruntime : %d\n", next->PID, next->name, task_state(next->state),
-        next->sched_entity.vruntime);
+        kernel_printf_color(VGA_BLUE, "  PID : %d, name : %s, state : %s, vruntime : %d\n", next->PID, next->name, task_state(next->state), next->sched_entity.vruntime);
+        // next->sched_entity.vruntime);
     }
-    kernel_printf("----------ALL PROCESSES--------------\n");
+    kernel_printf_color(VGA_GREEN, "----------ALL PROCESSES--------------\n");
 
     return 0;
 }
@@ -579,11 +631,11 @@ int print_rbtree_test() {
      * it is crucial because we schedule the process in a very short time
      */
     disable_interrupts();
-    kernel_printf("-----------------------------------------------------\n");
-    kernel_printf("----------CFS structure(Red Black Tree)--------------\n");
+    kernel_printf_color(VGA_GREEN, "-----------------------------------------------------\n");
+    kernel_printf_color(VGA_GREEN, "----------CFS structure(Red Black Tree)--------------\n");
     print_process(&(rq.tasks_timeline));
-    kernel_printf("----------CFS structure(Red Black Tree)--------------\n");
-    kernel_printf("-----------------------------------------------------\n");
+    kernel_printf_color(VGA_GREEN, "----------CFS structure(Red Black Tree)--------------\n");
+    kernel_printf_color(VGA_GREEN, "-----------------------------------------------------\n");
     enable_interrupts();
     return 0;
 
@@ -594,8 +646,10 @@ int print_rbtree_test() {
  * currently only run it in kernel mode
  * the program will use syscall to trap into kernel mode
  */
-int exec_from_file(char* filename) {
+int exec_from_file(char* filename, unsigned int argc, char params[][10]) {
 
+    // ---------------------------------------------------------------
+    // --------------begin loading program into memory----------------
     FILE file;
     const unsigned int CACHE_BLOCK_SIZE = 64;
     unsigned char buffer[512];
@@ -608,17 +662,161 @@ int exec_from_file(char* filename) {
     unsigned int n = size / CACHE_BLOCK_SIZE + 1;
     unsigned int i = 0;
     unsigned int j = 0;
-    kernel_printf("%d\n", size);
-    unsigned int ENTRY = (unsigned int)kmalloc(4096);
+
+
+// disable interrupt to avoid some unpredicted bugs 
+disable_schedule = 1;
+
     for (j = 0; j < n; j++) {
         fs_read(&file, buffer, CACHE_BLOCK_SIZE);
         kernel_memcpy((void*)(ENTRY + j * CACHE_BLOCK_SIZE), buffer, CACHE_BLOCK_SIZE);
-        kernel_cache(ENTRY + j * CACHE_BLOCK_SIZE);
+        if (size < 4096)
+            kernel_cache(ENTRY + j * CACHE_BLOCK_SIZE);
     }
-    int (*f)() = (int (*)())(ENTRY);
-    int ret = f();
-    // pc_create("seg",(void *)ENTRY,0,0,0,1);
-    // kfree((void*)ENTRY);
-    return ret;
 
+    // ---------------------------------------------------------------
+    // --------------end loading program into memory------------------
+
+    // cast the address to function call
+    int (*f)(unsigned int argc, char params[][10]) = 
+                    (int (*)(unsigned int argc, char params[][10]))(ENTRY);
+    
+    // call the program !!!
+    kernel_printf_color(VGA_BLUE,"Calling user function ");
+    kernel_printf_color(VGA_RED,"%s\n",filename);
+    unsigned int ret = f(argc, params);
+    kernel_printf_color(VGA_BLUE,"End calling user function ");
+    kernel_printf_color(VGA_RED,"%s\n",filename);
+
+// enable interrupts
+disable_schedule = 0;
+
+    return ret;
 }
+
+/* get_ticks : 
+ * get ticks from system clock
+ */
+unsigned int get_ticks(unsigned int ticks_high, unsigned int ticks_low) {
+    ticks_low = (ticks_low >> 8) | (ticks_high << 24);
+    ticks_high >>= 8;
+    unsigned int second;
+    // second = (ticks_high % 390625);
+    // second = second * 10995 + (second * 45421) % 390625;
+    // second += ticks_low / 390625;
+    second = ticks_low;
+    return second;
+}
+
+/* delay_s : 
+ * delay certain seconds 
+ * using system timer to calculate the time precisely
+ */
+void delay_s(unsigned int second) {
+    unsigned int ticks_high, ticks_low;
+    int cur_time = 0;
+    int tmp_time = 0;
+    asm volatile(
+            "mfc0 %0, $9, 6\n\t"
+            "mfc0 %1, $9, 7\n\t"
+            : "=r"(ticks_low), "=r"(ticks_high));
+    cur_time = get_ticks(ticks_high, ticks_low);
+    while (1) {
+        asm volatile(
+            "mfc0 %0, $9, 6\n\t"
+            "mfc0 %1, $9, 7\n\t"
+            : "=r"(ticks_low), "=r"(ticks_high));
+        tmp_time = get_ticks(ticks_high, ticks_low);
+        if (tmp_time - cur_time > 390625 * second) break;
+    }
+}
+
+/* test_program : 
+ * This is a testing program for process schedule
+ * it will print something during certain intervals(seconds)
+ * and safely exit after counter is up to five
+ */
+void test_program(unsigned int argc, char args[][10]){
+    int i = 0;
+    // default interval is 3 seconds
+    int interval = 3;
+    if (argc > 1){
+        //change interval based on command line paratemter
+        interval = atoi(args[1]);
+    }
+
+    while(1){
+        i++;
+        // delay certain seconds
+        delay_s(interval);
+        if (argc != 0)
+            kernel_printf("Program name is: [%s], current tick :%d\n", current_task->name, i);
+        else
+            kernel_printf("Program name is: [%s], current tick :%d\n", current_task->name, i);
+
+        // hot exit the program
+        if(i == 5){
+            in_stress_testing -- ;
+            kernel_printf_color(VGA_RED, "exiting!!!\n");
+            pc_kill_current();
+        }
+    }
+}
+
+/* pow10 : 
+ * pow based on 10
+ */
+unsigned int pow10(unsigned int p){
+    int i = 0;
+    int e = 1;
+    for(i = 0;i < p;i++)
+        e *= 10;
+    return e;
+}
+
+/* atoi : 
+ * char * to int 
+ */
+unsigned int atoi(char * param){
+    int i = 0;
+    int len = 0;
+    while(1){
+        if (param[len] == 0)
+            break;
+        len++;
+    }
+    unsigned int ret = 0;
+    for (i = 0;i < len;i++){
+        ret += (param[i] - '0') * pow10(len-i-1);
+    }
+    return ret;
+}
+
+/* itoa : 
+ * int to char * 
+ */
+char * itoa(int num, char * word){
+    int i = 9;
+    while(1){
+        word[i--] = '0' + num % 10;
+        num = num / 10;
+        if (num == 0) break;
+    }
+    return word + i + 1;
+}
+
+/* stress_test : 
+ * stress tesing ~
+ * this function 
+ */
+void stress_test(unsigned int prog_num){
+    kernel_printf("!!!!!!!!!!!!!!!!!%d\n",in_stress_testing);
+    in_stress_testing += prog_num;
+    int i = 0;
+    char words[11];
+    words[10] = 0;
+    for(i = 0;i < prog_num;i++){
+        pc_create(itoa(i, words),test_program,0,0,0,1,0);
+    }
+}
+

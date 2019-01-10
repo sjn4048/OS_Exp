@@ -225,13 +225,13 @@ void print_rbtree(struct rb_node *tree, struct rb_node *parent, int direction)
         
 		if (direction==0){
 			// tree is root
-            kernel_printf("  %s(PID : %d)(B) is root\n", task->name, (int)task->PID);
+            kernel_printf_color(VGA_BLUE, "  %s(PID : %d)(B) is root\n", task->name, (int)task->PID);
 		}
         else{                
 			// tree is not root
 			sched_entity * parent_entity = rb_entry(parent, sched_entity, rb_node);
 			task_struct * parent_task = container_of(parent_entity, task_struct, sched_entity);
-            kernel_printf("  %s(PID : %d)(%s) is %s's %s child\n", task->name, 
+            kernel_printf_color(VGA_BLUE, "  %s(PID : %d)(%s) is %s's %s child\n", task->name, 
 					(int)task->PID, rb_is_black(tree)?"B":"R", 
 					parent_task->name, direction==1?"right" : "left");
 		}

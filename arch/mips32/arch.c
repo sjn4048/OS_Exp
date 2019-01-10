@@ -2,7 +2,26 @@
 
 // Machine params
 
-// Virtual Memor
+unsigned int* const holder1 = (unsigned int*)0xbfc04000;
+unsigned int* const holder2 = (unsigned int*)0xbfc04000;
+unsigned int* const holder3 = (unsigned int*)0xbfc04000;
+unsigned int* const holder4 = (unsigned int*)0xbfc04000;
+unsigned int* const holder5 = (unsigned int*)0xbfc04000;
+unsigned int* const holder6 = (unsigned int*)0xbfc04000;
+unsigned int* const holder7 = (unsigned int*)0xbfc04000;
+unsigned int* const holder8 = (unsigned int*)0xbfc04000;
+unsigned int* const holder9 = (unsigned int*)0xbfc04000;
+unsigned int* const holder10 = (unsigned int*)0xbfc04000;
+unsigned int* const holder11 = (unsigned int*)0xbfc04000;
+unsigned int* const holder12 = (unsigned int*)0xbfc04000;
+unsigned int* const holder13 = (unsigned int*)0xbfc04000;
+unsigned int* const holder14 = (unsigned int*)0xbfc04000;
+unsigned int* const holder15 = (unsigned int*)0xbfc04000;
+unsigned int* const holder16 = (unsigned int*)0xbfc04000;
+unsigned int* const holder17 = (unsigned int*)0xbfc04000;
+unsigned int* const holder18 = (unsigned int*)0xbfc04000;
+unsigned int* const holder19 = (unsigned int*)0xbfc04000;
+unsigned int* const holder110 = (unsigned int*)0xbfc04000;
 
 unsigned int* const CHAR_VRAM = (unsigned int*)0xbfc04000;
 unsigned int* const GRAPHIC_VRAM = (unsigned int*)0xbfe0000;
