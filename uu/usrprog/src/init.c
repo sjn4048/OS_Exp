@@ -18,7 +18,7 @@ unsigned int main(unsigned int argc, char params[][10]) {
     printf("yes");
     for(i = 0;i < 3;i++)
         printf("%s\n",params[i]);
-    // unsigned int ret = ls(params[1]);
+    unsigned int ret = ls(params[1]);
 
     return 10;
 
