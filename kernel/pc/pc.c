@@ -786,15 +786,14 @@ unsigned int atoi(char * param){
 /* itoa : 
  * int to char * 
  */
-char * itoa(int param){
+char * itoa(int num, char * word){
     int i = 9;
-    char ret[10];
     while(1){
-        ret[i--] = '0' + param % 10;
-        param = param / 10;
-        if (param == 0) break;
+        word[i--] = '0' + num % 10;
+        num = num / 10;
+        if (num == 0) break;
     }
-    return ret+i;
+    return word + i;
 }
 
 /* atoi : 
@@ -802,7 +801,10 @@ char * itoa(int param){
  */
 void stress_test(unsigned int prog_num){
     int i = 0;
+    char words[11];
+    words[10] = 0;
     for(i = 0;i < prog_num;i++){
-        pc_create(itoa(i),test_program,0,0,0,1,0);
+        pc_create(itoa(i, words),test_program,0,0,0,1,0);
     }
 }
+
