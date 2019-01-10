@@ -661,7 +661,9 @@ int exec_from_file(char* filename) {
 asm volatile("move %0, $sp\n\t" : "=r"(ass));
 kernel_printf("before  %x\n",ass);
 flag = 1;
-    unsigned int ret = f(0,0,ENTRY);
+print_proc();
+kernel_getchar();
+unsigned int ret = f(0,0,ENTRY);
 asm volatile("move %0, $sp\n\t" : "=r"(ass));
 kernel_printf("after  %x\n",ass);
 
