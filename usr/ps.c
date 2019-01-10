@@ -117,6 +117,7 @@ void parse_cmd() {
             break;
         }
         if (param[j] == ' ') {
+            j++;
             params[i][k] = 0;
             i++; 
             k = 0;
