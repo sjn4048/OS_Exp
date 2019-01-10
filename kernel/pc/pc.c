@@ -650,12 +650,7 @@ int kk = 0;
     unsigned int j = 0;
     unsigned int ENTRY = (unsigned int)kmalloc(4096 * 2);
     kernel_printf("ENTRY  %x\n",ENTRY);
-    kernel_printf("addr%x\n", syscalls);
     
-for (kk = 0;kk < 10;kk++) kernel_printf("%x ",syscalls[kk]);
-print_proc();
-// disable_interrupts();
-// kernel_getchar();
 flag = 1;
     for (j = 0; j < n; j++) {
         fs_read(&file, buffer, CACHE_BLOCK_SIZE);
@@ -664,18 +659,12 @@ flag = 1;
     }
 
     kernel_printf("out");
-// enable_interrupts();
-// flag = 0;
-    for (kk = 0;kk < 10;kk++) kernel_printf("%x ",syscalls[kk]);
+
     int (*f)(unsigned int argc, void *args, unsigned int addr) = (int (*)(unsigned int argc, void *args, unsigned int addr))(ENTRY);
 
-// flag = 1;
-print_proc();
 for (kk = 0;kk < 10;kk++) kernel_printf("%x ",syscalls[kk]);
-// kernel_getchar();
 unsigned int ret = f(0,0,ENTRY);
 for (kk = 0;kk < 10;kk++) kernel_printf("%x ",syscalls[kk]);
-    // disable_interrupts();
     return ret;
 
 }
