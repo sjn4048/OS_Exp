@@ -6,6 +6,7 @@
 
 
 unsigned int main(unsigned int argc, void *args) {
+    printf("getin");
     // unsigned int ptr = malloc(16);
     // printf("malloc ptr : %x\n",ptr);
     // unsigned int ret =  myvi((char *)args);
