@@ -631,7 +631,7 @@ int print_rbtree_test() {
  * currently only run it in kernel mode
  * the program will use syscall to trap into kernel mode
  */
-int exec_from_file(char* filename, char params[][]) {
+int exec_from_file(char* filename, char params[][10]) {
 
     FILE file;
     const unsigned int CACHE_BLOCK_SIZE = 64;
