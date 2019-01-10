@@ -79,10 +79,11 @@ typedef struct {
     int static_prio, normal_prio;
 
     sched_entity sched_entity; // schedule entity
+    char holder0[16];
     context context; // context register
-
-    unsigned int parent;   //parent's pid
+    char holder1[16];
     int PID;   //pid
+    unsigned int parent;   //parent's pid
     unsigned int state;   //state
     char name[32];  //name
 
