@@ -49,6 +49,9 @@ extern void rb_erase(struct rb_node *, struct rb_root *);
 
 typedef void (*rb_augment_f)(struct rb_node *node, void *data);
 
+typedef struct rb_node rb_node_t;
+typedef struct rb_root rb_root_t;
+
 extern void rb_augment_insert(struct rb_node *node,
                               rb_augment_f func, void *data);
 extern struct rb_node *rb_augment_erase_begin(struct rb_node *node);

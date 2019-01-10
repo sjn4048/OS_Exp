@@ -4,6 +4,7 @@
 #include <zjunix/utils.h>
 #include <zjunix/buddy.h>
 #include <zjunix/slab.h>
+#include <zjunix/memory.h>
 
 struct slob_block
 {
@@ -333,13 +334,13 @@ struct kmem_cache_s {
 	void (*dtor)();
 };
 
-kmem_cache *kmem_cache_create(char *name, unsigned int size, unsigned int align,
+kmem_cache_t *kmem_cache_create(char *name, unsigned int size, unsigned int align,
 	void (*ctor)(),
 	void (*dtor)())
 {
-	kmem_cache *c;
+	kmem_cache_t *c;
 
-	c = slob_alloc(sizeof(kmem_cache));
+	c = slob_alloc(sizeof(kmem_cache_t));
 
 	if (c) {
 		c->name = name;
@@ -355,13 +356,13 @@ kmem_cache *kmem_cache_create(char *name, unsigned int size, unsigned int align,
 	return c;
 }
 
-int kmem_cache_destroy(kmem_cache *c)
+int kmem_cache_destroy(kmem_cache_t *c)
 {
-	slob_free(c, sizeof(kmem_cache));
+	slob_free(c, sizeof(kmem_cache_t));
 	return 0;
 }
 
-void *kmem_cache_alloc(kmem_cache *c)
+void *kmem_cache_alloc(kmem_cache_t *c)
 {
 	void *b;
 
@@ -373,7 +374,7 @@ void *kmem_cache_alloc(kmem_cache *c)
 	return b;
 }
 
-void kmem_cache_free(kmem_cache *c, void *b)
+void kmem_cache_free(kmem_cache_t *c, void *b)
 {
 	if (c->size < PAGE_SIZE)
 		slob_free(b, c->size);
@@ -381,12 +382,12 @@ void kmem_cache_free(kmem_cache *c, void *b)
 		free_pages(b, find_order(c->size));
 }
 
-unsigned int kmem_cache_size(kmem_cache *c)
+unsigned int kmem_cache_size(kmem_cache_t *c)
 {
 	return c->size;
 }
 
-const char *kmem_cache_name(kmem_cache *c)
+const char *kmem_cache_name(kmem_cache_t *c)
 {
 	return c->name;
 }

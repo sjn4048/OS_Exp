@@ -5,11 +5,21 @@
 
 // #define BOOTMM_DEBUG
 
-struct bootmm bmm;
+bootmm_t bmm;
 
 unsigned char bootmmap[MACHINE_MMSIZE >> PAGE_SHIFT];
 
-void set_mminfo(struct bootmm_info *info, unsigned int start, unsigned int end, unsigned int type)
+static inline void __set_maps(off_t s_pfn, off_t cnt, unsigned char value)
+{
+    while (cnt)
+    {
+        bmm.s_map[s_pfn] = value;
+        --cnt;
+        ++s_pfn;
+    }
+}
+
+void set_mminfo(bootmm_info_t *info, off_t start, off_t end, unsigned int type)
 {
     info->start = start;
     info->end = end;
@@ -27,9 +37,9 @@ void set_mminfo(struct bootmm_info *info, unsigned int start, unsigned int end, 
 for deleting
 --
 */
-unsigned int insert_mminfo(struct bootmm *mm, unsigned start, unsigned int end, unsigned int type)
+unsigned int insert_mminfo(bootmm_t *mm, off_t start, off_t end, unsigned int type)
 {
-    for (int i = 0; i < mm->info_cnt; i++)
+    for (size_t i = 0; i < mm->info_cnt; i++)
     {
         if (mm->info[i].type != type)
         {
@@ -65,8 +75,10 @@ unsigned int insert_mminfo(struct bootmm *mm, unsigned start, unsigned int end, 
 
         if (mm->info[i].start - 1 == end)
         {
+#ifdef BOOTMM_DEBUG
             // next info the newly-added info
             kernel_printf("Type of %d: %x, type: %x", i, mm->info[i].type, type);
+#endif
             mm->info[i].start = start;
             return 4;
         }
@@ -85,7 +97,7 @@ unsigned int insert_mminfo(struct bootmm *mm, unsigned start, unsigned int end, 
 }
 
 // remove mm->info[index]
-void remove_mminfo(struct bootmm *mm, unsigned int index)
+void remove_mminfo(bootmm_t *mm, off_t index)
 {
     // check if index is valid
     if (index >= mm->info_cnt)
@@ -93,7 +105,7 @@ void remove_mminfo(struct bootmm *mm, unsigned int index)
 
     if (index + 1 < mm->info_cnt)
     {
-        for (int i = index + 1; i < mm->info_cnt; i++)
+        for (size_t i = index + 1; i < mm->info_cnt; i++)
         {
             mm->info[i - 1] = mm->info[i];
         }
@@ -101,7 +113,7 @@ void remove_mminfo(struct bootmm *mm, unsigned int index)
     mm->info_cnt--;
 }
 
-unsigned char *find_pages(unsigned int page_cnt, unsigned int start_page, unsigned int end_page, unsigned int align)
+unsigned char *find_pages(size_t page_cnt, off_t start_page, off_t end_page, size_t align)
 {
     start_page = (start_page + align - 1) & ~(align - 1);
 #ifdef BOOTMM_DEBUG
@@ -109,16 +121,16 @@ unsigned char *find_pages(unsigned int page_cnt, unsigned int start_page, unsign
 #endif // BOOTMM_DEBUG
 
     // the iteration ends at end_page - page_cnt, as malloc will fail even all the memory left are not used
-    for (int i = start_page; i <= end_page - page_cnt;)
+    for (size_t i = start_page; i <= end_page - page_cnt;)
     {
+        size_t cnt = page_cnt;
+        size_t tmp = UPPER_ALLIGN(i, align);
+
         if (bmm.s_map[i] == PAGE_USED)
         {
             i++;
             continue;
         }
-
-        int cnt = page_cnt;
-        int tmp = i;
 
         while (cnt)
         {
@@ -145,10 +157,7 @@ unsigned char *find_pages(unsigned int page_cnt, unsigned int start_page, unsign
         {
             bmm.last_alloc_end = tmp - 1;
             // set used status.
-            for (int j = i; j < page_cnt; j++)
-            {
-                bmm.s_map[j] = PAGE_USED;
-            }
+            __set_maps(i, page_cnt, PAGE_USED);
 #ifdef BOOTMM_DEBUG
             kernel_printf("Found page at %d\n", i);
 #endif // BOOTMM_DEBUG
@@ -161,15 +170,15 @@ unsigned char *find_pages(unsigned int page_cnt, unsigned int start_page, unsign
     }
 
     // if iteration ended without having found a valid memory, return NULL
-    return 0;
+    return NULL;
 }
 
 // allocate memory in bootmm
 // return the absolute address with at least 1 page align
-unsigned int bootmm_alloc(unsigned int size, unsigned int type, unsigned int align)
+unsigned int bootmm_alloc(size_t size, unsigned int type, size_t align)
 {
     // get the page where size is in.
-    unsigned int page_cnt = UPPER_ALLIGN(size, PAGE_TABLE_SIZE) >> PAGE_SHIFT;
+    size_t page_cnt = UPPER_ALLIGN(size, PAGE_TABLE_SIZE) >> PAGE_SHIFT;
 #ifdef BOOTMM_DEBUG
     kernel_printf("size: %d, align: %d, need page: %d\n", size, align, page_cnt);
 #endif // BOOTMM_DEBUG
@@ -198,14 +207,13 @@ unsigned int bootmm_alloc(unsigned int size, unsigned int type, unsigned int ali
 #ifdef BOOTMM_DEBUG
     kernel_printf("bootmm_alloc_pages return NULL\n", res);
 #endif // BOOTMM_DEBUG
-    return 0;
+    return NULL;
 }
 
 void init_bootmm()
 {
-    unsigned char *t_map;
     // use up to 16 MB memory.
-    unsigned int end = 16 * 1024 * 1024;
+    off_t end = 16 * 1024 * 1024;
     kernel_memset(&bmm, 0, sizeof(bmm));
     bmm.phymm = MACHINE_MMSIZE;
     bmm.max_pfn = bmm.phymm >> PAGE_SHIFT;
@@ -215,7 +223,7 @@ void init_bootmm()
     insert_mminfo(&bmm, 0, end - 1, _MM_KERNEL);
     bmm.last_alloc_end = (end >> PAGE_SHIFT) - 1;
 
-    for (int i = 0; i <= bmm.last_alloc_end; i++)
+    for (size_t i = 0; i <= bmm.last_alloc_end; i++)
     {
         bmm.s_map[i] = PAGE_USED;
     }
@@ -226,11 +234,21 @@ void print_bootmap()
     char *type_msg[] = {"Kernel code/data", "Mm Bitmap", "Vga Buffer",
                         "Kernel page directory", "Kernel page table", "Dynamic", "Reserved"};
     kernel_printf("Bootmem info:\n");
-    for (int index = 0; index < bmm.info_cnt; ++index)
+    for (size_t index = 0; index < bmm.info_cnt; ++index)
     {
         kernel_printf("\t%x-%x : %s\n",
                       bmm.info[index].start, bmm.info[index].end, type_msg[bmm.info[index].type]);
     }
+}
+
+void *bootmm_kmalloc(size_t size)
+{
+    // TODO
+}
+
+void bootmm_kfree(void *obj)
+{
+    // TODO
 }
 
 #pragma region temporarily not used
@@ -239,10 +257,9 @@ void print_bootmap()
  * (set the former one.end = split_start-1)
  * (set the latter one.start = split_start)
  */
-unsigned int split_mminfo(struct bootmm *mm, unsigned int index, unsigned int split_start)
+unsigned int split_mminfo(bootmm_t *mm, off_t index, off_t split_start)
 {
-    unsigned int start, end;
-    unsigned int tmp;
+    off_t start, end;
 
     start = mm->info[index].start;
     end = mm->info[index].end;
@@ -255,7 +272,7 @@ unsigned int split_mminfo(struct bootmm *mm, unsigned int index, unsigned int sp
         return 0; // number of segments are reaching max, cannot alloc anymore
                   // segments
     // using copy and move, to get a mirror segment of mm->info[index]
-    for (tmp = mm->info_cnt - 1; tmp >= index; --tmp)
+    for (off_t tmp = mm->info_cnt - 1; tmp >= index; --tmp)
     {
         mm->info[tmp + 1] = mm->info[tmp];
     }
@@ -266,14 +283,21 @@ unsigned int split_mminfo(struct bootmm *mm, unsigned int index, unsigned int sp
 }
 
 // Won't be used actually
-void bootmm_free_pages(unsigned int start, unsigned int size)
+void bootmm_free_pages(off_t start, size_t size)
 {
-    unsigned int index, size_inpages;
-    struct bootmm_info target;
+    size_t size_inpages;
+    off_t index;
+    bootmm_info_t target;
     size &= PAGE_ALIGN;
     size_inpages = size >> PAGE_SHIFT;
-    if (!size_inpages)
-        return; // No need to free space less than one page
+    if (size_inpages == 0)
+    {
+#ifdef BOOTMM_DEBUG
+        kernel_printf("\tIn bootmm_free_pages: No need to free.\n");
+#endif // DEBUG
+        return;
+    }
+
     start &= PAGE_ALIGN;
     for (index = 0; index < bmm.info_cnt; index++)
     {
@@ -286,19 +310,32 @@ void bootmm_free_pages(unsigned int start, unsigned int size)
     {
         kernel_printf("bootmm_free_pages: No allocated space %x-%x\n",
                       start, start + size - 1);
+#ifdef BOOTMM_DEBUG
+        while (1)
+            ;
+#elif // DEBUG
         return;
+#endif
     }
 
     target = bmm.info[index];
     if (target.start == start)
     {
         if (target.end == start + size - 1)
+        {
             remove_mminfo(&bmm, index); // Exactly the same
-        else                            // Remove the front part
+        }
+        else
+        {
+            // Remove the front part
             set_mminfo(bmm.info + index, start + size, target.end, target.type);
+        }
     }
-    else if (target.end == start + size - 1) // Remove the rear part
+    else if (target.end == start + size - 1)
+    {
+        // Remove the rear part
         set_mminfo(bmm.info + index, target.start, start - 1, target.type);
+    }
     else
     {
         if (split_mminfo(&bmm, index, start) == 0)
@@ -317,7 +354,7 @@ void bootmm_free_pages(unsigned int start, unsigned int size)
  * @param cnt	: the number of pages to be set
  * @param value	: the value to be set
  */
-void set_maps(unsigned int s_pfn, unsigned int cnt, unsigned char value)
+void set_maps(off_t s_pfn, size_t cnt, unsigned char value)
 {
     while (cnt)
     {

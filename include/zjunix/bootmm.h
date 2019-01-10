@@ -1,5 +1,6 @@
 #ifndef _ZJUNIX_BOOTMM_H
 #define _ZJUNIX_BOOTMM_H
+#include <zjunix/memory.h>
 
 extern unsigned char __end[];
 
@@ -15,19 +16,14 @@ enum mm_usage
     _MM_COUNT
 };
 
-#define BOOTMM_DEBUG
-#ifdef BOOTMM_DEBUG
-#include <driver/ps2.h>
-#endif
-
 // record every part of mm's information
-struct bootmm_info
+typedef struct bootmm_info
 {
     unsigned int start;
     unsigned int end;
     unsigned int type;
-};
-// typedef struct bootmm_info * p_mminfo;
+} bootmm_info_t;
+// typedef bootmm_info_t  * p_mminfo;
 
 // 4K per page
 #define PAGE_SHIFT 12
@@ -38,26 +34,30 @@ struct bootmm_info
 
 #define MAX_INFO 10
 
-struct bootmm
+typedef struct bootmm
 {
     unsigned int phymm;   // the actual physical memory
-    unsigned int max_pfn; // record the max page number
+    size_t max_pfn; // record the max page number
     unsigned char *s_map; // map begin place
     unsigned int last_alloc_end;
     unsigned int info_cnt; // get number of infos stored in bootmm now
-    struct bootmm_info info[MAX_INFO];
-};
-// typedef struct bootmm * p_bootmm;
+    bootmm_info_t  info[MAX_INFO];
+} bootmm_t;
+// typedef bootmm_t * p_bootmm;
 
-extern struct bootmm bmm;
+extern bootmm_t bmm;
 
-extern void set_mminfo(struct bootmm_info *info, unsigned int start, unsigned int end, unsigned int type);
+extern void set_mminfo(bootmm_info_t *info, unsigned int start, unsigned int end, unsigned int type);
 
-extern unsigned int insert_mminfo(struct bootmm *mm, unsigned int start, unsigned int end, unsigned int type);
+extern unsigned int insert_mminfo(bootmm_t *mm, unsigned int start, unsigned int end, unsigned int type);
 
-extern unsigned int split_mminfo(struct bootmm *mm, unsigned int index, unsigned int split_start);
+extern unsigned int split_mminfo(bootmm_t *mm, unsigned int index, unsigned int split_start);
 
-extern void remove_mminfo(struct bootmm *mm, unsigned int index);
+void* bootmm_kmalloc(size_t size);
+
+void bootmm_kfree(void* obj);
+
+extern void remove_mminfo(bootmm_t *mm, unsigned int index);
 
 extern void init_bootmm();
 
