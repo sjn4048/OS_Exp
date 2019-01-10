@@ -191,7 +191,7 @@ void parse_cmd() {
         for(j = 0;j < 10;j++) name[j] = param[j];
         name[9] = 0;
         if (name[0] != 't'){
-            pc_create(name,test_program,1,name,0,1,0);
+            pc_create(name,test_program,1,params,0,1,0);
         }
         else{
             pc_create("default program",test_program,0,0,0,1,0);
@@ -201,7 +201,7 @@ void parse_cmd() {
         for(j = 0;j < 10;j++) name[j] = param[j];
         name[9] = 0;
         if (name[0] != 't'){
-            pc_create(name,test_program,1,name,0,0,0);
+            pc_create(name,test_program,1,params,0,0,0);
         }
         else{
             pc_create("default program",test_program,0,0,0,0,0);
