@@ -139,5 +139,6 @@ int exec_from_file(char* filename, unsigned int argc, char params[][10]);
 int pc_kill_current();
 void kill_all_children(struct list_head * head);
 void test_program(unsigned int argc, char *args);
+void stress_test(unsigned int prog_num);
 unsigned int atoi(char * param);
 #endif  // !_ZJUNIX_PC_H

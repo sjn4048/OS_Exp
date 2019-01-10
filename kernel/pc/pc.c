@@ -579,7 +579,7 @@ int print_proc() {
     kernel_printf_color(VGA_GREEN, "----------ALL PROCESSES--------------\n");
     list_for_each(pos, (&all_task)) {
         next = container_of(pos, task_struct, task_list);
-        kernel_printf_color(VGA_BLUE, "  PID : %d, name : %s, state : %s, vruntime : %x\n", next->PID, next->name, task_state(next->state), next);
+        kernel_printf_color(VGA_BLUE, "  PID : %d, name : %s, state : %s, vruntime : %x\n", next->PID, next->name, task_state(next->state), next->sched_entity.vruntime);
         // next->sched_entity.vruntime);
     }
     kernel_printf_color(VGA_GREEN, "----------ALL PROCESSES--------------\n");
@@ -633,6 +633,8 @@ int print_rbtree_test() {
  */
 int exec_from_file(char* filename, unsigned int argc, char params[][10]) {
 
+    // ---------------------------------------------------------------
+    // --------------begin loading program into memory----------------
     FILE file;
     const unsigned int CACHE_BLOCK_SIZE = 64;
     unsigned char buffer[512];
@@ -647,8 +649,7 @@ int exec_from_file(char* filename, unsigned int argc, char params[][10]) {
     unsigned int j = 0;
     unsigned int ENTRY = (unsigned int)kmalloc(4096 * 2);
 
-kernel_printf("ENTRY  %x\n",ENTRY);
-
+// disable interrupt to avoid some unpredicted bugs 
 disable_schedule = 1;
 
     for (j = 0; j < n; j++) {
@@ -658,21 +659,29 @@ disable_schedule = 1;
             kernel_cache(ENTRY + j * CACHE_BLOCK_SIZE);
     }
 
+    // ---------------------------------------------------------------
+    // --------------end loading program into memory------------------
+
+    // cast the address to function call
     int (*f)(unsigned int argc, void *args) = 
                     (int (*)(unsigned int argc, void *args))(ENTRY);
 
     for(i = 0;i < argc;i++)
         kernel_printf("params : %s\n",params[i]);
+    
+    // call the program !!!
     unsigned int ret = f(argc,params);
     
     return ret;
 
+// enable interrupts
 disable_schedule = 0;
 
 }
 
-
-
+/* get_ticks : 
+ * get ticks from system clock
+ */
 unsigned int get_ticks(unsigned int ticks_high, unsigned int ticks_low) {
     ticks_low = (ticks_low >> 8) | (ticks_high << 24);
     ticks_high >>= 8;
@@ -684,6 +693,10 @@ unsigned int get_ticks(unsigned int ticks_high, unsigned int ticks_low) {
     return second;
 }
 
+/* delay_s : 
+ * delay certain seconds 
+ * using system timer to calculate the time precisely
+ */
 void delay_s(unsigned int second) {
     unsigned int ticks_high, ticks_low;
     int cur_time = 0;
@@ -703,29 +716,47 @@ void delay_s(unsigned int second) {
     }
 }
 
-void test_program(unsigned int argc, char *args){
+/* test_program : 
+ * This is a testing program for process schedule
+ * it will print something during certain intervals(seconds)
+ * and safely exit after counter is up to five
+ */
+void test_program(unsigned int argc, char args[][10]){
     int i = 0;
     char name[] = "default program";
     int tmp[10];
     int j = 0;
+    // default interval is 3 seconds
+    int interval = 3;
+    // this is important because 
     if (argc != 0){
-        for(j = 0;j < 10;j++) tmp[j] = args[j];
+        for(j = 0;j < 10;j++) tmp[j] = args[0][j];
         tmp[9] = 0;
     }
+    if (argc > 1){
+        //change interval based on command line paratemter
+        interval = atoi(args[1]);
+    }
     while(1){
-        delay_s(3);
+        i++;
+        // delay certain seconds
+        delay_s(interval);
         if (argc != 0)
             kernel_printf("Program name is: [%s], current tick :%d\n", tmp, i);
         else
             kernel_printf("Program name is: [%s], current tick :%d\n", name, i);
-        i++;
+
+        // hot exit the program
         if(i == 5){
-            kernel_printf("exiting!!!\n");
+            kernel_printf_color(VGA_RED, "exiting!!!\n");
             pc_kill_current();
         }
     }
 }
 
+/* pow10 : 
+ * pow based on 10
+ */
 unsigned int pow10(unsigned int p){
     int i = 0;
     int e = 1;
@@ -734,6 +765,9 @@ unsigned int pow10(unsigned int p){
     return e;
 }
 
+/* atoi : 
+ * char * to int 
+ */
 unsigned int atoi(char * param){
     int i = 0;
     int len = 0;
@@ -747,4 +781,14 @@ unsigned int atoi(char * param){
         ret += (param[i] - '0') * pow10(len-i-1);
     }
     return ret;
+}
+
+/* atoi : 
+ * char * to int 
+ */
+void stress_test(unsigned int prog_num){
+    int i = 0;
+    for(i = 0;i < prog_num;i++){
+        pc_create("stress testing",test_program,0,0,0,1,0);
+    }
 }
