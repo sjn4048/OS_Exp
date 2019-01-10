@@ -21,6 +21,7 @@
 #define TASK_READY 2
 #define TASK_DEAD 3
 
+
 // intervl between two schedule interrupts
 unsigned int sysctl_sched_latency = 1000000;
 unsigned int disable_schedule = 0;
@@ -371,18 +372,21 @@ void check_if_ps_exit(){
 
 }
 
+
+
 /* pc_kill_syscall : 
  * process kill system call, it can be used to forcely terminate 
  * a process when a unhandled exception occurs
  * see more info in 'exc.c'
  */
 unsigned int pc_kill_syscall(unsigned int status, unsigned int cause, context* pt_context) {
-    
+
     disable_interrupts();
     check_if_ps_exit();
     pc_exit(pt_context);
     // pc_schedule(status, cause, pt_context);
     enable_interrupts();
+
     return 0;
 }
 

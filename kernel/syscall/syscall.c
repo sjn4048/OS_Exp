@@ -5,6 +5,9 @@
 
 sys_fn syscalls[256];
 
+// simple Semaphore implemtation
+int Semaphore = 1;
+
 void init_syscall() {
     register_exception_handler(8, __syscall);
 
@@ -50,11 +53,15 @@ void register_syscall(int index, sys_fn fn) {
 }
 
 int syscall(unsigned int code){
+    // simple Semaphore implemtation
+    while (Semaphore == 0);
+    Semaphore = 0;
     asm volatile(
         "move $t0, %0\n\t"
         "syscall\n\t"
         "nop\n\t"
         : : "r"(code));
+    Semaphore = 1;
     return 0;
 }
 
