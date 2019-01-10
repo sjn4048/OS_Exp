@@ -130,38 +130,38 @@ int kernel_putintx(unsigned int x, int fc, int bg) {
     return x;
 }
 
-int kernel_vprintf(const char *format, va_list ap) {
+int kernel_vprintf(int fc, const char *format, va_list ap) {
     int cnt = 0;
     while (*format) {
         if (*format != '%') {
-            kernel_putchar(*format++, 0xfff, 0);
+            kernel_putchar(*format++, fc, 0);
         } else {
             format++;
             switch (*format) {
                 case 'c': {
                     char valch = va_arg(ap, int);
-                    kernel_putchar(valch, 0xfff, 0);
+                    kernel_putchar(valch, fc, 0);
                     format++;
                     cnt++;
                     break;
                 }
                 case 'd': {
                     int valint = va_arg(ap, int);
-                    kernel_putint(valint, 0xfff, 0);
+                    kernel_putint(valint, fc, 0);
                     format++;
                     cnt++;
                     break;
                 }
                 case 'x': {
                     int valint = va_arg(ap, int);
-                    kernel_putintx(valint, 0xfff, 0);
+                    kernel_putintx(valint, fc, 0);
                     format++;
                     cnt++;
                     break;
                 }
                 case 's': {
                     char *valstr = va_arg(ap, char *);
-                    kernel_puts(valstr, 0xfff, 0);
+                    kernel_puts(valstr, fc, 0);
                     format++;
                     cnt++;
                     break;
@@ -181,7 +181,16 @@ int kernel_printf(const char *format, ...) {
     int cnt = 0;
     va_list ap;
     va_start(ap, format);
-    cnt = kernel_vprintf(format, ap);
+    cnt = kernel_vprintf(0xfff, format, ap);
+    va_end(ap);
+    return cnt;
+}
+
+int kernel_printf_color(int fc, const char *format, ...) {
+    int cnt = 0;
+    va_list ap;
+    va_start(ap, format);
+    cnt = kernel_vprintf(fc, format, ap);
     va_end(ap);
     return cnt;
 }

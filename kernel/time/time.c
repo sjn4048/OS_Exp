@@ -3,6 +3,7 @@
 #include <driver/vga.h>
 #include <intr.h>
 #include <zjunix/pc.h>
+#include <zjunix/log.h>
 
 void get_time_string(unsigned int ticks_high, unsigned int ticks_low, char *buf) {
     // Divide by 256
