@@ -112,7 +112,10 @@ void parse_cmd() {
     j = 0;
     k = 0;
     while (1){
-        if (param[j] == 0) break;
+        if (param[j] == 0) {
+            params[i][k] = 0;
+            break;
+        }
         if (param[j] == ' ') {
             params[i][k] = 0;
             i++; 
@@ -181,7 +184,7 @@ void parse_cmd() {
         kernel_printf("argc %d\n",argc);
         for(i = 0;i < argc;i++)
             kernel_printf("params : %s\n",params[i]);
-        result = exec_from_file(param, argc, params);
+        // result = exec_from_file(param, argc, params);
         kernel_printf("exec return with %d\n", result);
     } else if (kernel_strcmp(ps_buffer, "kill_cur") == 0) {
         result = pc_kill_current(param);
