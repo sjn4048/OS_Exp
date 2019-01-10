@@ -179,7 +179,6 @@ void change_sysctl_sched_latency(unsigned int latency){
  */
 void pc_schedule(unsigned int status, unsigned int cause, context* pt_context) {
     if (disable_schedule == 1){
-        kernel_printf("disable\n");
         asm volatile("mtc0 $zero, $9\n\t");
         return;
     }
@@ -672,11 +671,10 @@ disable_schedule = 1;
     // call the program !!!
     unsigned int ret = f(0,0);
     
-    return ret;
-
 // enable interrupts
 disable_schedule = 0;
 
+    return ret;
 }
 
 /* get_ticks : 
