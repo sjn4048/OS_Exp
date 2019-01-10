@@ -721,17 +721,8 @@ void delay_s(unsigned int second) {
  */
 void test_program(unsigned int argc, char args[][10]){
     int i = 0;
-    char name[] = "default program";
-    char tmp[10];
-    int j = 0;
     // default interval is 3 seconds
     int interval = 3;
-    // this is important because 
-    if (argc != 0){
-        for(j = 0;j < 10;j++) tmp[j] = args[0][j];
-        tmp[9] = 0;
-    }
-
     if (argc > 1){
         //change interval based on command line paratemter
         interval = atoi(args[1]);
@@ -805,7 +796,7 @@ void stress_test(unsigned int prog_num){
     char words[11];
     words[10] = 0;
     for(i = 0;i < prog_num;i++){
-        pc_create(itoa(i, words),test_program,1,(char (*)[10])itoa(i, words),0,1,0);
+        pc_create(itoa(i, words),test_program,0,0,0,1,0);
     }
 }
 
