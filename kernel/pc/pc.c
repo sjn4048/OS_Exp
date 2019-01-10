@@ -788,7 +788,7 @@ char * itoa(int num, char * word){
         num = num / 10;
         if (num == 0) break;
     }
-    return word + i;
+    return word + i + 1;
 }
 
 /* stress_test : 
