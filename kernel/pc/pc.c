@@ -732,13 +732,14 @@ void test_program(unsigned int argc, char args[][10]){
         for(j = 0;j < 10;j++) tmp[j] = args[0][j];
         tmp[9] = 0;
     }
+    kernel_printf("tmp %s",tmp);
+    kernel_printf("args %s",args[0]);
     if (argc > 1){
         //change interval based on command line paratemter
         interval = atoi(args[1]);
     }
     kernel_printf("interval %d   ",interval);
-    for(int j = 0;j < argc;j++)
-        kernel_printf("param %s\n",args[j]);
+
     while(1){
         i++;
         // delay certain seconds
