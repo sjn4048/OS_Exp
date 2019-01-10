@@ -581,7 +581,7 @@ int print_proc() {
     kernel_printf_color(VGA_GREEN, "----------ALL PROCESSES--------------\n");
     list_for_each(pos, (&all_task)) {
         next = container_of(pos, task_struct, task_list);
-        kernel_printf_color(VGA_BLUE, "  PID : %d, name : %s, state : %s, vruntime : %x\n", next->PID, next->name, task_state(next->state), next->sched_entity.vruntime);
+        kernel_printf_color(VGA_BLUE, "  PID : %d, name : %s, state : %s, vruntime : %d\n", next->PID, next->name, task_state(next->state), next->sched_entity.vruntime);
         // next->sched_entity.vruntime);
     }
     kernel_printf_color(VGA_GREEN, "----------ALL PROCESSES--------------\n");
@@ -736,6 +736,9 @@ void test_program(unsigned int argc, char args[][10]){
         //change interval based on command line paratemter
         interval = atoi(args[1]);
     }
+    kernel_printf("interval %d",interval);
+    kernel_printf("name %d",name);
+    
     while(1){
         i++;
         // delay certain seconds
