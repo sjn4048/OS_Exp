@@ -631,7 +631,7 @@ int print_rbtree_test() {
  * currently only run it in kernel mode
  * the program will use syscall to trap into kernel mode
  */
-int exec_from_file(char* filename, char params[][10]) {
+int exec_from_file(char* filename, unsigned int argc, char params[][10]) {
 
     FILE file;
     const unsigned int CACHE_BLOCK_SIZE = 64;
@@ -658,9 +658,12 @@ disable_schedule = 1;
             kernel_cache(ENTRY + j * CACHE_BLOCK_SIZE);
     }
 
-    int (*f)(unsigned int argc, void *args, unsigned int addr) = (int (*)(unsigned int argc, void *args, unsigned int addr))(ENTRY);
+    int (*f)(unsigned int argc, void *args) = 
+                    (int (*)(unsigned int argc, void *args))(ENTRY);
 
-    unsigned int ret = f(0,0,ENTRY);
+    for(i = 0;i < argc;i++)
+        kernel_printf("params : %s\n",params[i]);
+    unsigned int ret = f(argc,params);
     
     return ret;
 

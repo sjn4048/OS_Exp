@@ -119,6 +119,7 @@ void parse_cmd() {
         params[i][k++] = param[j];
         j++;
     }
+    k = i;
     if (ps_buffer[0] == 0) {
         return;
     } else if (kernel_strcmp(ps_buffer, "clear") == 0) {
@@ -173,7 +174,7 @@ void parse_cmd() {
         result = proc_demo_create();
         kernel_printf("proc return with %d\n", result);
     } else if (kernel_strcmp(ps_buffer, "exec") == 0) {
-        result = exec_from_file(param, params);
+        result = exec_from_file(param, k+1, params);
         kernel_printf("exec return with %d\n", result);
     } else if (kernel_strcmp(ps_buffer, "kill_cur") == 0) {
         result = pc_kill_current(param);
