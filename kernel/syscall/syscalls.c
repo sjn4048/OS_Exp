@@ -21,8 +21,8 @@ unsigned int kmalloc_syscall(unsigned int status, unsigned int cause, context* p
 kernel_printf("syscall!!!!!! 1\n");
 
     const unsigned int size = (unsigned int)pt_context->a0;
-    // void * ptr = kmalloc(size);
-    // kernel_printf("aaa%x\n",(unsigned int)ptr);
+    void * ptr = kmalloc(size);
+    kernel_printf("aaa%x\n",(unsigned int)ptr);
 kernel_printf("syscall!!!!!! 2\n");
 
     return (unsigned int)size;
