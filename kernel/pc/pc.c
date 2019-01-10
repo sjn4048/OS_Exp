@@ -653,6 +653,7 @@ int exec_from_file(char* filename, unsigned int argc, char params[][10]) {
     const unsigned int CACHE_BLOCK_SIZE = 64;
     unsigned char buffer[512];
     int result = fs_open(&file, filename);
+    kernel_printf("filename %s\n",filename);
     if (result != 0) {
         kernel_printf("File %s not exist\n", filename);
         return 1;
@@ -669,8 +670,8 @@ disable_schedule = 1;
     for (j = 0; j < n; j++) {
         fs_read(&file, buffer, CACHE_BLOCK_SIZE);
         kernel_memcpy((void*)(ENTRY + j * CACHE_BLOCK_SIZE), buffer, CACHE_BLOCK_SIZE);
-        // if (size < 4096)
-        //     kernel_cache(ENTRY + j * CACHE_BLOCK_SIZE);
+        if (size < 4096)
+            kernel_cache(ENTRY + j * CACHE_BLOCK_SIZE);
     }
 
     // ---------------------------------------------------------------
