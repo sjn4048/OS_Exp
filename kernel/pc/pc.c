@@ -638,42 +638,42 @@ int print_rbtree_test() {
  */
 int exec_from_file(char* filename) {
 
-    FILE file;
-    const unsigned int CACHE_BLOCK_SIZE = 64;
-    unsigned char buffer[512];
-    int result = fs_open(&file, filename);
-    if (result != 0) {
-        kernel_printf("File %s not exist\n", filename);
-        return 1;
-    }
-    unsigned int size = get_entry_filesize(file.entry.data);
-    unsigned int n = size / CACHE_BLOCK_SIZE + 1;
-    unsigned int i = 0;
-    unsigned int j = 0;
-    unsigned int ENTRY = (unsigned int)kmalloc(4096);
-    kernel_printf("ENTRY  %x\n",ENTRY);
+//     FILE file;
+//     const unsigned int CACHE_BLOCK_SIZE = 64;
+//     unsigned char buffer[512];
+//     int result = fs_open(&file, filename);
+//     if (result != 0) {
+//         kernel_printf("File %s not exist\n", filename);
+//         return 1;
+//     }
+//     unsigned int size = get_entry_filesize(file.entry.data);
+//     unsigned int n = size / CACHE_BLOCK_SIZE + 1;
+//     unsigned int i = 0;
+//     unsigned int j = 0;
+//     unsigned int ENTRY = (unsigned int)kmalloc(4096);
+//     kernel_printf("ENTRY  %x\n",ENTRY);
  
-print_proc();
-// kernel_getchar();
-    for (j = 0; j < n; j++) {
-        fs_read(&file, buffer, CACHE_BLOCK_SIZE);
-        kernel_memcpy((void*)(ENTRY + j * CACHE_BLOCK_SIZE), buffer, CACHE_BLOCK_SIZE);
-        kernel_cache(ENTRY + j * CACHE_BLOCK_SIZE);
-    }
-    int (*f)(unsigned int argc, void *args, unsigned int addr) = (int (*)(unsigned int argc, void *args, unsigned int addr))(ENTRY);
-    unsigned int ass = 0;
-asm volatile("move %0, $sp\n\t" : "=r"(ass));
-kernel_printf("before  %x\n",ass);
-// flag = 1;
-print_proc();
-// kernel_getchar();
-unsigned int ret = f(0,0,ENTRY);
-asm volatile("move %0, $sp\n\t" : "=r"(ass));
-kernel_printf("after  %x\n",ass);
+// print_proc();
+// // kernel_getchar();
+//     for (j = 0; j < n; j++) {
+//         fs_read(&file, buffer, CACHE_BLOCK_SIZE);
+//         kernel_memcpy((void*)(ENTRY + j * CACHE_BLOCK_SIZE), buffer, CACHE_BLOCK_SIZE);
+//         kernel_cache(ENTRY + j * CACHE_BLOCK_SIZE);
+//     }
+//     int (*f)(unsigned int argc, void *args, unsigned int addr) = (int (*)(unsigned int argc, void *args, unsigned int addr))(ENTRY);
+//     unsigned int ass = 0;
+// asm volatile("move %0, $sp\n\t" : "=r"(ass));
+// kernel_printf("before  %x\n",ass);
+// // flag = 1;
+// print_proc();
+// // kernel_getchar();
+// unsigned int ret = f(0,0,ENTRY);
+// asm volatile("move %0, $sp\n\t" : "=r"(ass));
+// kernel_printf("after  %x\n",ass);
 
-    // disable_interrupts();
-    return ret;
-
+//     // disable_interrupts();
+//     return ret;
+return 0;
 }
 
 
