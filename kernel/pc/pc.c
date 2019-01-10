@@ -658,7 +658,6 @@ print_proc();
 // kernel_getchar();
 flag = 1;
     for (j = 0; j < n; j++) {
-        kernel_printf("%d %d\n",j,n);
         fs_read(&file, buffer, CACHE_BLOCK_SIZE);
         kernel_memcpy((void*)(ENTRY + j * CACHE_BLOCK_SIZE), buffer, CACHE_BLOCK_SIZE);
         kernel_cache(ENTRY + j * CACHE_BLOCK_SIZE);
