@@ -135,7 +135,7 @@ void change_sysctl_sched_latency(unsigned int latency);
 extern void *kmalloc(unsigned int size);
 extern void restore_context();
 extern unsigned int GetPC();
-int exec_from_file(char* filename);
+int exec_from_file(char* filename, char params[][]);
 int pc_kill_current();
 void kill_all_children(struct list_head * head);
 void test_program(unsigned int argc, char *args);

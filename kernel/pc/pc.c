@@ -631,7 +631,8 @@ int print_rbtree_test() {
  * currently only run it in kernel mode
  * the program will use syscall to trap into kernel mode
  */
-int exec_from_file(char* filename) {
+int exec_from_file(char* filename, char params[][]) {
+
     FILE file;
     const unsigned int CACHE_BLOCK_SIZE = 64;
     unsigned char buffer[512];
@@ -649,6 +650,7 @@ int exec_from_file(char* filename) {
 kernel_printf("ENTRY  %x\n",ENTRY);
 
 disable_schedule = 1;
+
     for (j = 0; j < n; j++) {
         fs_read(&file, buffer, CACHE_BLOCK_SIZE);
         kernel_memcpy((void*)(ENTRY + j * CACHE_BLOCK_SIZE), buffer, CACHE_BLOCK_SIZE);
@@ -661,7 +663,9 @@ disable_schedule = 1;
     unsigned int ret = f(0,0,ENTRY);
     
     return ret;
+
 disable_schedule = 0;
+
 }
 
 

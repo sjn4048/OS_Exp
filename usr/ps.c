@@ -88,9 +88,11 @@ void parse_cmd() {
     unsigned int result = 0;
     char dir[32];
     char c;
+    char params[5][10];
     kernel_putchar('\n', 0, 0);
     char sd_buffer[8192];
     int i = 0;
+    int k = 0;
     int j;
     char *param;
     for (i = 0; i < 63; i++) {
@@ -103,6 +105,20 @@ void parse_cmd() {
         param = ps_buffer;
     else
         param = ps_buffer + i + 1;
+
+    i = 0;
+    j = 0;
+    k = 0;
+    while (1){
+        if (param[j] == 0) break;
+        if (param[j] == ' ') {
+            params[i][k] = 0;
+            i++; 
+            k = 0;
+        }
+        params[i][k++] = param[j];
+        j++;
+    }
     if (ps_buffer[0] == 0) {
         return;
     } else if (kernel_strcmp(ps_buffer, "clear") == 0) {
@@ -157,7 +173,7 @@ void parse_cmd() {
         result = proc_demo_create();
         kernel_printf("proc return with %d\n", result);
     } else if (kernel_strcmp(ps_buffer, "exec") == 0) {
-        result = exec_from_file(param);
+        result = exec_from_file(param, params);
         kernel_printf("exec return with %d\n", result);
     } else if (kernel_strcmp(ps_buffer, "kill_cur") == 0) {
         result = pc_kill_current(param);
