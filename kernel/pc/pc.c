@@ -655,7 +655,7 @@ disable_schedule = 1;
     for (j = 0; j < n; j++) {
         fs_read(&file, buffer, CACHE_BLOCK_SIZE);
         kernel_memcpy((void*)(ENTRY + j * CACHE_BLOCK_SIZE), buffer, CACHE_BLOCK_SIZE);
-        if (size < 4096)
+        // if (size < 4096)
             kernel_cache(ENTRY + j * CACHE_BLOCK_SIZE);
     }
 
