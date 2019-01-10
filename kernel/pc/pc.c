@@ -176,11 +176,9 @@ void change_sysctl_sched_latency(unsigned int latency){
  * task which has the mininum vruntime
  */
 void pc_schedule(unsigned int status, unsigned int cause, context* pt_context) {
-    int epc = 0;
     if (flag == 1){
-        asm volatile("mfc0 %0, $14\n\t" : "=r"(epc));
-        kernel_printf("bbb %x\n",epc);
-        print_proc();
+        asm volatile("mtc0 $zero, $9\n\t");
+        return;
     }
     
     disable_interrupts();
@@ -656,15 +654,17 @@ int kk = 0;
     
 for (kk = 0;kk < 10;kk++) kernel_printf("%x ",syscalls[kk]);
 print_proc();
-disable_interrupts();
+// disable_interrupts();
 // kernel_getchar();
+flag = 1;
     for (j = 0; j < n; j++) {
+        kernel_printf("%d\n",j);
         fs_read(&file, buffer, CACHE_BLOCK_SIZE);
         kernel_memcpy((void*)(ENTRY + j * CACHE_BLOCK_SIZE), buffer, CACHE_BLOCK_SIZE);
         kernel_cache(ENTRY + j * CACHE_BLOCK_SIZE);
-
     }
-enable_interrupts();
+// enable_interrupts();
+flag = 0;
     for (kk = 0;kk < 10;kk++) kernel_printf("%x ",syscalls[kk]);
     int (*f)(unsigned int argc, void *args, unsigned int addr) = (int (*)(unsigned int argc, void *args, unsigned int addr))(ENTRY);
 
