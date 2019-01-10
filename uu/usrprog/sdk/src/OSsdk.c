@@ -18,3 +18,5 @@ unsigned long get_entry_filesize(u8 *entry) {
 unsigned long get_u32(u8 *ch) {
     return (*ch) + ((*(ch + 1)) << 8) + ((*(ch + 2)) << 16) + ((*(ch + 3)) << 24);
 }
+
+
