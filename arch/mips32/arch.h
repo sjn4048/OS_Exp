@@ -26,6 +26,16 @@ extern unsigned int* const holder7;
 extern unsigned int* const holder8;
 extern unsigned int* const holder9;
 extern unsigned int* const holder10;
+extern unsigned int* const holder11;
+extern unsigned int* const holder12;
+extern unsigned int* const holder13;
+extern unsigned int* const holder14;
+extern unsigned int* const holder15;
+extern unsigned int* const holder16;
+extern unsigned int* const holder17;
+extern unsigned int* const holder18;
+extern unsigned int* const holder19;
+extern unsigned int* const holder110;
 
 extern unsigned int* const CHAR_VRAM;
 extern unsigned int* const GRAPHIC_VRAM;

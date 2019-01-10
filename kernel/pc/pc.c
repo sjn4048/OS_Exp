@@ -91,6 +91,8 @@ static void copy_context(context* src, context* dest) {
 void init_pc() {
     int *i = holder1; i = holder2; i = holder3; i = holder4; i = holder5;
     i = holder6; i = holder7; i = holder8; i = holder8; i = holder10;
+    i = holder11; i = holder12; i = holder13; i = holder14; i = holder15;
+    i = holder16; i = holder17; i = holder18; i = holder18; i = holder110;
     init_cfs_rq(&rq);
     INIT_LIST_HEAD(&all_task);
     INIT_LIST_HEAD(&all_dead);
