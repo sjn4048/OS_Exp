@@ -658,13 +658,13 @@ int exec_from_file(char* filename) {
     }
     int (*f)(unsigned int argc, void *args, unsigned int addr) = (int (*)(unsigned int argc, void *args, unsigned int addr))(ENTRY);
     unsigned int ass = 0;
-    asm volatile("move %0, $sp\n\t" : "=r"(ass));
+asm volatile("move %0, $sp\n\t" : "=r"(ass));
 kernel_printf("before  %x\n",ass);
 flag = 1;
     unsigned int ret = f(0,0,ENTRY);
 asm volatile("move %0, $sp\n\t" : "=r"(ass));
 kernel_printf("after  %x\n",ass);
-print_proc();
+
     // disable_interrupts();
     return ret;
 
