@@ -654,10 +654,10 @@ int exec_from_file(char* filename) {
 
 print_proc();
 kernel_getchar();
-    unsigned int ENTRY;
+    unsigned int ENTRY = (unsigned int)kmalloc(4096);
     kernel_printf("size  %x\n",size);
     kernel_printf("ENTRY  %x\n",ENTRY);
-ENTRY = 0x80f00000; 
+ 
 print_proc();
 kernel_getchar();
 
