@@ -652,6 +652,8 @@ int kk = 0;
     unsigned int j = 0;
     unsigned int ENTRY = (unsigned int)kmalloc(4096 * 2);
     kernel_printf("ENTRY  %x\n",ENTRY);
+    kernel_printf("addr%x\n", syscalls);
+    
 for (kk = 0;kk < 10;kk++) kernel_printf("%x ",syscalls[kk]);
 print_proc();
 // kernel_getchar();
@@ -659,6 +661,8 @@ print_proc();
         fs_read(&file, buffer, CACHE_BLOCK_SIZE);
         kernel_memcpy((void*)(ENTRY + j * CACHE_BLOCK_SIZE), buffer, CACHE_BLOCK_SIZE);
         kernel_cache(ENTRY + j * CACHE_BLOCK_SIZE);
+        for (kk = 0;kk < 10;kk++) kernel_printf("%x ",syscalls[kk]);
+        kernel_printf("\n");
     }
     int (*f)(unsigned int argc, void *args, unsigned int addr) = (int (*)(unsigned int argc, void *args, unsigned int addr))(ENTRY);
     unsigned int ass = 0;
