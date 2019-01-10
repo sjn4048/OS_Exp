@@ -635,7 +635,6 @@ int print_rbtree_test() {
  * the program will use syscall to trap into kernel mode
  */
 int exec_from_file(char* filename) {
-int kk = 0;
     FILE file;
     const unsigned int CACHE_BLOCK_SIZE = 64;
     unsigned char buffer[512];
@@ -662,9 +661,7 @@ flag = 1;
 
     int (*f)(unsigned int argc, void *args, unsigned int addr) = (int (*)(unsigned int argc, void *args, unsigned int addr))(ENTRY);
 
-for (kk = 0;kk < 10;kk++) kernel_printf("%x ",syscalls[kk]);
-unsigned int ret = f(0,0,ENTRY);
-for (kk = 0;kk < 10;kk++) kernel_printf("%x ",syscalls[kk]);
+    unsigned int ret = f(0,0,ENTRY);
     return ret;
 
 }
