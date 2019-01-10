@@ -1,6 +1,6 @@
 #include <init.h>
 // #include "myvi.h"
-// #include "ls.h"
+#include "ls.h"
 
 #pragma GCC push_options
 #pragma GCC optimize("O0")
@@ -11,7 +11,7 @@ unsigned int main(unsigned int argc, void *args) {
     // printf("malloc ptr : %x\n",ptr);
     // unsigned int ret =  myvi((char *)args);
     // unsigned int ret =  myvi("test.txt");
-    // unsigned int ret = ls("/");
+    unsigned int ret = ls("/");
     printf("malloc ptr\n");
 
     // int i = 23;
