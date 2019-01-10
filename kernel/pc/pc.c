@@ -650,7 +650,7 @@ int exec_from_file(char* filename) {
     unsigned int n = size / CACHE_BLOCK_SIZE + 1;
     unsigned int i = 0;
     unsigned int j = 0;
-    unsigned int ENTRY = (unsigned int)kmalloc(4096 * 4);
+    unsigned int ENTRY = (unsigned int)kmalloc(4096);
     kernel_printf("ENTRY  %x\n",ENTRY);
     // unsigned int ENTRY = 0x87000000; 
 print_proc();
