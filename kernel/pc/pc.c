@@ -652,6 +652,14 @@ int exec_from_file(char* filename) {
     unsigned int j = 0;
     unsigned int ENTRY = (unsigned int)kmalloc(4096);
     kernel_printf("ENTRY  %x\n",ENTRY);
+    kernel_printf("ENTRY  %x\n",(unsigned int)kmalloc(4096));
+    kernel_printf("ENTRY  %x\n",(unsigned int)kmalloc(4096));
+    kernel_printf("ENTRY  %x\n",(unsigned int)kmalloc(4096));
+    kernel_printf("ENTRY  %x\n",(unsigned int)kmalloc(4096));
+    kernel_printf("ENTRY  %x\n",(unsigned int)kmalloc(4096));
+    kernel_printf("ENTRY  %x\n",(unsigned int)kmalloc(4096));
+    kernel_printf("ENTRY  %x\n",(unsigned int)kmalloc(4096));
+    kernel_printf("ENTRY  %x\n",(unsigned int)kmalloc(4096));
     // unsigned int ENTRY = 0x87000000; 
 print_proc();
 // kernel_getchar();
