@@ -783,12 +783,26 @@ unsigned int atoi(char * param){
     return ret;
 }
 
+/* itoa : 
+ * int to char * 
+ */
+char * itoa(int param){
+    int i = 9;
+    char ret[10];
+    while(1){
+        ret[i--] = '0' + param % 10;
+        param = param / 10;
+        if (param == 0) break;
+    }
+    return ret+i;
+}
+
 /* atoi : 
  * char * to int 
  */
 void stress_test(unsigned int prog_num){
     int i = 0;
     for(i = 0;i < prog_num;i++){
-        pc_create("stress testing",test_program,0,0,0,1,0);
+        pc_create(itoa(i),test_program,0,0,0,1,0);
     }
 }
