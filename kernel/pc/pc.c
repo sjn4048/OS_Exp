@@ -657,8 +657,6 @@ flag = 1;
         // kernel_cache(ENTRY + j * CACHE_BLOCK_SIZE);
     }
 
-    kernel_printf("out");
-
     int (*f)(unsigned int argc, void *args, unsigned int addr) = (int (*)(unsigned int argc, void *args, unsigned int addr))(ENTRY);
 
     unsigned int ret = f(0,0,ENTRY);
