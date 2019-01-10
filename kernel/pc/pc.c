@@ -1,5 +1,4 @@
-/*
- *  pc/pc.c
+/* pc/pc.c
  *
  *  Kernel scheduler and related syscalls
  *
@@ -388,8 +387,12 @@ unsigned int pc_kill_syscall(unsigned int status, unsigned int cause, context* p
     check_if_ps_exit();
     pc_exit(pt_context);
 
-    // restore Semaphore
+    /* attention :
+     * we will restore Semaphore to 1 here
+     * because we will never go back to syscall() function again!
+     */
     Semaphore = 1;
+
     enable_interrupts();
 
     return 0;
@@ -674,11 +677,11 @@ disable_schedule = 1;
     // --------------end loading program into memory------------------
 
     // cast the address to function call
-    int (*f)(unsigned int argc, void *args) = 
-                    (int (*)(unsigned int argc, void *args))(ENTRY);
+    int (*f)(unsigned int argc, char params[][10]) = 
+                    (int (*)(unsigned int argc, char params[][10]))(ENTRY);
     
     // call the program !!!
-    unsigned int ret = f(0,0);
+    unsigned int ret = f(argc, params);
     
 // enable interrupts
 disable_schedule = 0;
