@@ -796,8 +796,9 @@ char * itoa(int num, char * word){
     return word + i;
 }
 
-/* atoi : 
- * char * to int 
+/* stress_test : 
+ * stress tesing ~
+ * this function 
  */
 void stress_test(unsigned int prog_num){
     int i = 0;
