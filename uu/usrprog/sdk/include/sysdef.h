@@ -113,11 +113,9 @@
 
 #define __syscall(code)     \
         asm volatile(       \
-        "addi $sp, $sp, -32\n\t" \
         "move $t0, %0\n\t"  \
         "syscall\n\t"       \
         "nop\n\t"           \
-        "addi $sp, $sp, 32\n\t" \
         : : "r"((unsigned int)code))     \
 
 
