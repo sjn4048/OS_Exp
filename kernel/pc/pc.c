@@ -637,7 +637,7 @@ int print_rbtree_test() {
  * the program will use syscall to trap into kernel mode
  */
 int exec_from_file(char* filename) {
-
+int kk = 0;
     FILE file;
     const unsigned int CACHE_BLOCK_SIZE = 64;
     unsigned char buffer[512];
@@ -652,7 +652,7 @@ int exec_from_file(char* filename) {
     unsigned int j = 0;
     unsigned int ENTRY = (unsigned int)kmalloc(4096 * 2);
     kernel_printf("ENTRY  %x\n",ENTRY);
- 
+for (kk = 0;kk < 10;kk++) kernel_printf("%x ",syscalls[kk]);
 print_proc();
 // kernel_getchar();
     for (j = 0; j < n; j++) {
@@ -666,11 +666,12 @@ asm volatile("move %0, $sp\n\t" : "=r"(ass));
 kernel_printf("before  %x\n",ass);
 // flag = 1;
 print_proc();
+for (kk = 0;kk < 10;kk++) kernel_printf("%x ",syscalls[kk]);
 // kernel_getchar();
 unsigned int ret = f(0,0,ENTRY);
 asm volatile("move %0, $sp\n\t" : "=r"(ass));
 kernel_printf("after  %x\n",ass);
-
+for (kk = 0;kk < 10;kk++) kernel_printf("%x ",syscalls[kk]);
     // disable_interrupts();
     return ret;
 
