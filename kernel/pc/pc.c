@@ -742,9 +742,9 @@ void test_program(unsigned int argc, char args[][10]){
         // delay certain seconds
         delay_s(interval);
         if (argc != 0)
-            kernel_printf("Program name is: [%s], current tick :%d\n", tmp, i);
+            kernel_printf("Program name is: [%s], current tick :%d\n", current_task->name, i);
         else
-            kernel_printf("Program name is: [%s], current tick :%d\n", name, i);
+            kernel_printf("Program name is: [%s], current tick :%d\n", current_task->name, i);
 
         // hot exit the program
         if(i == 5){
