@@ -653,13 +653,13 @@ int exec_from_file(char* filename) {
     
 
 print_proc();
-kernel_getchar();
+// kernel_getchar();
     unsigned int ENTRY = (unsigned int)kmalloc(4096 * 2);
     kernel_printf("size  %x\n",size);
     kernel_printf("ENTRY  %x\n",ENTRY);
  
 print_proc();
-kernel_getchar();
+// kernel_getchar();
 
     for (j = 0; j < n; j++) {
         fs_read(&file, buffer, CACHE_BLOCK_SIZE);
@@ -673,7 +673,7 @@ asm volatile("move %0, $sp\n\t" : "=r"(ass));
 kernel_printf("before  %x\n",ass);
 // flag = 1;
 print_proc();
-kernel_getchar();
+// kernel_getchar();
 unsigned int ret = f(0,0,ENTRY);
 asm volatile("move %0, $sp\n\t" : "=r"(ass));
 kernel_printf("after  %x\n",ass);
