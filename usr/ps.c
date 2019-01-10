@@ -196,8 +196,7 @@ void parse_cmd() {
         name[9] = 0;
         if (name[0] != 't'){
             pc_create(name,test_program,argc,params,0,1,0);
-        }
-        else{
+        } else{
             pc_create("default program",test_program,0,0,0,1,0);
         }
         kernel_printf("test_program return with %d\n", result);
@@ -206,11 +205,13 @@ void parse_cmd() {
         name[9] = 0;
         if (name[0] != 't'){
             pc_create(name,test_program,argc,params,0,0,0);
-        }
-        else{
+        } else{
             pc_create("default program",test_program,0,0,0,0,0);
         }
         kernel_printf("test_program return with %d\n", result);
+    } else if (kernel_strcmp(ps_buffer, "tprog3") == 0) {
+        stress_test(atoi(param));
+        kernel_printf("stress testing return with %d\n", 0);
     }
     
     // ----------- process schedule commands -----------
