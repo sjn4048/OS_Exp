@@ -665,9 +665,6 @@ disable_schedule = 1;
     // cast the address to function call
     int (*f)(unsigned int argc, void *args) = 
                     (int (*)(unsigned int argc, void *args))(ENTRY);
-
-    for(i = 0;i < argc;i++)
-        kernel_printf("params : %s\n",params[i]);
     
     // call the program !!!
     unsigned int ret = f(argc,params);

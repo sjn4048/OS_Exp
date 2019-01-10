@@ -178,6 +178,9 @@ void parse_cmd() {
         result = proc_demo_create();
         kernel_printf("proc return with %d\n", result);
     } else if (kernel_strcmp(ps_buffer, "exec") == 0) {
+        kernel_printf("argc %d\n",argc);
+        for(i = 0;i < argc;i++)
+            kernel_printf("params : %s\n",params[i]);
         result = exec_from_file(param, argc, params);
         kernel_printf("exec return with %d\n", result);
     } else if (kernel_strcmp(ps_buffer, "kill_cur") == 0) {
