@@ -656,6 +656,7 @@ int kk = 0;
     
 for (kk = 0;kk < 10;kk++) kernel_printf("%x ",syscalls[kk]);
 print_proc();
+disable_interrupts();
 // kernel_getchar();
     for (j = 0; j < n; j++) {
         fs_read(&file, buffer, CACHE_BLOCK_SIZE);
@@ -663,18 +664,15 @@ print_proc();
         kernel_cache(ENTRY + j * CACHE_BLOCK_SIZE);
 
     }
+enable_interrupts();
     for (kk = 0;kk < 10;kk++) kernel_printf("%x ",syscalls[kk]);
     int (*f)(unsigned int argc, void *args, unsigned int addr) = (int (*)(unsigned int argc, void *args, unsigned int addr))(ENTRY);
-    unsigned int ass = 0;
-asm volatile("move %0, $sp\n\t" : "=r"(ass));
-kernel_printf("before  %x\n",ass);
+
 // flag = 1;
 print_proc();
 for (kk = 0;kk < 10;kk++) kernel_printf("%x ",syscalls[kk]);
 // kernel_getchar();
 unsigned int ret = f(0,0,ENTRY);
-asm volatile("move %0, $sp\n\t" : "=r"(ass));
-kernel_printf("after  %x\n",ass);
 for (kk = 0;kk < 10;kk++) kernel_printf("%x ",syscalls[kk]);
     // disable_interrupts();
     return ret;
