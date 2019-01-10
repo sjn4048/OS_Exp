@@ -62,6 +62,7 @@ int syscall(unsigned int code){
     disable_interrupts();
     Semaphore = 0;
     enable_interrupts();
+    kernel_printf("into\n");
     asm volatile(
         "move $t0, %0\n\t"
         "syscall\n\t"
