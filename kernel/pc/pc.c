@@ -804,7 +804,7 @@ void stress_test(unsigned int prog_num){
     char words[11];
     words[10] = 0;
     for(i = 0;i < prog_num;i++){
-        pc_create(itoa(i, words),test_program,0,0,0,1,0);
+        pc_create(itoa(i, words),test_program,1,(char (*)[10])itoa(i, words),0,1,0);
     }
 }
 
