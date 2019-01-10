@@ -11,9 +11,11 @@ unsigned int syscall4(unsigned int status, unsigned int cause, context* pt_conte
 }
 
 unsigned int kernel_printf_syscall(unsigned int status, unsigned int cause, context* pt_context){
+    kernel_printf("syscall!!!!!! 1\n");
     const char *a0 = (char *)pt_context->a0;
     const char *a1 = (char *)pt_context->a1;
     kernel_printf(a0,a1);
+    kernel_printf("syscall!!!!!! 2\n");
     return 0;
 }
 
