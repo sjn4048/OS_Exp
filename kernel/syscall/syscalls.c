@@ -93,4 +93,23 @@ unsigned int kernel_clear_screen_syscall(unsigned int status, unsigned int cause
     return 0;
 }
 
+unsigned int fs_open_dir_syscall(unsigned int status, unsigned int cause, context* pt_context){
+    FS_FAT_DIR* dir = (FS_FAT_DIR*)pt_context->a0;
+    unsigned char * filename = (unsigned char *)pt_context->a1;
+    unsigned long ret = fs_open_dir(dir, filename);
+    return ret;
+}
 
+unsigned int fs_read_dir_syscall(unsigned int status, unsigned int cause, context* pt_context){
+    FS_FAT_DIR* dir = (FS_FAT_DIR*)pt_context->a0;
+    u8* buf = (u8*)pt_context->a1;
+    unsigned long ret = fs_read_dir(dir, buf);
+    return ret;
+}
+
+unsigned int get_filename_syscall(unsigned int status, unsigned int cause, context* pt_context){
+    u8* entry = (u8*)pt_context->a0;
+    u8* buf = (u8*)pt_context->a1;
+    get_filename(entry, buf);
+    return 0;
+}

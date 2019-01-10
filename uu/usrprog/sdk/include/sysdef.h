@@ -93,7 +93,21 @@
     __syscall(17);                                \
     get_ret_value;   })
 
+#define sys_fs_open_dir ({                    \
+    __syscall(18);                                \
+    get_ret_value;   })
 
+#define sys_fs_read_dir ({                    \
+    __syscall(19);                                \
+    get_ret_value;   })
+
+#define sys_get_filename ({                    \
+    __syscall(20);                                \
+    get_ret_value;   })
+
+#define get_filename(arg1, arg2) SYSCALL_DEFINE2(_get_filename, arg1, arg2)
+#define fs_open_dir(arg1, arg2) SYSCALL_DEFINE2(_fs_open_dir, arg1, arg2)
+#define fs_read_dir(arg1, arg2) SYSCALL_DEFINE2(_fs_read_dir, arg1, arg2)
 
 #define kernel_set_cursor() SYSCALL_DEFINE0(_kernel_set_cursor)
 #define kernel_getchar() SYSCALL_DEFINE0(_kernel_getchar)

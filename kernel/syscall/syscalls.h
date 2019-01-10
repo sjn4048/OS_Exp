@@ -12,7 +12,9 @@ unsigned int fs_close_syscall(unsigned int status, unsigned int cause, context* 
 unsigned int fs_create_syscall(unsigned int status, unsigned int cause, context* pt_context);
 unsigned int fs_lseek_syscall(unsigned int status, unsigned int cause, context* pt_context);
 unsigned int fs_write_syscall(unsigned int status, unsigned int cause, context* pt_context);
-
+unsigned int fs_open_dir_syscall(unsigned int status, unsigned int cause, context* pt_context);
+unsigned int fs_read_dir_syscall(unsigned int status, unsigned int cause, context* pt_context);
+unsigned int get_filename_syscall(unsigned int status, unsigned int cause, context* pt_context);
 
 unsigned int kernel_putchar_at_syscall(unsigned int status, unsigned int cause, context* pt_context);
 unsigned int kernel_getchar_syscall(unsigned int status, unsigned int cause, context* pt_context);

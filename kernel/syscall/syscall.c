@@ -20,6 +20,9 @@ void init_syscall() {
     register_syscall(11,fs_create_syscall);
     register_syscall(12,fs_lseek_syscall);
     register_syscall(13,fs_write_syscall);
+    register_syscall(18,fs_open_dir_syscall);
+    register_syscall(19,fs_read_dir_syscall);
+    register_syscall(20,get_filename_syscall);
 
 
     register_syscall(14,kernel_putchar_at_syscall);

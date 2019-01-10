@@ -6,6 +6,11 @@ typedef unsigned short u16;
 typedef unsigned long u32;
 #define LOCAL_DATA_BUF_NUM 4
 
+typedef struct fs_fat_dir {
+    unsigned long cur_sector;
+    unsigned long loc;
+    unsigned long sec;
+} FS_FAT_DIR;
 
 struct __attribute__((__packed__)) dir_entry_attr {
     u8 name[8];                   /* Name */
