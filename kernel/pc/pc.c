@@ -26,7 +26,7 @@ unsigned int sysctl_sched_latency = 1000000;
 unsigned int disable_schedule = 0;
 //current task pointer
 task_struct *current_task = 0;
-
+unsigned int ENTRY;
 // lists contain different kinds of tasks
 struct list_head all_task;
 struct list_head all_dead;
@@ -89,6 +89,8 @@ static void copy_context(context* src, context* dest) {
  * initialize the process schedule module
  */
 void init_pc() {
+    ENTRY = (unsigned int)kmalloc(4096 * 2);
+kernel_printf("ENTRY  %x\n",ENTRY);
     int *i = holder1; i = holder2; i = holder3; i = holder4; i = holder5;
     i = holder6; i = holder7; i = holder8; i = holder8; i = holder10;
     i = holder11; i = holder12; i = holder13; i = holder14; i = holder15;
@@ -647,8 +649,8 @@ int exec_from_file(char* filename, unsigned int argc, char params[][10]) {
     unsigned int n = size / CACHE_BLOCK_SIZE + 1;
     unsigned int i = 0;
     unsigned int j = 0;
-    unsigned int ENTRY = (unsigned int)kmalloc(4096 * 2);
-kernel_printf("%x\n",ENTRY);
+
+
 // disable interrupt to avoid some unpredicted bugs 
 disable_schedule = 1;
 
