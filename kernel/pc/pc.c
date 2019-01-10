@@ -648,7 +648,7 @@ int exec_from_file(char* filename, unsigned int argc, char params[][10]) {
     unsigned int i = 0;
     unsigned int j = 0;
     unsigned int ENTRY = (unsigned int)kmalloc(4096 * 2);
-
+kernel_printf("%x\n",ENTRY);
 // disable interrupt to avoid some unpredicted bugs 
 disable_schedule = 1;
 
