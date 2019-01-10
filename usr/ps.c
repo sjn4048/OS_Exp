@@ -123,7 +123,7 @@ void parse_cmd() {
     }
     // total params numbers
     argc = i + 1;
-    
+
     if (ps_buffer[0] == 0) {
         return;
     } else if (kernel_strcmp(ps_buffer, "clear") == 0) {
@@ -188,20 +188,20 @@ void parse_cmd() {
         change_sysctl_sched_latency(atoi(param));
         kernel_printf("change_sysctl_sched_latency return with 0\n");
     } else if (kernel_strcmp(ps_buffer, "tprog1") == 0) {
-        for(j = 0;j < 10;j++) name[j] = param[j];
+        for(j = 0;j < 10;j++) name[j] = params[0][j];
         name[9] = 0;
         if (name[0] != 't'){
-            pc_create(name,test_program,1,params,0,1,0);
+            pc_create(name,test_program,argc,params,0,1,0);
         }
         else{
             pc_create("default program",test_program,0,0,0,1,0);
         }
         kernel_printf("test_program return with %d\n", result);
     } else if (kernel_strcmp(ps_buffer, "tprog2") == 0) {
-        for(j = 0;j < 10;j++) name[j] = param[j];
+        for(j = 0;j < 10;j++) name[j] = params[0][j];
         name[9] = 0;
         if (name[0] != 't'){
-            pc_create(name,test_program,1,params,0,0,0);
+            pc_create(name,test_program,argc,params,0,0,0);
         }
         else{
             pc_create("default program",test_program,0,0,0,0,0);
