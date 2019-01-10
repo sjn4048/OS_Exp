@@ -6,7 +6,7 @@
 
 
 unsigned int main(unsigned int argc, void *args) {
-    printf("%dab\n",23);
+    // printf("%dab\n",23);
     // unsigned int ptr = malloc(4096);
     // unsigned int ret =  myvi((char *)args);
     // unsigned int ret =  myvi("test.txt");
