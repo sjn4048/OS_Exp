@@ -14,6 +14,9 @@
 #include <zjunix/syscall.h>
 #include <zjunix/log.h>
 #include <driver/ps2.h>
+#include <zjunix/syscall.h>
+
+extern int Semaphore;
 
 // defines the task's possible state
 #define TASK_RUNNING 0
@@ -384,7 +387,9 @@ unsigned int pc_kill_syscall(unsigned int status, unsigned int cause, context* p
     disable_interrupts();
     check_if_ps_exit();
     pc_exit(pt_context);
-    // pc_schedule(status, cause, pt_context);
+
+    // restore Semaphore
+    Semaphore = 1;
     enable_interrupts();
 
     return 0;
@@ -396,7 +401,7 @@ int pc_kill_current(){
      * current process. 
      */
     syscall(10);
-    
+
     /* Another implementation : 
      * ( NOTE : still some unknown bugs, maybe unstatble!!! )
      * in order to get 'pt_context' info which can't be accessed directly 

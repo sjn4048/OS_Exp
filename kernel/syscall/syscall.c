@@ -57,21 +57,19 @@ void register_syscall(int index, sys_fn fn) {
 
 // user syscall entry ( you can directly call this )
 int syscall(unsigned int code){
-    // simple Semaphore implemtation
-    while (Semaphore == 0);
-    disable_interrupts();
-    Semaphore = 0;
-    enable_interrupts();
+    if (code == 10){
+        // simple Semaphore implemtation
+        while (Semaphore == 0);
+        disable_interrupts();
+        Semaphore = 0;
+        enable_interrupts();
+    }
     kernel_printf("into\n");
     asm volatile(
         "move $t0, %0\n\t"
         "syscall\n\t"
         "nop\n\t"
         : : "r"(code));
-    // restore Semaphore
-    disable_interrupts();
-    Semaphore = 1;
-    enable_interrupts();
     return 0;
 }
 

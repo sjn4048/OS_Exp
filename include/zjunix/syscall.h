@@ -6,6 +6,7 @@
 typedef unsigned int (*sys_fn)(unsigned int status, unsigned int cause, context* pt_context);
 
 extern sys_fn syscalls[256];
+extern int Semaphore;
 
 void init_syscall();
 void __syscall(unsigned int status, unsigned int cause, context* pt_context);
