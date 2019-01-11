@@ -58,6 +58,7 @@ int ext2_write(EXT2_FILE *file, __u8 *buffer, __u64 length, __u64 *bytes_of_writ
 int ext2_is_valid_filename(__u8 *name);
 int ext2_strlen(__u8 *string);
 int ext2_find_file_relative(__u8 *path, INODE *inode);
+int ext2_find_file_absolute(__u8 *path, INODE *inode);
 int ext2_rm_inode(INODE inode);
 int ext2_is_removable(__u8 *name);
 

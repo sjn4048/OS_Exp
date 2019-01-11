@@ -412,7 +412,8 @@ int ext2_create_plus(__u8 *param, INODE *parent, INODE *result)
 int ext2_rm(__u8 *param)
 {
     INODE inode;
-    if (EXT2_FAIL == ext2_find(param, &inode))
+    if (EXT2_FAIL == ext2_traverse_block(
+                         param, current_dir.inode.info.i_block, &(inode)))
     {
         log(LOG_FAIL, "Cannot find %s", param);
         return EXT2_FAIL;
@@ -427,14 +428,14 @@ int ext2_rm(__u8 *param)
     // remove
     if (EXT2_FAIL == ext2_rm_inode(inode))
     {
-        log(LOG_FAIL, "Failed to remove that.");
+        log(LOG_FAIL, "Failed to remove inode.");
         return EXT2_FAIL;
     }
 
     // remove dir entry from current inode
     if (EXT2_FAIL == ext2_rm_dir_entry(param, &current_dir.inode, EXT2_NULL))
     {
-        log(LOG_FAIL, "Failed to remove that.");
+        log(LOG_FAIL, "Failed to remove directory entry.");
         return EXT2_FAIL;
     }
 
@@ -524,12 +525,22 @@ int ext2_mv(__u8 *param)
         return EXT2_FAIL;
     }
 
-    log(LOG_STEP, "src: %s", src);
-    log(LOG_STEP, "dest: %s", dest);
-    log(LOG_STEP, "target: %s", target);
-    log(LOG_STEP, "target_rename: %s", target_rename);
-
     INODE inode;
+    __u8 dest_target[64];
+    int length = ext2_strlen(dest);
+    kernel_memcpy(dest_target, dest, length);
+    dest_target[length] = '/';
+    int length2 = ext2_strlen(target_rename);
+    kernel_memcpy(dest_target + length + 1, target_rename, length2);
+    dest_target[length + length2 + 1] = '\0';
+    log(LOG_STEP, "%s", dest_target);
+
+    if (EXT2_SUCCESS == ext2_find(dest_target, &inode))
+    {
+        log(LOG_FAIL, "%s exists.", dest_target);
+        return EXT2_FAIL;
+    }
+
     if (EXT2_FAIL == ext2_find(src, &inode))
     {
         log(LOG_FAIL, "Cannot find %s", src);
@@ -549,7 +560,7 @@ int ext2_mv(__u8 *param)
         return EXT2_FAIL;
     }
 
-    int length = ext2_strlen(target_rename);
+    length = ext2_strlen(target_rename);
     kernel_memcpy(&(dir.name), target_rename, length);
     dir.name_len = length;
     dir.name[length] = '\0';
@@ -589,6 +600,21 @@ int ext2_cp(__u8 *param)
     log(LOG_STEP, "target: %s", target);
     log(LOG_STEP, "target_rename: %s", target_rename);
     INODE inode;
+
+    __u8 dest_target[64];
+    int length = ext2_strlen(dest);
+    kernel_memcpy(dest_target, dest, length);
+    dest_target[length] = '/';
+    int length2 = ext2_strlen(target_rename);
+    kernel_memcpy(dest_target + length + 1, target_rename, length2);
+    dest_target[length + length2 + 1] = '\0';
+    log(LOG_STEP, "%s", dest_target);
+    if (EXT2_SUCCESS == ext2_find_file_absolute(dest_target, &inode))
+    {
+        log(LOG_FAIL, "%s exists.", dest_target);
+        return EXT2_FAIL;
+    }
+
     if (EXT2_FAIL == ext2_find(src, &inode))
     {
         log(LOG_FAIL, "Cannot find %s", src);

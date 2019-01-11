@@ -149,14 +149,14 @@ int ext2_find_file_loop(__u8 *path, struct ext2_path *sub_path, INODE *inode)
         // if parent inode's type is not directory
         if ((parent_inode.info.i_mode & EXT2_S_IFDIR) == 0)
         {
-            goto fail;
+            return EXT2_FAIL;
         }
 
         // traverse blocks
         if (EXT2_FAIL == ext2_traverse_block(
                              sub_path->name, parent_inode.info.i_block, &(sub_path->inode)))
         {
-            goto fail;
+            return EXT2_FAIL;
         }
         else
         {
@@ -168,9 +168,6 @@ int ext2_find_file_loop(__u8 *path, struct ext2_path *sub_path, INODE *inode)
     // success
     kernel_memcpy(inode, &sub_path->inode, sizeof(INODE));
     return EXT2_SUCCESS;
-
-fail:
-    return EXT2_FAIL;
 }
 
 /**

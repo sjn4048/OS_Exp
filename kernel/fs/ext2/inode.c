@@ -308,13 +308,13 @@ int ext2_traverse_triple_indirect_block(__u8 *target, const __u32 *i_blocks, int
 int ext2_traverse_block(__u8 *target, __u32 *i_blocks, INODE *inode)
 {
     int result = ext2_traverse_direct_block(target, i_blocks, 12, inode);
-    if (EXT2_NOT_FOUND == (result & EXT2_NOT_FOUND))
+    if (result & EXT2_NOT_FOUND)
     {
         result = ext2_traverse_indirect_block(target, i_blocks + 12, 1, inode);
-        if (EXT2_NOT_FOUND == (result & EXT2_NOT_FOUND))
+        if (result & EXT2_NOT_FOUND)
         {
             result = ext2_traverse_double_indirect_block(target, i_blocks + 13, 1, inode);
-            if (EXT2_NOT_FOUND == (result & EXT2_NOT_FOUND))
+            if (result & EXT2_NOT_FOUND)
             {
                 result = ext2_traverse_triple_indirect_block(target, i_blocks + 14, 1, inode);
                 if (EXT2_SUCCESS == result)

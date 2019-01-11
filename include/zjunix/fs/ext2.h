@@ -428,6 +428,13 @@ struct FS_INFO
 /* current directory */
 struct ext2_path current_dir;
 
+/* system call */
+int ext2_open(__u8 *path, EXT2_FILE *file);
+int ext2_close(EXT2_FILE *file);
+int ext2_lseek(EXT2_FILE *file, __u32 new_pointer);
+int ext2_read(EXT2_FILE *file, __u8 *buffer, __u64 length, __u64 *bytes_of_read);
+int ext2_write(EXT2_FILE *file, __u8 *buffer, __u64 length, __u64 *bytes_of_write);
+
 /* functions provided to outside */
 int ext2_init();
 int ext2_cat(__u8 *path);
