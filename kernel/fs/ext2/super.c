@@ -158,7 +158,7 @@ int ext2_set_block_used(__u32 block_id)
  * @param name
  * @return success or not
  */
-int ext2_rm_dir_entry_d(__u32 *block, int len, __u8 *name)
+int ext2_rm_dir_entry_d(__u32 *block, int len, __u8 *name, struct ext2_dir_entry *dir)
 {
     // block by block
     __u8 buffer[4096];
@@ -189,6 +189,12 @@ int ext2_rm_dir_entry_d(__u32 *block, int len, __u8 *name)
                 kernel_memcpy(&dir1, &dir2, sizeof(struct ext2_dir_entry));
                 offset += dir2.rec_len;
                 continue;
+            }
+
+            // now we find it!
+            if (dir != EXT2_NULL)
+            {
+                kernel_memcpy(dir, &dir2, sizeof(struct ext2_dir_entry));
             }
 
             if (offset == 0)
@@ -233,7 +239,7 @@ int ext2_rm_dir_entry_d(__u32 *block, int len, __u8 *name)
  * @param name
  * @return success or not
  */
-int ext2_rm_dir_entry_id(__u32 *block, int len, __u8 *name)
+int ext2_rm_dir_entry_id(__u32 *block, int len, __u8 *name, struct ext2_dir_entry *dir)
 {
     __u8 buffer[4096];
     for (int i = 0; i < len; i++)
@@ -247,7 +253,7 @@ int ext2_rm_dir_entry_id(__u32 *block, int len, __u8 *name)
                       fs_info.par_start_address + block[i] * (fs_info.block_size / 512),
                       fs_info.block_size / 512);
         __u32 *entries = (__u32 *)buffer;
-        int result = ext2_rm_dir_entry_d(entries, 1024, name);
+        int result = ext2_rm_dir_entry_d(entries, 1024, name, dir);
 
         if (-1 == result)
         {
@@ -268,7 +274,7 @@ int ext2_rm_dir_entry_id(__u32 *block, int len, __u8 *name)
  * @param name
  * @return success or not
  */
-int ext2_rm_dir_entry_2id(__u32 *block, int len, __u8 *name)
+int ext2_rm_dir_entry_2id(__u32 *block, int len, __u8 *name, struct ext2_dir_entry *dir)
 {
     __u8 buffer[4096];
     for (int i = 0; i < len; i++)
@@ -282,7 +288,7 @@ int ext2_rm_dir_entry_2id(__u32 *block, int len, __u8 *name)
                       fs_info.par_start_address + block[i] * (fs_info.block_size / 512),
                       fs_info.block_size / 512);
         __u32 *entries = (__u32 *)buffer;
-        int result = ext2_rm_dir_entry_id(entries, 1024, name);
+        int result = ext2_rm_dir_entry_id(entries, 1024, name, dir);
 
         if (-1 == result)
         {
@@ -303,7 +309,7 @@ int ext2_rm_dir_entry_2id(__u32 *block, int len, __u8 *name)
  * @param name
  * @return success or not
  */
-int ext2_rm_dir_entry_3id(__u32 *block, int len, __u8 *name)
+int ext2_rm_dir_entry_3id(__u32 *block, int len, __u8 *name, struct ext2_dir_entry *dir)
 {
     __u8 buffer[4096];
     for (int i = 0; i < len; i++)
@@ -317,7 +323,7 @@ int ext2_rm_dir_entry_3id(__u32 *block, int len, __u8 *name)
                       fs_info.par_start_address + block[i] * (fs_info.block_size / 512),
                       fs_info.block_size / 512);
         __u32 *entries = (__u32 *)buffer;
-        int result = ext2_rm_dir_entry_2id(entries, 1024, name);
+        int result = ext2_rm_dir_entry_2id(entries, 1024, name, dir);
 
         if (-1 == result)
         {
@@ -337,18 +343,18 @@ int ext2_rm_dir_entry_3id(__u32 *block, int len, __u8 *name)
  * @param name
  * @return success or not
  */
-int ext2_rm_dir_entry(__u8 *name)
+int ext2_rm_dir_entry(__u8 *name, INODE *inode, struct ext2_dir_entry *dir)
 {
-    int result = ext2_rm_dir_entry_d(current_dir.inode.info.i_block, 12, name);
+    int result = ext2_rm_dir_entry_d(inode->info.i_block, 12, name, dir);
     if (-1 == result)
     {
-        result = ext2_rm_dir_entry_id(current_dir.inode.info.i_block, 1, name);
+        result = ext2_rm_dir_entry_id(inode->info.i_block, 1, name, dir);
         if (-1 == result)
         {
-            result = ext2_rm_dir_entry_2id(current_dir.inode.info.i_block, 1, name);
+            result = ext2_rm_dir_entry_2id(inode->info.i_block, 1, name, dir);
             if (-1 == result)
             {
-                result = ext2_rm_dir_entry_3id(current_dir.inode.info.i_block, 1, name);
+                result = ext2_rm_dir_entry_3id(inode->info.i_block, 1, name, dir);
                 if (-1 == result)
                 {
                     return EXT2_FAIL;

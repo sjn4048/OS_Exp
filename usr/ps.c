@@ -250,7 +250,19 @@ void parse_cmd()
     {
         result = ext2_rm(param);
     }
-    
+    else if (kernel_strcmp(ps_buffer, "mv") == 0)
+    {
+        result = ext2_mv(param);
+    }
+    else if (kernel_strcmp(ps_buffer, "cp") == 0)
+    {
+        result = ext2_cp(param);
+    }
+    else if (kernel_strcmp(ps_buffer, "rename") == 0)
+    {
+        result = ext2_rename(param);
+    }
+
     // ----------- ext2 file system commands -----------
     // ====================================================+
 

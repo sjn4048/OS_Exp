@@ -436,5 +436,9 @@ int ext2_cd(__u8 *path);
 int ext2_mkdir(__u8 *name);
 int ext2_create(__u8 *param);
 int ext2_rm(__u8 *param);
+int ext2_mv(__u8 *param);
+int ext2_rename(__u8 *param);
+// unverified
+int ext2_cp(__u8 *param);
 
 #endif //_ZJUNIX_FS_EXT2_H
