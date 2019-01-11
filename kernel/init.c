@@ -66,16 +66,17 @@ void init_kernel() {
     log(LOG_OK, "Slab.");
     init_slob();
     log(LOG_OK, "Slob.");
-    mem_test();
-    log(LOG_OK, "Memory test.");
-    // char* res = mem_choose();
-    // log(LOG_OK, "Allocator: ", res);
-    log(LOG_END, "Memory Modules.");
     // File system
     log(LOG_START, "File System.");
     init_fs();
     ext2_init();
     log(LOG_END, "File System.");
+    char* res = mem_choose();
+    log(LOG_OK, "Allocator: %s", res);
+    //test_malloc_accuracy();
+    log(LOG_OK, "Memory test.");
+    log(LOG_END, "Memory Modules.");
+
     // System call
     log(LOG_START, "System Calls.");
     init_syscall();

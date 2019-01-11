@@ -6,43 +6,66 @@
 #include <driver/vga.h>
 #include <zjunix/log.h>
 #include <zjunix/bootmm.h>
-#include <zjunix/fs/fat.h>
+#include <zjunix/fs/ext2.h>
 
+/* Choose memory allocator
+ *
+ * 
+ * 
+ */
 char *mem_choose()
 {
-    char *filename = "allocator";
+    char *filename = "/allocator";
 
-    FILE file;
-    int result = fs_open(&file, filename);
+    EXT2_FILE file;
+    int result = ext2_open(filename, &file);
 
-    if (result == 0 && get_entry_filesize(file.entry.data) < 15)
+    if (result == EXT2_SUCCESS && file.inode.info.i_size < 128)
     {
-        unsigned char buffer[15];
-        fs_read(&file, buffer, 15);
-
-        if (kernel_strcmp(buffer, "slob"))
+#ifdef MEM_CHOOSE_DEBUG
+        kernel_printf("\tFile found.\n");
+#endif
+        unsigned char buffer[128];
+        kernel_memset(buffer, 0, sizeof(buffer));
+        unsigned long length;
+        ext2_read(&file, buffer, 128, &length);
+#ifdef MEM_CHOOSE_DEBUG
+        kernel_printf("\tIn file: %s\n", buffer);
+#endif
+        if (kernel_strcmp(buffer, "slob") == 0)
         {
             allocator = SLOB;
         }
-        else if (kernel_strcmp(buffer, "slab"))
+        else if (kernel_strcmp(buffer, "slab") == 0)
         {
             allocator = SLAB;
         }
-        else if (kernel_strcmp(buffer, "slub"))
+        else if (kernel_strcmp(buffer, "slub") == 0)
         {
             //allocator = SLUB;
         }
-        else if (kernel_strcmp(buffer, "buddy"))
+        else if (kernel_strcmp(buffer, "buddy") == 0)
         {
             allocator = BUDDY;
         }
-        else if (kernel_strcmp(buffer, "bootmm"))
+        else if (kernel_strcmp(buffer, "bootmm") == 0)
         {
             allocator = BOOTMM;
         }
+        else
+        {
+            // default allocator: SLOB
+            allocator = SLOB;
+        }
+#ifdef MEM_CHOOSE_DEBUG
+        kernel_printf("Allocator: %d\n", allocator);
+#endif
     }
     else
     {
+#ifdef MEM_CHOOSE_DEBUG
+        kernel_printf("File not found.\n");
+#endif
         // default allocator: SLOB
         allocator = SLOB;
     }
@@ -116,27 +139,41 @@ void kfree(void *obj)
 #endif // SLOB_DEBUG
 }
 
-void mem_test()
-{
-    test_malloc_accuracy();
-}
-
 #pragma GCC push_options
 #pragma GCC optimize("O0")
 
-#define ACCURACY_RETRY_IN 300
+#define ACCURACY_RETRY_SIZE 300
 #define ACCURACY_EXPAND_RATE 1
 
 void test_malloc_accuracy()
 {
-    int *a[ACCURACY_RETRY_IN];
+    // test cases where big nodes are allocated.
+    void *b;
+    b = kmalloc(10);
+    kfree(b);
+    b = kmalloc(100);
+    kfree(b);
+    b = kmalloc(256);
+    kfree(b);
+    b = kmalloc(512);
+    kfree(b);
+    b = kmalloc(1024);
+    kfree(b);
+    b = kmalloc(2048);
+    kfree(b);
+    b = kmalloc(4096);
+    kfree(b);
+    b = kmalloc(10000);
+    kfree(b);
+
+    int *a[ACCURACY_RETRY_SIZE];
 
 #ifdef MEMORY_TEST_DEBUG
     kernel_printf("Phase 1...\n");
 #endif // DEBUG
 
     // initialize all the elements in a[N];
-    for (size_t i = 1; i < ACCURACY_RETRY_IN; i++)
+    for (size_t i = 1; i < ACCURACY_RETRY_SIZE; i++)
     {
         a[i] = (int *)kmalloc(sizeof(int) * i * ACCURACY_EXPAND_RATE);
 #ifdef MEMORY_TEST_DEBUG
@@ -163,7 +200,7 @@ void test_malloc_accuracy()
 #ifdef MEMORY_TEST_DEBUG
     kernel_printf("Phase 2...\n");
 #endif // DEBUG
-    for (size_t i = 1; i < ACCURACY_RETRY_IN; i++)
+    for (size_t i = 1; i < ACCURACY_RETRY_SIZE; i++)
     {
         if (*a[i] != i)
         {
@@ -182,47 +219,30 @@ void test_malloc_accuracy()
 #pragma GCC push_options
 #pragma GCC optimize("O0")
 
-#define RETRY_CNT 1000
-#define RETRY_CNT2 5000
-#define RETRY_SIZE 2000
+#define SPEED_ALLOC_CNT 1000
+#define SPEED_RETRY_TIMES 5000
+#define SPEED_SIZE 20
 void test_malloc_speed()
 {
-    void *a;
-    //TODO:known bug
-    // a = kmalloc(10);
-    // kfree(a);
-    // a = kmalloc(100);
-    // kfree(a);
-    // a = kmalloc(256);
-    // kfree(a);
-    // a = kmalloc(512);
-    // kfree(a);
-    // a = kmalloc(1024);
-    // kfree(a);
-    // a = kmalloc(2048);
-    // kfree(a);
-    // a = kmalloc(4096);
-    // kfree(a);
-    // a = kmalloc(10000);
-    // kfree(a);
-
-    void *b[RETRY_CNT];
+    void *b[SPEED_ALLOC_CNT];
     char time_str_buf[9];
     get_time(time_str_buf, sizeof(time_str_buf) / sizeof(char));
-    kernel_printf("%s", time_str_buf);
-    for (size_t j = 0; j < RETRY_CNT2; j++)
+    kernel_printf("\n--------------\n"
+                  "Speed test:\n\tstart: %s\n", time_str_buf);
+    for (size_t j = 0; j < SPEED_RETRY_TIMES; j++)
     {
-        for (size_t i = 0; i < RETRY_CNT; i++)
+        for (size_t i = 0; i < SPEED_ALLOC_CNT; i++)
         {
-            b[i] = (char *)kmalloc(RETRY_SIZE);
+            b[i] = kmalloc(SPEED_SIZE);
         }
-        for (size_t i = 0; i < RETRY_CNT; i++)
+        for (size_t i = 0; i < SPEED_ALLOC_CNT; i++)
         {
             kfree(b[i]);
         }
     }
     get_time(time_str_buf, sizeof(time_str_buf) / sizeof(char));
-    kernel_printf("%s", time_str_buf);
+    kernel_printf("\tend: %s\n"
+                  "--------------\n", time_str_buf);
 }
 #pragma GCC pop_options
 
@@ -252,3 +272,38 @@ void test_reg_base()
 }
 
 #pragma GCC pop_options
+
+#include <driver/ps2.h>
+// entry for memory test programs.
+void mem_test()
+{
+    kernel_printf("Memory test v1.0\n"
+                  "\tPress 1 for accuracy test\n"
+                  "\tPress 2 for speed test\n"
+                  "\tPress 3 for unit benchmark.\n"
+                  "\tPress 4 for mem_info\n");
+
+    char input = kernel_getchar();
+    if (input == '1')
+    {
+        test_malloc_accuracy();
+        log(LOG_OK, "Accuracy test done.");
+    }
+    else if (input == '2')
+    {
+        test_malloc_speed();
+        log(LOG_OK, "Accuracy test done.");
+    }
+    else if (input == '3')
+    {
+        test_malloc_accuracy();
+        test_malloc_speed();
+        log(LOG_OK, "Accuracy test done.");
+    }
+    else if (input == '4')
+    {
+        print_bootmap();
+        buddy_info();
+        log(LOG_OK, "Print mem_info done.");
+    }
+}

@@ -9,6 +9,11 @@
 
 #pragma region debug
 
+//#define MEM_CHOOSE_DEBUG
+#ifdef MEM_CHOOSE_DEBUG
+#include <driver/ps2.h>
+#endif
+
 //#define BOOTMM_DEBUG
 #ifdef BOOTMM_DEBUG
 #include <driver/ps2.h>

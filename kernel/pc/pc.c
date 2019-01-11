@@ -95,7 +95,7 @@ static void copy_context(context* src, context* dest) {
  */
 void init_pc() {
     ENTRY = (unsigned int)kmalloc(4096 * 2);
-kernel_printf("ENTRY  %x\n",ENTRY);
+    // kernel_printf("ENTRY  %x\n",ENTRY);
     int *i = holder1; i = holder2; i = holder3; i = holder4; i = holder5;
     i = holder6; i = holder7; i = holder8; i = holder8; i = holder10;
     i = holder11; i = holder12; i = holder13; i = holder14; i = holder15;
