@@ -143,11 +143,227 @@ int ext2_set_block_used(__u32 block_id)
     // refresh block bitmap
     sd_read_block(
         buffer,
-        fs_info.par_start_address + group_desc.bg_block_bitmap * 8 + block_id / 8 / 512, 1);
-    buffer[block_id / 8 % 512] |= 1 << (7 - block_id % 8);
+        fs_info.par_start_address + group_desc.bg_block_bitmap * 8 + block_id % fs_info.sb.s_blocks_per_group / 8 / 512, 1);
+    buffer[block_id % fs_info.sb.s_blocks_per_group / 8 % 512] |= 1 << (block_id % 8);
     sd_write_block(
         buffer,
-        fs_info.par_start_address + group_desc.bg_block_bitmap * 8 + block_id / 8 / 512, 1);
+        fs_info.par_start_address + group_desc.bg_block_bitmap * 8 + block_id % fs_info.sb.s_blocks_per_group / 8 / 512, 1);
 
     return EXT2_SUCCESS;
+}
+
+/**
+ * remove dir entry from direct block
+ * @param block
+ * @param name
+ * @return success or not
+ */
+int ext2_rm_dir_entry_d(__u32 *block, int len, __u8 *name, struct ext2_dir_entry *dir)
+{
+    // block by block
+    __u8 buffer[4096];
+    int offset;
+    struct ext2_dir_entry dir1, dir2;
+    for (int i = 0; i < len; i++)
+    {
+        if (block[i] == 0)
+        {
+            // this block is empty
+            return EXT2_FAIL;
+        }
+
+        sd_read_block(buffer,
+                      fs_info.par_start_address + block[i] * (fs_info.block_size / 512),
+                      fs_info.block_size / 512);
+
+        offset = 0;
+        while (offset < 4096)
+        {
+            if (EXT2_FAIL == ext2_dir_entry_fill(&dir2, buffer + offset))
+            {
+                return EXT2_FAIL;
+            }
+
+            if (EXT2_FALSE == ext2_is_equal((__u8 *)dir2.name, name))
+            {
+                kernel_memcpy(&dir1, &dir2, sizeof(struct ext2_dir_entry));
+                offset += dir2.rec_len;
+                continue;
+            }
+
+            // now we find it!
+            if (dir != EXT2_NULL)
+            {
+                kernel_memcpy(dir, &dir2, sizeof(struct ext2_dir_entry));
+            }
+
+            if (offset == 0)
+            {
+                // target is the first
+                if (dir2.rec_len == 4096)
+                {
+                    // there is no other entry
+                    kernel_memset(buffer, 0, 4096);
+                    sd_write_block(buffer, fs_info.par_start_address + block[i] * 8, 8);
+                    return EXT2_SUCCESS;
+                }
+                else
+                {
+                    // copy next;
+                    kernel_memcpy(&dir1, &dir2, sizeof(struct ext2_dir_entry));
+                    ext2_dir_entry_fill(&dir2, buffer + offset + dir2.rec_len);
+
+                    dir1.rec_len += dir2.rec_len;
+                    kernel_memcpy(buffer + offset, &(dir1), 8);
+                    sd_write_block(buffer, fs_info.par_start_address + block[i] * 8, 8);
+                    return EXT2_SUCCESS;
+                }
+            }
+            else
+            {
+                offset -= dir1.rec_len;
+                dir1.rec_len += dir2.rec_len;
+                kernel_memcpy(buffer + offset, &(dir1), 8);
+                sd_write_block(buffer, fs_info.par_start_address + block[i] * 8, 8);
+                return EXT2_SUCCESS;
+            }
+        }
+    }
+
+    return -1;
+}
+
+/**
+ * remove dir entry from indirect block
+ * @param block
+ * @param name
+ * @return success or not
+ */
+int ext2_rm_dir_entry_id(__u32 *block, int len, __u8 *name, struct ext2_dir_entry *dir)
+{
+    __u8 buffer[4096];
+    for (int i = 0; i < len; i++)
+    {
+        if (block[i] == 0)
+        {
+            return EXT2_FAIL;
+        }
+
+        sd_read_block(buffer,
+                      fs_info.par_start_address + block[i] * (fs_info.block_size / 512),
+                      fs_info.block_size / 512);
+        __u32 *entries = (__u32 *)buffer;
+        int result = ext2_rm_dir_entry_d(entries, 1024, name, dir);
+
+        if (-1 == result)
+        {
+            continue;
+        }
+        else
+        {
+            return result;
+        }
+    }
+
+    return -1;
+}
+
+/**
+ * remove dir entry from double indirect block
+ * @param block
+ * @param name
+ * @return success or not
+ */
+int ext2_rm_dir_entry_2id(__u32 *block, int len, __u8 *name, struct ext2_dir_entry *dir)
+{
+    __u8 buffer[4096];
+    for (int i = 0; i < len; i++)
+    {
+        if (block[i] == 0)
+        {
+            return EXT2_FAIL;
+        }
+
+        sd_read_block(buffer,
+                      fs_info.par_start_address + block[i] * (fs_info.block_size / 512),
+                      fs_info.block_size / 512);
+        __u32 *entries = (__u32 *)buffer;
+        int result = ext2_rm_dir_entry_id(entries, 1024, name, dir);
+
+        if (-1 == result)
+        {
+            continue;
+        }
+        else
+        {
+            return result;
+        }
+    }
+
+    return -1;
+}
+
+/**
+ * remove dir entry from triple indirect block
+ * @param block
+ * @param name
+ * @return success or not
+ */
+int ext2_rm_dir_entry_3id(__u32 *block, int len, __u8 *name, struct ext2_dir_entry *dir)
+{
+    __u8 buffer[4096];
+    for (int i = 0; i < len; i++)
+    {
+        if (block[i] == 0)
+        {
+            return EXT2_FAIL;
+        }
+
+        sd_read_block(buffer,
+                      fs_info.par_start_address + block[i] * (fs_info.block_size / 512),
+                      fs_info.block_size / 512);
+        __u32 *entries = (__u32 *)buffer;
+        int result = ext2_rm_dir_entry_2id(entries, 1024, name, dir);
+
+        if (-1 == result)
+        {
+            continue;
+        }
+        else
+        {
+            return result;
+        }
+    }
+
+    return -1;
+}
+
+/**
+ * remove dir entry from current inode
+ * @param name
+ * @return success or not
+ */
+int ext2_rm_dir_entry(__u8 *name, INODE *inode, struct ext2_dir_entry *dir)
+{
+    int result = ext2_rm_dir_entry_d(inode->info.i_block, 12, name, dir);
+    if (-1 == result)
+    {
+        result = ext2_rm_dir_entry_id(inode->info.i_block, 1, name, dir);
+        if (-1 == result)
+        {
+            result = ext2_rm_dir_entry_2id(inode->info.i_block, 1, name, dir);
+            if (-1 == result)
+            {
+                result = ext2_rm_dir_entry_3id(inode->info.i_block, 1, name, dir);
+                if (-1 == result)
+                {
+                    return EXT2_FAIL;
+                }
+            }
+        }
+    }
+    else
+    {
+        return result;
+    }
 }

@@ -257,13 +257,51 @@ void parse_cmd()
     // ----------- process schedule commands -----------
     // -------------------------------------------------
 
-    else if (kernel_strcmp(ps_buffer, "cat") == 0) {
-        result = fs_cat(param);
-        kernel_printf("cat return with %d\n", result);
-    } else if (kernel_strcmp(ps_buffer, "ls") == 0) {
-        result = ls(param);
-        kernel_printf("ls return with %d\n", result);
-    } else if (kernel_strcmp(ps_buffer, "vi") == 0) {
+    // ====================================================+
+    // ----------- ext2 file system commands -----------
+
+    else if (kernel_strcmp(ps_buffer, "cat") == 0)
+    {
+        result = ext2_cat(param);
+    }
+    else if (kernel_strcmp(ps_buffer, "ls") == 0)
+    {
+        result = ext2_ls();
+    }
+    else if (kernel_strcmp(ps_buffer, "cd") == 0)
+    {
+        result = ext2_cd(param);
+    }
+    else if (kernel_strcmp(ps_buffer, "mkdir") == 0)
+    {
+        result = ext2_mkdir(param);
+    }
+    else if (kernel_strcmp(ps_buffer, "create") == 0)
+    {
+        result = ext2_create(param);
+    }
+    else if (kernel_strcmp(ps_buffer, "rm") == 0)
+    {
+        result = ext2_rm(param);
+    }
+    else if (kernel_strcmp(ps_buffer, "mv") == 0)
+    {
+        result = ext2_mv(param);
+    }
+    else if (kernel_strcmp(ps_buffer, "cp") == 0)
+    {
+        result = ext2_cp(param);
+    }
+    else if (kernel_strcmp(ps_buffer, "rename") == 0)
+    {
+        result = ext2_rename(param);
+    }
+
+    // ----------- ext2 file system commands -----------
+    // ====================================================+
+
+    else if (kernel_strcmp(ps_buffer, "vi") == 0)
+    {
         result = myvi(param);
         kernel_printf("vi return with %d\n", result);
     } else {

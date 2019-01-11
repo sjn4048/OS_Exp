@@ -658,3 +658,550 @@ int ext2_store_inode(INODE *inode)
 
     return EXT2_SUCCESS;
 }
+
+/**
+ * set inode free in bitmap
+ * @param inode id
+ * @return success or not
+ */
+int ext2_set_inode_free(__u32 id)
+{
+    struct ext2_group_desc group_desc;
+    unsigned char buffer[512];
+    // refresh group descriptor
+    sd_read_block(
+        buffer,
+        fs_info.group_desc_address + ((id - 1) / fs_info.sb.s_inodes_per_group) * 32 / 512, 1);
+    ext2_group_desc_fill(
+        &group_desc,
+        buffer + ((id - 1) / fs_info.sb.s_inodes_per_group) * 32 % 512);
+    group_desc.bg_free_blocks_count += 1;
+    kernel_memcpy(
+        buffer + ((id - 1) / fs_info.sb.s_inodes_per_group) * 32 % 512,
+        &group_desc, sizeof(struct ext2_group_desc));
+    sd_write_block(
+        buffer,
+        fs_info.group_desc_address + ((id - 1) / fs_info.sb.s_inodes_per_group) * 32 / 512, 1);
+    // refresh block bitmap
+    sd_read_block(
+        buffer,
+        fs_info.par_start_address + group_desc.bg_inode_bitmap * 8 + (id - 1) % fs_info.sb.s_inodes_per_group / 8 / 512, 1);
+    buffer[(id - 1) % fs_info.sb.s_inodes_per_group / 8 % 512] &= ~(1 << ((id - 1) % 8));
+    sd_write_block(
+        buffer,
+        fs_info.par_start_address + group_desc.bg_inode_bitmap * 8 + (id - 1) % fs_info.sb.s_inodes_per_group / 8 / 512, 1);
+
+    return EXT2_SUCCESS;
+}
+
+/**
+ * remove inode in direct blocks
+ * @param blocks
+ * @param length
+ * @return success or not
+ */
+int ext2_traverse_block_rm_d(__u32 *blocks, int length)
+{
+    // block by block
+    __u8 buffer[4096];
+    int offset;
+    struct ext2_dir_entry dir;
+    for (int i = 0; i < length; i++)
+    {
+        if (blocks[i] == 0)
+        {
+            // this block is empty
+            return 0;
+        }
+
+        sd_read_block(buffer,
+                      fs_info.par_start_address + blocks[i] * (fs_info.block_size / 512),
+                      fs_info.block_size / 512);
+
+        offset = 0;
+        while (offset < 4096)
+        {
+            ext2_dir_entry_fill(&dir, buffer + offset);
+            offset += dir.rec_len;
+
+            // remove
+            INODE inode;
+            inode.id = dir.inode;
+            ext2_find_inode(dir.inode, &(inode.info));
+            ext2_rm_inode(inode);
+        }
+
+        ext2_set_block_free(blocks[i]);
+    }
+
+    return -1;
+}
+
+/**
+ * remove inode in indirect blocks
+ * @param blocks
+ * @param length
+ * @return success or not
+ */
+int ext2_traverse_block_rm_id(__u32 *blocks, int length)
+{
+    __u8 buffer[4096];
+    for (int i = 0; i < length; i++)
+    {
+        if (blocks[i] == 0)
+        {
+            return 0;
+        }
+
+        sd_read_block(buffer,
+                      fs_info.par_start_address + blocks[i] * (fs_info.block_size / 512),
+                      fs_info.block_size / 512);
+        __u32 *entries = (__u32 *)buffer;
+        if (0 == ext2_traverse_block_rm_d(entries, 1024))
+        {
+            return 0;
+        }
+
+        ext2_set_block_free(blocks[i]);
+    }
+
+    return -1;
+}
+
+/**
+ * remove inode in double indirect blocks
+ * @param blocks
+ * @param length
+ * @return success or not
+ */
+int ext2_traverse_block_rm_2id(__u32 *blocks, int length)
+{
+    __u8 buffer[4096];
+    for (int i = 0; i < length; i++)
+    {
+        if (blocks[i] == 0)
+        {
+            return 0;
+        }
+
+        sd_read_block(buffer,
+                      fs_info.par_start_address + blocks[i] * (fs_info.block_size / 512),
+                      fs_info.block_size / 512);
+        __u32 *entries = (__u32 *)buffer;
+        if (0 == ext2_traverse_block_rm_id(entries, 1024))
+        {
+            return 0;
+        }
+
+        ext2_set_block_free(blocks[i]);
+    }
+
+    return -1;
+}
+
+/**
+ * remove inode in triple indirect blocks
+ * @param blocks
+ * @param length
+ * @return success or not
+ */
+int ext2_traverse_block_rm_3id(__u32 *blocks, int length)
+{
+    __u8 buffer[4096];
+    for (int i = 0; i < length; i++)
+    {
+        if (blocks[i] == 0)
+        {
+            return 0;
+        }
+
+        sd_read_block(buffer,
+                      fs_info.par_start_address + blocks[i] * (fs_info.block_size / 512),
+                      fs_info.block_size / 512);
+        __u32 *entries = (__u32 *)buffer;
+        if (0 == ext2_traverse_block_rm_2id(entries, 1024))
+        {
+            return 0;
+        }
+
+        ext2_set_block_free(blocks[i]);
+    }
+
+    return -1;
+}
+
+/**
+ * remove all inode in blocks
+ * @param blocks
+ * @return success or not
+ */
+int ext2_traverse_block_rm(__u32 *blocks)
+{
+    if (-1 == ext2_traverse_block_rm_d(blocks, 12))
+    {
+        if (-1 == ext2_traverse_block_rm_id(blocks + 12, 1))
+        {
+            if (-1 == ext2_traverse_block_rm_2id(blocks + 13, 1))
+            {
+                if (-1 == ext2_traverse_block_rm_3id(blocks + 14, 1))
+                {
+                    return EXT2_SUCCESS;
+                }
+            }
+        }
+    }
+    return EXT2_SUCCESS;
+}
+
+int ext2_traverse_block_cp_d(__u32 *src, __u32 *dest, int len, INODE *parent)
+{
+    // block by block
+    __u8 buffer[4096];
+    int offset;
+    struct ext2_dir_entry dir;
+    INODE inode;
+    for (int i = 0; i < len; i++)
+    {
+        if (src[i] == 0)
+        {
+            // this block is empty
+            return EXT2_SUCCESS;
+        }
+
+        sd_read_block(buffer,
+                      fs_info.par_start_address + src[i] * (fs_info.block_size / 512),
+                      fs_info.block_size / 512);
+
+        offset = 0;
+        while (offset < 4096)
+        {
+            if (EXT2_FAIL == ext2_dir_entry_fill(&dir, buffer + offset))
+            {
+                return EXT2_FAIL;
+            }
+            offset += dir.rec_len;
+
+            if (EXT2_FAIL == ext2_find_inode(dir.inode, &(inode.info)))
+            {
+                return EXT2_FAIL;
+            }
+
+            if (EXT2_FAIL == ext2_cp_i2i(&inode, parent, dir.name))
+            {
+                return EXT2_FAIL;
+            }
+        }
+    }
+
+    return -1;
+}
+
+int ext2_traverse_block_cp_id(__u32 *src, __u32 *dest, int len, INODE *parent)
+{
+    __u8 buffer[4096];
+    __u32 result[1024];
+    kernel_memset(result, 0, 4096);
+    for (int i = 0; i < len; i++)
+    {
+        if (src[i] == 0)
+        {
+            return EXT2_SUCCESS;
+        }
+
+        sd_read_block(buffer, fs_info.par_start_address + src[i] * 8, 8);
+        if (dest[i] == 0)
+        {
+            dest[i] = ext2_new_block_without_inode((parent->id - 1) / fs_info.sb.s_inodes_per_group);
+        }
+
+        __u32 *ptr = (__u32 *)buffer;
+        if (EXT2_FAIL == ext2_traverse_block_cp_d(ptr, result, 1024, parent))
+        {
+            return EXT2_FAIL;
+        }
+
+        sd_write_block((__u8 *)result, fs_info.par_start_address + dest[i] * 8, 8);
+    }
+}
+
+int ext2_traverse_block_cp_2id(__u32 *src, __u32 *dest, int len, INODE *parent)
+{
+    __u8 buffer[4096];
+    __u32 result[1024];
+    kernel_memset(result, 0, 4096);
+    for (int i = 0; i < len; i++)
+    {
+        if (src[i] == 0)
+        {
+            return EXT2_SUCCESS;
+        }
+
+        sd_read_block(buffer, fs_info.par_start_address + src[i] * 8, 8);
+        if (dest[i] == 0)
+        {
+            dest[i] = ext2_new_block_without_inode((parent->id - 1) / fs_info.sb.s_inodes_per_group);
+        }
+
+        __u32 *ptr = (__u32 *)buffer;
+        if (EXT2_FAIL == ext2_traverse_block_cp_id(ptr, result, 1024, parent))
+        {
+            return EXT2_FAIL;
+        }
+
+        sd_write_block((__u8 *)result, fs_info.par_start_address + dest[i] * 8, 8);
+    }
+}
+
+int ext2_traverse_block_cp_3id(__u32 *src, __u32 *dest, int len, INODE *parent)
+{
+    __u8 buffer[4096];
+    __u32 result[1024];
+    kernel_memset(result, 0, 4096);
+    for (int i = 0; i < len; i++)
+    {
+        if (src[i] == 0)
+        {
+            return EXT2_SUCCESS;
+        }
+
+        sd_read_block(buffer, fs_info.par_start_address + src[i] * 8, 8);
+        if (dest[i] == 0)
+        {
+            dest[i] = ext2_new_block_without_inode((parent->id - 1) / fs_info.sb.s_inodes_per_group);
+        }
+
+        __u32 *ptr = (__u32 *)buffer;
+        if (EXT2_FAIL == ext2_traverse_block_cp_2id(ptr, result, 1024, parent))
+        {
+            return EXT2_FAIL;
+        }
+
+        sd_write_block((__u8 *)result, fs_info.par_start_address + dest[i] * 8, 8);
+    }
+}
+
+int ext2_traverse_block_cp_b_d(__u32 *src, __u32 *dest, int len, INODE *parent)
+{
+    // block by block
+    __u8 buffer[4096];
+    int offset;
+    for (int i = 0; i < len; i++)
+    {
+        if (src[i] == 0)
+        {
+            // this block is empty
+            return EXT2_SUCCESS;
+        }
+
+        sd_read_block(buffer,
+                      fs_info.par_start_address + src[i] * (fs_info.block_size / 512),
+                      fs_info.block_size / 512);
+
+        if (dest[i] == 0)
+        {
+            dest[i] = ext2_new_block_without_inode((parent->id - 1) / fs_info.sb.s_inodes_per_group);
+        }
+        if (dest[i] == 0)
+        {
+            return EXT2_FAIL;
+        }
+
+        sd_write_block(buffer, fs_info.par_start_address + dest[i] * 8, 8);
+    }
+
+    return -1;
+}
+
+int ext2_traverse_block_cp_b_id(__u32 *src, __u32 *dest, int len, INODE *parent)
+{
+    __u8 buffer[4096];
+    __u32 result[1024];
+    kernel_memset(result, 0, 4096);
+    for (int i = 0; i < len; i++)
+    {
+        if (src[i] == 0)
+        {
+            return EXT2_SUCCESS;
+        }
+
+        sd_read_block(buffer, fs_info.par_start_address + src[i] * 8, 8);
+        if (dest[i] == 0)
+        {
+            dest[i] = ext2_new_block_without_inode((parent->id - 1) / fs_info.sb.s_inodes_per_group);
+        }
+
+        __u32 *ptr = (__u32 *)buffer;
+        if (EXT2_FAIL == ext2_traverse_block_cp_b_d(ptr, result, 1024, parent))
+        {
+            return EXT2_FAIL;
+        }
+
+        sd_write_block((__u8 *)result, fs_info.par_start_address + dest[i] * 8, 8);
+    }
+}
+
+int ext2_traverse_block_cp_b_2id(__u32 *src, __u32 *dest, int len, INODE *parent)
+{
+    __u8 buffer[4096];
+    __u32 result[1024];
+    kernel_memset(result, 0, 4096);
+    for (int i = 0; i < len; i++)
+    {
+        if (src[i] == 0)
+        {
+            return EXT2_SUCCESS;
+        }
+
+        sd_read_block(buffer, fs_info.par_start_address + src[i] * 8, 8);
+        if (dest[i] == 0)
+        {
+            dest[i] = ext2_new_block_without_inode((parent->id - 1) / fs_info.sb.s_inodes_per_group);
+        }
+
+        __u32 *ptr = (__u32 *)buffer;
+        if (EXT2_FAIL == ext2_traverse_block_cp_b_id(ptr, result, 1024, parent))
+        {
+            return EXT2_FAIL;
+        }
+
+        sd_write_block((__u8 *)result, fs_info.par_start_address + dest[i] * 8, 8);
+    }
+}
+
+int ext2_traverse_block_cp_b_3id(__u32 *src, __u32 *dest, int len, INODE *parent)
+{
+    __u8 buffer[4096];
+    __u32 result[1024];
+    kernel_memset(result, 0, 4096);
+    for (int i = 0; i < len; i++)
+    {
+        if (src[i] == 0)
+        {
+            return EXT2_SUCCESS;
+        }
+
+        sd_read_block(buffer, fs_info.par_start_address + src[i] * 8, 8);
+        if (dest[i] == 0)
+        {
+            dest[i] = ext2_new_block_without_inode((parent->id - 1) / fs_info.sb.s_inodes_per_group);
+        }
+
+        __u32 *ptr = (__u32 *)buffer;
+        if (EXT2_FAIL == ext2_traverse_block_cp_b_2id(ptr, result, 1024, parent))
+        {
+            return EXT2_FAIL;
+        }
+
+        sd_write_block((__u8 *)result, fs_info.par_start_address + dest[i] * 8, 8);
+    }
+}
+
+int ext2_cp_i2i(INODE *src, INODE *dest, __u8 *name)
+{
+    INODE child;
+    if ((src->info.i_mode & EXT2_S_IFDIR))
+    {
+        if (EXT2_FALSE == ext2_is_removable(name))
+        {
+            // there is no need to copy
+            return EXT2_SUCCESS;
+        }
+
+        // it is directory
+        if (EXT2_FAIL == ext2_mkdir_plus(name, dest, &child))
+        {
+            log(LOG_FAIL, "Cannot make directory %s", name);
+            return EXT2_FAIL;
+        }
+
+        // recursively copy
+        int result = ext2_traverse_block_cp_d(src->info.i_block, child.info.i_block, 12, &child);
+        if (-1 == result)
+        {
+            result = ext2_traverse_block_cp_id(src->info.i_block + 12, child.info.i_block + 12, 1, &child);
+            if (-1 == result)
+            {
+                result = ext2_traverse_block_cp_2id(src->info.i_block + 13, child.info.i_block + 13, 1, &child);
+                if (-1 == result)
+                {
+                    result = ext2_traverse_block_cp_3id(src->info.i_block + 14, child.info.i_block + 14, 1, &child);
+                    if (-1 == result)
+                    {
+                        return EXT2_FAIL;
+                    }
+                    else
+                    {
+                        return result;
+                    }
+                }
+                else
+                {
+                    return result;
+                }
+            }
+            else
+            {
+                return result;
+            }
+        }
+        else
+        {
+            return result;
+        }
+    }
+    else
+    {
+        if (EXT2_FALSE == ext2_is_valid_filename(name))
+        {
+            // there is no need to copy
+            return EXT2_FAIL;
+        }
+
+        // it is directory
+        if (EXT2_FAIL == ext2_create_plus(name, dest, &child))
+        {
+            log(LOG_FAIL, "Cannot create file %s", name);
+            return EXT2_FAIL;
+        }
+
+        // recursively copy
+        int result = ext2_traverse_block_cp_b_d(src->info.i_block, child.info.i_block, 12, &child);
+        if (-1 == result)
+        {
+            result = ext2_traverse_block_cp_b_id(src->info.i_block + 12, child.info.i_block + 12, 1, &child);
+            if (-1 == result)
+            {
+                result = ext2_traverse_block_cp_b_2id(src->info.i_block + 13, child.info.i_block + 13, 1, &child);
+                if (-1 == result)
+                {
+                    result = ext2_traverse_block_cp_b_3id(src->info.i_block + 14, child.info.i_block + 14, 1, &child);
+                    if (-1 == result)
+                    {
+                        return EXT2_FAIL;
+                    }
+                    else
+                    {
+                        return result;
+                    }
+                }
+                else
+                {
+                    return result;
+                }
+            }
+            else
+            {
+                return result;
+            }
+        }
+        else
+        {
+            return result;
+        }
+    }
+
+    if (EXT2_FAIL == ext2_store_inode(&child))
+    {
+        return EXT2_FAIL;
+    }
+}

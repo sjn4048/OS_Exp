@@ -425,3 +425,54 @@ int ext2_write(EXT2_FILE *file, __u8 *buffer, __u64 length, __u64 *bytes_of_writ
     }
     return EXT2_SUCCESS;
 }
+
+/**
+ * remove file or directory by inode RECURSIVELY
+ * @param inode
+ * @return success or not
+ */
+int ext2_rm_inode(INODE inode)
+{
+    if ((inode.info.i_mode & EXT2_S_IFDIR) != 0)
+    {
+        // not a directory
+        ext2_release_blocks(inode.info.i_block);
+        ext2_set_inode_free(inode.id);
+    }
+    else
+    {
+        // it is a directory
+        ext2_traverse_block_rm(inode.info.i_block);
+        ext2_set_inode_free(inode.id);
+    }
+    return EXT2_SUCCESS;
+}
+
+/**
+ * determine whether a file can be removed
+ * @para name
+ * @return true or false
+ */
+int ext2_is_removable(__u8 *name)
+{
+    char self[2] = {'.', '\0'};
+    char parent[3] = {'.', '.', '\0'};
+    char lf[11] = {'l', 'o', 's', 't', '+', 'f', 'o', 'u', 'n', 'd', '\0'};
+
+    if (ext2_is_equal(name, self))
+    {
+        return EXT2_FALSE;
+    }
+
+    if (ext2_is_equal(name, parent))
+    {
+        return EXT2_FALSE;
+    }
+
+    if (ext2_is_equal(name, lf))
+    {
+        return EXT2_FALSE;
+    }
+
+    return EXT2_TRUE;
+}
