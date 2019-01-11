@@ -151,7 +151,7 @@ int ext2_cd(__u8 *path)
  */
 int ext2_mkdir(__u8 *name)
 {
-    return ext2_mkdir_plus(name, &(current_dir.inode), EXT2_NULL);
+    return ext2_mkdir_plus(name, &(current_dir.inode), EXT2_NULL, EXT2_TRUE);
 }
 
 /**
@@ -159,12 +159,15 @@ int ext2_mkdir(__u8 *name)
  * @param name: file name
  * @return success or not
  */
-int ext2_mkdir_plus(__u8 *name, INODE *parent, INODE *result)
+int ext2_mkdir_plus(__u8 *name, INODE *parent, INODE *result, int check_file_name)
 {
-    if (!ext2_is_valid_filename(name))
+    if (EXT2_TRUE == check_file_name)
     {
-        log(LOG_FAIL, "Invalid file name: %s", name);
-        return EXT2_FAIL;
+        if (!ext2_is_valid_filename(name))
+        {
+            log(LOG_FAIL, "Invalid file name: %s", name);
+            return EXT2_FAIL;
+        }
     }
 
     // Orlov
@@ -282,7 +285,7 @@ int ext2_mkdir_plus(__u8 *name, INODE *parent, INODE *result)
 
 int ext2_create(__u8 *param)
 {
-    return ext2_create_plus(param, &(current_dir.inode), EXT2_NULL);
+    return ext2_create_plus(param, &(current_dir.inode), EXT2_NULL, EXT2_TRUE);
 }
 
 /**
@@ -291,7 +294,7 @@ int ext2_create(__u8 *param)
  * @param param: filename and content, split by ' '
  * @return success or not
  */
-int ext2_create_plus(__u8 *param, INODE *parent, INODE *result)
+int ext2_create_plus(__u8 *param, INODE *parent, INODE *result, int check_file_name)
 {
     char filename[64];
     char content[64]; // 64 because of ps.c
@@ -323,10 +326,19 @@ int ext2_create_plus(__u8 *param, INODE *parent, INODE *result)
     }
 
     INODE inode;
-    if (EXT2_SUCCESS == ext2_traverse_block(filename, current_dir.inode.info.i_block, &inode))
+    if (EXT2_TRUE == check_file_name)
     {
-        log(LOG_FAIL, "%s exists.", filename);
-        return EXT2_FAIL;
+        if (!ext2_is_valid_filename(filename))
+        {
+            log(LOG_FAIL, "Invalid file name: %s", filename);
+            return EXT2_FAIL;
+        }
+
+        if (EXT2_SUCCESS == ext2_traverse_block(filename, current_dir.inode.info.i_block, &inode))
+        {
+            log(LOG_FAIL, "%s exists.", filename);
+            return EXT2_FAIL;
+        }
     }
 
     // new inode
@@ -594,7 +606,8 @@ int ext2_cp(__u8 *param)
         return EXT2_FAIL;
     }
 
-    kernel_memcpy(src + ext2_strlen(src), target, ext2_strlen(target) + 1);
+    src[ext2_strlen(src)] = '\0';
+    kernel_memcpy(src + ext2_strlen(src) + 1, target, ext2_strlen(target) + 1);
     log(LOG_STEP, "src: %s", src);
     log(LOG_STEP, "dest: %s", dest);
     log(LOG_STEP, "target: %s", target);

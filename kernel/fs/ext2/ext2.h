@@ -63,8 +63,8 @@ int ext2_rm_inode(INODE inode);
 int ext2_is_removable(__u8 *name);
 
 /* ext2.c */
-int ext2_mkdir_plus(__u8 *name, INODE *parent, INODE *result);
-int ext2_create_plus(__u8 *param, INODE *parent, INODE *result);
+int ext2_mkdir_plus(__u8 *name, INODE *parent, INODE *result, int check_file_name);
+int ext2_create_plus(__u8 *param, INODE *parent, INODE *result, int check_file_name);
 
 /* debug.c */
 void ext2_output_buffer(void *data, int length);

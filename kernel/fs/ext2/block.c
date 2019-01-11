@@ -468,6 +468,11 @@ int ext2_new_block(INODE *inode, int count)
         }
     }
 
+    for (int i = 0; i < count; i++)
+    {
+        ext2_set_block_used(pointers[i]);
+    }
+
     // assign them to inode
     if (EXT2_FAIL == ext2_attach_block_to_inode(pointers, count, inode))
     {
