@@ -11,7 +11,18 @@
  */
 kmem_cache_t slab_kmem_caches[PAGE_SHIFT];
 
-static size_t slab_kmem_cache_sizes[PAGE_SHIFT] = {8, 16, 32, 64, 128, 256, 512, 1024};
+static size_t slab_kmem_cache_sizes[PAGE_SHIFT] = {48, 96, 192, 1536, 8, 16, 32, 64, 128, 256, 512, 1024};
+
+void print_each_cache()
+{
+    for (int i = 0; i < PAGE_SHIFT; i++)
+    {
+        kernel_printf("cache %d:", i);
+        kernel_printf("%d %d %d\n",
+                      slab_kmem_caches[i].size, slab_kmem_caches[i].offset, slab_kmem_caches[i].objsize);
+        kernel_getchar();
+    }
+}
 
 // initialize struct kmem_cache_cpu
 void init_kmem_cpu(kmem_cache_cpu_t *kcpu)
@@ -348,6 +359,8 @@ void *slab_kmalloc(size_t size)
         return 0;
     }
 
+    void *ret;
+
     // if the size larger than the max size of slab system, then call buddy to
     // solve this
     if (size > slab_kmem_caches[PAGE_SHIFT - 1].objsize)
@@ -357,7 +370,11 @@ void *slab_kmalloc(size_t size)
         //kernel_getchar();
 #endif // ! SLAB_DEBUG
         size = UPPER_ALLIGN(size, PAGE_SIZE);
-        return (void *)(KERNEL_ENTRY | (unsigned int)alloc_pages(size >> PAGE_SHIFT));
+        ret = (void *)(KERNEL_ENTRY | (unsigned int)alloc_pages(size >> PAGE_SHIFT));
+#ifdef SLAB_DEBUG
+        print_each_cache();
+#endif
+        return ret;
     }
 
     size_t slab_idx = find_slab(size);
@@ -371,6 +388,9 @@ void *slab_kmalloc(size_t size)
     kernel_printf("\tslab: returns: %x\n", (void *)(KERNEL_ENTRY | (unsigned int)slab_alloc(&slab_kmem_caches[slab_idx])));
     //kernel_getchar();
 #endif // ! SLAB_DEBUG
+#ifdef SLAB_DEBUG
+    print_each_cache();
+#endif
     return (void *)(KERNEL_ENTRY | (unsigned int)slab_alloc(&slab_kmem_caches[slab_idx]));
 }
 
@@ -388,8 +408,16 @@ void slab_kfree(void *obj)
         kernel_printf("\tFlag: %x, call buddy to solve this.\n", page->flag);
         // //kernel_getchar();
 #endif // ! SLAB_DEBUG
-        return free_pages((void *)((unsigned int)obj & PAGE_MASK), page->bplevel);
+        free_pages((void *)((unsigned int)obj & PAGE_MASK), page->bplevel);
+#ifdef SLAB_DEBUG
+        print_each_cache();
+#endif
+        return;
     }
 
-    return free_slab(page->virtual, obj);
+    free_slab(page->virtual, obj);
+#ifdef SLAB_DEBUG
+    print_each_cache();
+#endif
+    return;
 }

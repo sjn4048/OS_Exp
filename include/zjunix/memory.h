@@ -141,6 +141,7 @@ void test_malloc_accuracy();
 void mem_test();
 void test_malloc_speed();
 void test_reg_base();
-char *mem_choose();
+char* mem_choose();
+char* get_allocator_name();
 
 #endif

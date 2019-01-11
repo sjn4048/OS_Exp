@@ -18,7 +18,8 @@
 #include <zjunix/time.h>
 #include "../usr/ps.h"
 
-void machine_info() {
+void machine_info()
+{
     int row;
     int col;
     kernel_printf("\n%s\n", "LittleZombie V1.0");
@@ -33,17 +34,19 @@ void machine_info() {
 
 #pragma GCC push_options
 #pragma GCC optimize("O0")
-void create_startup_process() {
+void create_startup_process()
+{
     // nice value of 1, just for test
-    pc_create("powershell",(void*)ps,0,0,1,1,0);
+    pc_create("powershell", (void *)ps, 0, 0, 1, 1, 0);
     log(LOG_OK, "Shell init");
     // nice value of 2, just for test
-    pc_create("time",(void*)system_time_proc,0,0,2,1,0);
+    pc_create("time", (void *)system_time_proc, 0, 0, 2, 1, 0);
     log(LOG_OK, "Timer init");
 }
 #pragma GCC pop_options
 
-void init_kernel() {
+void init_kernel()
+{
     kernel_clear_screen(31);
     // Exception
     init_exception();
@@ -66,17 +69,19 @@ void init_kernel() {
     log(LOG_OK, "Slab.");
     init_slob();
     log(LOG_OK, "Slob.");
+    //test_malloc_accuracy();
+    //test_malloc_speed();
     // File system
     log(LOG_START, "File System.");
     init_fs();
     ext2_init();
     log(LOG_END, "File System.");
-    char* res = mem_choose();
+    char *res = mem_choose();
     log(LOG_OK, "Allocator: %s", res);
-    //test_malloc_accuracy();
-    log(LOG_OK, "Memory test.");
     log(LOG_END, "Memory Modules.");
-
+    // test_malloc_accuracy();
+    // test_malloc_speed();
+    // log(LOG_OK, "Memory test.");
     // System call
     log(LOG_START, "System Calls.");
     init_syscall();

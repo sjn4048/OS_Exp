@@ -8,8 +8,13 @@
 #include <zjunix/bootmm.h>
 #include <zjunix/fs/ext2.h>
 
+char* get_allocator_name()
+{
+    return all_to_str[allocator];
+}
+
 /* Choose memory allocator
- *
+ * from sd card.
  * 
  * 
  */
@@ -75,8 +80,6 @@ char *mem_choose()
 // Top-most and only memory allocation entry
 void *kmalloc(size_t size)
 {
-    allocator = SLOB;
-
     void *res;
 #ifdef MEMORY_DEBUG
     kernel_printf("Kmalloc: Size:%d, Allocator: %s\t", size, all_to_str[allocator]);
@@ -142,30 +145,30 @@ void kfree(void *obj)
 #pragma GCC push_options
 #pragma GCC optimize("O0")
 
-#define ACCURACY_RETRY_SIZE 300
+#define ACCURACY_RETRY_SIZE 10
 #define ACCURACY_EXPAND_RATE 1
 
 void test_malloc_accuracy()
 {
     // test cases where big nodes are allocated.
-    void *b;
-    b = kmalloc(10);
-    kfree(b);
-    b = kmalloc(100);
-    kfree(b);
-    b = kmalloc(256);
-    kfree(b);
-    b = kmalloc(512);
-    kfree(b);
-    b = kmalloc(1024);
-    kfree(b);
-    b = kmalloc(2048);
-    kfree(b);
-    b = kmalloc(4096);
-    kfree(b);
-    b = kmalloc(10000);
-    kfree(b);
-
+    // void *b;
+    // b = kmalloc(10);
+    // kfree(b);
+    // b = kmalloc(100);
+    // kfree(b);
+    // b = kmalloc(256);
+    // kfree(b);
+    // b = kmalloc(512);
+    // kfree(b);
+    // b = kmalloc(1024);
+    // kfree(b);
+    // b = kmalloc(2048);
+    // kfree(b);
+    // b = kmalloc(4096);
+    // kfree(b);
+    // b = kmalloc(10000);
+    // kfree(b);
+ 
     int *a[ACCURACY_RETRY_SIZE];
 
 #ifdef MEMORY_TEST_DEBUG
@@ -176,14 +179,14 @@ void test_malloc_accuracy()
     for (size_t i = 1; i < ACCURACY_RETRY_SIZE; i++)
     {
         a[i] = (int *)kmalloc(sizeof(int) * i * ACCURACY_EXPAND_RATE);
-#ifdef MEMORY_TEST_DEBUG
+//#ifdef MEMORY_TEST_DEBUG
         kernel_printf("a[%d]: size: %d, 1st: %x ", i, sizeof(int) * i * ACCURACY_EXPAND_RATE, (unsigned int)a[i]);
-#endif // DEBUG
+//#endif // DEBUG
         kfree(a[i]);
         a[i] = (int *)kmalloc(sizeof(int) * i * ACCURACY_EXPAND_RATE);
-#ifdef MEMORY_TEST_DEBUG
+//#ifdef MEMORY_TEST_DEBUG
         kernel_printf("2nd: %x\n", (unsigned int)a[i]);
-#endif // DEBUG
+//#endif // DEBUG
         *a[i] = i;
 #ifdef MEMORY_TEST_DEBUG
         if (i >= 1)
@@ -204,7 +207,8 @@ void test_malloc_accuracy()
     {
         if (*a[i] != i)
         {
-            log(LOG_FAIL, "Fail to validate memory allocation: error at %d", i);
+            // log(LOG_FAIL, "Fail to validate memory allocation: error at %d, now %d. Addr: %x", i, *a[i], a[i]);
+            // kernel_getchar();
         }
         // free it after test.
         kfree(a[i]);
@@ -219,9 +223,9 @@ void test_malloc_accuracy()
 #pragma GCC push_options
 #pragma GCC optimize("O0")
 
-#define SPEED_ALLOC_CNT 1000
-#define SPEED_RETRY_TIMES 5000
-#define SPEED_SIZE 20
+#define SPEED_ALLOC_CNT 100
+#define SPEED_RETRY_TIMES 10000
+#define SPEED_SIZE 4
 void test_malloc_speed()
 {
     void *b[SPEED_ALLOC_CNT];
@@ -274,6 +278,9 @@ void test_reg_base()
 #pragma GCC pop_options
 
 #include <driver/ps2.h>
+
+#pragma GCC push_options
+#pragma GCC optimize("O0")
 // entry for memory test programs.
 void mem_test()
 {
@@ -292,7 +299,7 @@ void mem_test()
     else if (input == '2')
     {
         test_malloc_speed();
-        log(LOG_OK, "Accuracy test done.");
+        log(LOG_OK, "Speed test done.");
     }
     else if (input == '3')
     {
@@ -307,3 +314,5 @@ void mem_test()
         log(LOG_OK, "Print mem_info done.");
     }
 }
+
+#pragma GCC pop_options

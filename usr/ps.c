@@ -193,8 +193,12 @@ void parse_cmd()
         }
         sd_write_block(sd_buffer, 7, 1);
         kernel_puts("sdwz\n", 0xfff, 0);
-    } else if (kernel_strcmp(ps_buffer, "mmtest") == 0) {
+    } 
+    else if (kernel_strcmp(ps_buffer, "mmtest") == 0) {
         mem_test();
+    }
+    else if (kernel_strcmp(ps_buffer, "alloc") == 0) {
+        kernel_printf("Allocator: %s\n", get_allocator_name());
     }
     else if (kernel_strcmp(ps_buffer, "mmtest") == 0)
     {

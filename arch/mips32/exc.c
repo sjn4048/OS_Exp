@@ -214,21 +214,20 @@ error_null_or_not_exist:
 
 void do_exceptions(unsigned int status, unsigned int cause, context *pt_context, unsigned int bad_addr)
 {
-    kernel_printf_color(VGA_RED, "[Exception Interrupt]\n");
     int index = cause >> 2;
     index &= 0x1f;
 
-//     if (index == 2 || index == 3)
-//     {
-//         // if encountered TLB miss
-// #ifdef TLB_DEBUG
-//         kernel_printf("Start TLB_Refill. Index: %d, bad_addr: %x, status: %d, cause:%d, epc=%x\n", index, bad_addr, status, cause);
-// #endif
-//         tlb_refill(bad_addr);
-// #ifdef TLB_DEBUG
-//         kernel_printf("TLB_Refill done.\n");
-// #endif
-//     }
+    //     if (index == 2 || index == 3)
+    //     {
+    //         // if encountered TLB miss
+    // #ifdef TLB_DEBUG
+    //         kernel_printf("Start TLB_Refill. Index: %d, bad_addr: %x, status: %d, cause:%d, epc=%x\n", index, bad_addr, status, cause);
+    // #endif
+    //         tlb_refill(bad_addr);
+    // #ifdef TLB_DEBUG
+    //         kernel_printf("TLB_Refill done.\n");
+    // #endif
+    //     }
 
     if (exceptions[index])
     {
@@ -236,6 +235,7 @@ void do_exceptions(unsigned int status, unsigned int cause, context *pt_context,
     }
     else
     {
+        kernel_printf_color(VGA_RED, "[Exception Interrupt]\n");
         task_struct *pcb;
         unsigned int badVaddr;
         asm volatile("mfc0 %0, $8\n\t"
@@ -243,11 +243,12 @@ void do_exceptions(unsigned int status, unsigned int cause, context *pt_context,
         pcb = current_task;
         // if (current_task)
         // {
-            if (in_stress_testing == 0){
-                kernel_printf("\nProcess %s exited due to exception cause=%x;\n", pcb->name, cause);
-                kernel_printf("status=%x, EPC=%x, BadVaddr=%x\n", status, pcb->context.epc, badVaddr);
-            }
-            pc_kill_syscall(status, cause, pt_context);
+        if (in_stress_testing == 0)
+        {
+            kernel_printf("\nProcess %s exited due to exception cause=%x;\n", pcb->name, cause);
+            kernel_printf("status=%x, EPC=%x, BadVaddr=%x\n", status, pcb->context.epc, badVaddr);
+        }
+        pc_kill_syscall(status, cause, pt_context);
         // }
     }
 }
