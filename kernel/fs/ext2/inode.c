@@ -597,6 +597,7 @@ int ext2_append_to_end_triple_indirect(__u32 *block, int len, struct ext2_dir_en
  */
 int ext2_append_to_end(INODE *inode, struct ext2_dir_entry *dir)
 {
+    inode->info.i_size += dir->rec_len;
     int result = ext2_append_to_end_direct(inode->info.i_block, 12, dir, inode);
     if ((result & EXT2_NOT_FOUND) == EXT2_NOT_FOUND)
     {
@@ -1108,7 +1109,7 @@ int ext2_cp_i2i(INODE *src, INODE *dest, __u8 *name)
         }
 
         // it is directory
-        if (EXT2_FAIL == ext2_mkdir_plus(name, dest, &child))
+        if (EXT2_FAIL == ext2_mkdir_plus(name, dest, &child, EXT2_FALSE))
         {
             log(LOG_FAIL, "Cannot make directory %s", name);
             return EXT2_FAIL;
@@ -1158,7 +1159,7 @@ int ext2_cp_i2i(INODE *src, INODE *dest, __u8 *name)
         }
 
         // it is directory
-        if (EXT2_FAIL == ext2_create_plus(name, dest, &child))
+        if (EXT2_FAIL == ext2_create_plus(name, dest, &child, EXT2_FALSE))
         {
             log(LOG_FAIL, "Cannot create file %s", name);
             return EXT2_FAIL;
