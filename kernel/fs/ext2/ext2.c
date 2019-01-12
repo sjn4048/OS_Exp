@@ -606,12 +606,7 @@ int ext2_cp(__u8 *param)
         return EXT2_FAIL;
     }
 
-    src[ext2_strlen(src)] = '\0';
-    kernel_memcpy(src + ext2_strlen(src) + 1, target, ext2_strlen(target) + 1);
-    log(LOG_STEP, "src: %s", src);
-    log(LOG_STEP, "dest: %s", dest);
-    log(LOG_STEP, "target: %s", target);
-    log(LOG_STEP, "target_rename: %s", target_rename);
+    src[ext2_strlen(src)] = '/';
     INODE inode;
 
     __u8 dest_target[64];
@@ -621,7 +616,6 @@ int ext2_cp(__u8 *param)
     int length2 = ext2_strlen(target_rename);
     kernel_memcpy(dest_target + length + 1, target_rename, length2);
     dest_target[length + length2 + 1] = '\0';
-    log(LOG_STEP, "%s", dest_target);
     if (EXT2_SUCCESS == ext2_find_file_absolute(dest_target, &inode))
     {
         log(LOG_FAIL, "%s exists.", dest_target);

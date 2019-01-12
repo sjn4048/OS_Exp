@@ -1100,6 +1100,7 @@ int ext2_traverse_block_cp_b_3id(__u32 *src, __u32 *dest, int len, INODE *parent
 int ext2_cp_i2i(INODE *src, INODE *dest, __u8 *name)
 {
     INODE child;
+    int result;
     if ((src->info.i_mode & EXT2_S_IFDIR))
     {
         if (EXT2_FALSE == ext2_is_removable(name))
@@ -1116,7 +1117,7 @@ int ext2_cp_i2i(INODE *src, INODE *dest, __u8 *name)
         }
 
         // recursively copy
-        int result = ext2_traverse_block_cp_d(src->info.i_block, child.info.i_block, 12, &child);
+        result = ext2_traverse_block_cp_d(src->info.i_block, child.info.i_block, 12, &child);
         if (-1 == result)
         {
             result = ext2_traverse_block_cp_id(src->info.i_block + 12, child.info.i_block + 12, 1, &child);
@@ -1132,22 +1133,22 @@ int ext2_cp_i2i(INODE *src, INODE *dest, __u8 *name)
                     }
                     else
                     {
-                        return result;
+                        goto ret;
                     }
                 }
                 else
                 {
-                    return result;
+                    goto ret;
                 }
             }
             else
             {
-                return result;
+                goto ret;
             }
         }
         else
         {
-            return result;
+            goto ret;
         }
     }
     else
@@ -1166,7 +1167,7 @@ int ext2_cp_i2i(INODE *src, INODE *dest, __u8 *name)
         }
 
         // recursively copy
-        int result = ext2_traverse_block_cp_b_d(src->info.i_block, child.info.i_block, 12, &child);
+        result = ext2_traverse_block_cp_b_d(src->info.i_block, child.info.i_block, 12, &child);
         if (-1 == result)
         {
             result = ext2_traverse_block_cp_b_id(src->info.i_block + 12, child.info.i_block + 12, 1, &child);
@@ -1178,27 +1179,33 @@ int ext2_cp_i2i(INODE *src, INODE *dest, __u8 *name)
                     result = ext2_traverse_block_cp_b_3id(src->info.i_block + 14, child.info.i_block + 14, 1, &child);
                     if (-1 == result)
                     {
-                        return EXT2_FAIL;
+                        goto ret;
                     }
                     else
                     {
-                        return result;
+                        goto ret;
                     }
                 }
                 else
                 {
-                    return result;
+                    goto ret;
                 }
             }
             else
             {
-                return result;
+                goto ret;
             }
         }
         else
         {
-            return result;
+            goto ret;
         }
+    }
+
+ret:
+    if (result == EXT2_FAIL)
+    {
+        return EXT2_FAIL;
     }
 
     if (EXT2_FAIL == ext2_store_inode(&child))
