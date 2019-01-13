@@ -96,7 +96,7 @@ static void copy_context(context* src, context* dest) {
 void init_pc() {
     //kernel_printf("malloc ENTRY\n: ");
     ENTRY = (unsigned int)kmalloc(4096 * 2);
-    //kernel_printf("ENTRY  %x\n",ENTRY);
+    log(LOG_OK, "Memory entry: %x",ENTRY);
     int *i = holder1; i = holder2; i = holder3; i = holder4; i = holder5;
     i = holder6; i = holder7; i = holder8; i = holder8; i = holder10;
     i = holder11; i = holder12; i = holder13; i = holder14; i = holder15;
@@ -811,7 +811,7 @@ char * itoa(int num, char * word){
  * this function 
  */
 void stress_test(unsigned int prog_num){
-    kernel_printf("!!!!!!!!!!!!!!!!!%d\n",in_stress_testing);
+    // kernel_printf("!!!!!!!!!!!!!!!!!%d\n",in_stress_testing);
     in_stress_testing += prog_num;
     int i = 0;
     char words[11];

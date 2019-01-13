@@ -145,29 +145,29 @@ void kfree(void *obj)
 #pragma GCC push_options
 #pragma GCC optimize("O0")
 
-#define ACCURACY_RETRY_SIZE 10
+#define ACCURACY_RETRY_SIZE 100
 #define ACCURACY_EXPAND_RATE 1
 
 void test_malloc_accuracy()
 {
     // test cases where big nodes are allocated.
-    // void *b;
-    // b = kmalloc(10);
-    // kfree(b);
-    // b = kmalloc(100);
-    // kfree(b);
-    // b = kmalloc(256);
-    // kfree(b);
-    // b = kmalloc(512);
-    // kfree(b);
-    // b = kmalloc(1024);
-    // kfree(b);
-    // b = kmalloc(2048);
-    // kfree(b);
-    // b = kmalloc(4096);
-    // kfree(b);
-    // b = kmalloc(10000);
-    // kfree(b);
+    void *b;
+    b = kmalloc(10);
+    kfree(b);
+    b = kmalloc(100);
+    kfree(b);
+    b = kmalloc(256);
+    kfree(b);
+    b = kmalloc(512);
+    kfree(b);
+    b = kmalloc(1024);
+    kfree(b);
+    b = kmalloc(2048);
+    kfree(b);
+    b = kmalloc(4096);
+    kfree(b);
+    b = kmalloc(10000);
+    kfree(b);
  
     int *a[ACCURACY_RETRY_SIZE];
 
@@ -207,7 +207,7 @@ void test_malloc_accuracy()
     {
         if (*a[i] != i)
         {
-            // log(LOG_FAIL, "Fail to validate memory allocation: error at %d, now %d. Addr: %x", i, *a[i], a[i]);
+            log(LOG_FAIL, "Fail to validate memory allocation: error at %d, now %d. Addr: %x", i, *a[i], a[i]);
             // kernel_getchar();
         }
         // free it after test.

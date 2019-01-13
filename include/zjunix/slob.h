@@ -10,4 +10,4 @@ extern void init_slob();
 
 unsigned int slob_ksize(const void *m);
 
-#define SLOB_SINGLE
+//#define SLOB_SINGLE

@@ -19,8 +19,8 @@ enum mm_usage
 // record every part of mm's information
 typedef struct bootmm_info
 {
-    unsigned int start;
-    unsigned int end;
+    off_t start;
+    off_t end;
     unsigned int type;
 } bootmm_info_t;
 // typedef bootmm_info_t  * p_mminfo;

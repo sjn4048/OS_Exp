@@ -18,8 +18,8 @@
  */
 typedef struct slab_head {
     void *end_ptr;
-    unsigned int nr_objs;
-    boolean_t was_full;
+    size_t nr_objs;
+    boolean_t was_full; // 这一机制参考了陈元学长组的实现
 } slab_t;
 
 /*
@@ -40,14 +40,12 @@ typedef struct kmem_cache_cpu {
     page_t *page;
 } kmem_cache_cpu_t;
 
-// TODO: 补全函数声明
-
 typedef struct kmem_cache_struct{
-    unsigned int size;
-    unsigned int objsize;
-    unsigned int offset;
-    struct kmem_cache_node node;
-    struct kmem_cache_cpu cpu;
+    size_t size;
+    size_t objsize;
+    off_t offset;
+    kmem_cache_node_t node;
+    kmem_cache_cpu_t cpu;
     char* name;
 } kmem_cache_t;
 

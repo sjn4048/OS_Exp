@@ -235,7 +235,6 @@ void do_exceptions(unsigned int status, unsigned int cause, context *pt_context,
     }
     else
     {
-        kernel_printf_color(VGA_RED, "[Exception Interrupt]\n");
         task_struct *pcb;
         unsigned int badVaddr;
         asm volatile("mfc0 %0, $8\n\t"
@@ -245,6 +244,7 @@ void do_exceptions(unsigned int status, unsigned int cause, context *pt_context,
         // {
         if (in_stress_testing == 0)
         {
+            kernel_printf_color(VGA_RED, "[Exception Interrupt]\n");
             kernel_printf("\nProcess %s exited due to exception cause=%x;\n", pcb->name, cause);
             kernel_printf("status=%x, EPC=%x, BadVaddr=%x\n", status, pcb->context.epc, badVaddr);
         }

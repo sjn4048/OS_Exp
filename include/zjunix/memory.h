@@ -83,7 +83,7 @@ typedef struct page
     unsigned int reference; //
     struct list_head list;  // double-way list
     void *virtual;          // default 0x(-1)
-    unsigned int bplevel;   /* the order level of the page
+    off_t bplevel;   /* the order level of the page
                               *
                               * unsigned int sl_objs;
                               * 		represents the number of objects in current
@@ -108,7 +108,7 @@ typedef unsigned long addr_t;
 enum __Allocator
 {
     SLAB,
-    SLUB,
+    // SLUB,
     SLOB,
     BUDDY,
     BOOTMM

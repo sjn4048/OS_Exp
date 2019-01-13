@@ -7,7 +7,7 @@
 
 bootmm_t bmm;
 
-unsigned char bootmmap[MACHINE_MMSIZE >> PAGE_SHIFT];
+bool bootmmap[MACHINE_MMSIZE >> PAGE_SHIFT];
 
 static inline void __set_maps(off_t s_pfn, off_t cnt, unsigned char value)
 {

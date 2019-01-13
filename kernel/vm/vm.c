@@ -56,7 +56,7 @@ mm_t *mm_create()
 // 递归的删除二级页表中的所有内容（先删第二层，然后删第一层，最后删自己）
 void pgd_delete(pgd_t *pgd)
 {
-    for (int i = 0; i < PGD_SPAN; i++)
+    for (off_t i = 0; i < PGD_SPAN; i++)
     {
         unsigned int pde = pgd[i] & PAGE_MASK;
 
@@ -66,7 +66,7 @@ void pgd_delete(pgd_t *pgd)
         kernel_printf("Delete pde: %x\n", pde);
 #endif //VMA_DEBUG
         unsigned int *pde_ptr = (unsigned int *)pde;
-        for (int j = 0; j < PGD_SPAN; j++)
+        for (off_t j = 0; j < PGD_SPAN; j++)
         {
             unsigned int pte = pde_ptr[j] & PAGE_MASK;
             if (pte != NULL)

@@ -12,17 +12,17 @@
 #define MAX_BUDDY_ORDER 4
 
 typedef struct freelist {
-    unsigned int nr_free;
+    size_t nr_free;
     struct list_head free_head;
 } freelist_t;
 
-struct buddy_sys {
-    unsigned int buddy_start_pfn;
-    unsigned int buddy_end_pfn;
-    struct page *start_page;
+typedef struct buddy_sys {
+    off_t buddy_start_pfn;
+    off_t buddy_end_pfn;
+    page_t *start_page;
     struct lock_t lock;
-    struct freelist freelist[MAX_BUDDY_ORDER + 1];
-};
+    freelist_t freelist[MAX_BUDDY_ORDER + 1];
+} buddy_t;
 
 struct buddy_sys buddy;
 
